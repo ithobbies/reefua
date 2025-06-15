@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Thermometer, Zap, Droplets, ShieldAlert, Info, UserCircle, CalendarDays, Tag, AlignLeft } from 'lucide-react'; // Added AlignLeft for description
+import { Thermometer, Zap, Droplets, ShieldAlert, Info, UserCircle, CalendarDays, Tag, AlignLeft, Trophy } from 'lucide-react'; // Added AlignLeft for description and Trophy for winner
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 
@@ -39,6 +39,14 @@ export default function LotDetailPage({ params }: LotDetailPageProps) {
 
   const { name, images, parameters, currentBid, buyNowPrice, endTime, seller, bidHistory, description } = lot; // Added description
   const dataAiHintsForSlider = lot.images.map((_, idx) => lot.dataAiHint ? `${lot.dataAiHint} ${idx+1}` : `coral detail ${idx+1}`);
+
+  const isAuctionActive = new Date(endTime) > new Date();
+  let winnerNickname: string | null = null;
+
+  if (!isAuctionActive && bidHistory.length > 0) {
+    // Assuming bidHistory is sorted with the highest/latest bid first
+    winnerNickname = bidHistory[0].user;
+  }
 
 
   return (
@@ -89,29 +97,47 @@ export default function LotDetailPage({ params }: LotDetailPageProps) {
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <p className="text-sm text-muted-foreground">Поточна ставка:</p>
+                <p className="text-sm text-muted-foreground">Поточна/Фінальна ставка:</p>
                 <p className="text-4xl font-bold text-primary semibold">{currentBid} грн</p>
               </div>
-              {buyNowPrice && (
-                <div>
-                  <p className="text-sm text-muted-foreground">Або купити зараз за:</p>
-                  <p className="text-2xl font-semibold text-accent">{buyNowPrice} грн</p>
+              
+              <CountdownBadge endTime={endTime} />
+
+              {isAuctionActive ? (
+                <>
+                  {buyNowPrice && (
+                    <div>
+                      <p className="text-sm text-muted-foreground">Або купити зараз за:</p>
+                      <p className="text-2xl font-semibold text-accent">{buyNowPrice} грн</p>
+                    </div>
+                  )}
+                  <form className="space-y-3">
+                    <Input type="number" placeholder={`Ваша ставка (мін. ${currentBid + 10})`} aria-label="Сума ставки" className="text-base" />
+                    <Button type="submit" className="w-full text-lg py-3">Зробити ставку</Button>
+                    {buyNowPrice && (
+                      <Button type="button" variant="outline" className="w-full text-lg py-3 border-accent text-accent hover:bg-accent/10">
+                        <Tag className="mr-2 h-5 w-5" /> Купити зараз
+                      </Button>
+                    )}
+                  </form>
+                  <div className="text-xs text-muted-foreground">
+                    <Info className="inline h-3 w-3 mr-1" />
+                    Ви можете встановити максимальну ставку (проксі-бід), система автоматично підніматиме її за вас.
+                  </div>
+                </>
+              ) : (
+                <div className="text-center py-4">
+                  {winnerNickname ? (
+                    <>
+                      <Trophy className="h-10 w-10 text-yellow-500 mx-auto mb-2" />
+                      <p className="text-lg font-semibold">Переможець:</p>
+                      <p className="text-xl text-primary font-bold">{winnerNickname}</p>
+                    </>
+                  ) : (
+                    <p className="text-lg text-muted-foreground">Аукціон завершено. Переможця не визначено (не було ставок).</p>
+                  )}
                 </div>
               )}
-              <CountdownBadge endTime={endTime} />
-              <form className="space-y-3">
-                <Input type="number" placeholder={`Ваша ставка (мін. ${currentBid + 10})`} aria-label="Сума ставки" className="text-base" />
-                <Button type="submit" className="w-full text-lg py-3">Зробити ставку</Button>
-                {buyNowPrice && (
-                  <Button type="button" variant="outline" className="w-full text-lg py-3 border-accent text-accent hover:bg-accent/10">
-                    <Tag className="mr-2 h-5 w-5" /> Купити зараз
-                  </Button>
-                )}
-              </form>
-              <div className="text-xs text-muted-foreground">
-                <Info className="inline h-3 w-3 mr-1" />
-                Ви можете встановити максимальну ставку (проксі-бід), система автоматично підніматиме її за вас.
-              </div>
             </CardContent>
           </Card>
 
