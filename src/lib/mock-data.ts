@@ -29,7 +29,7 @@ const fiveMinutes = () => new Date(Date.now() + 5 * 60 * 1000);
 const oneHour = () => new Date(Date.now() + 60 * 60 * 1000);
 const twoDays = () => new Date(Date.now() + 2 * 24 * 60 * 60 * 1000);
 
-export const mockCategories: string[] = ['SPS Корали', 'LPS Корали', 'М\'які Корали', 'Зоантуси', 'Гриби Ricordea', 'Інше'];
+export const mockCategories: string[] = ['SPS Корали', 'LPS Корали', 'М\'які Корали', 'Анемони', 'Риба', 'Безхребетні'];
 
 export const mockLots: Lot[] = [
   {
@@ -52,14 +52,14 @@ export const mockLots: Lot[] = [
   },
   {
     id: '2',
-    name: 'Зоантус "Rasta"',
+    name: 'Зоантус "Rasta"', // Цей лот має стару категорію, але дані залишаться для демонстрації.
     description: 'Популярні та яскраві зоантуси з характерним зелено-жовтим забарвленням. Добре ростуть при помірному освітленні та течії. Колонія з 5+ поліпів.',
     imageUrl: 'https://placehold.co/400x300.png',
     dataAiHint: 'zoanthid coral',
     currentBid: 350,
     endTime: oneHour(),
     seller: 'FragHub',
-    category: 'Зоантуси',
+    category: 'Зоантуси', // Залишаємо як є, щоб не "ламати" поточні дані, але нові лоти будуть використовувати оновлені категорії
     parameters: { salinity: '1.026 SG', par: '100-150 PAR', flow: 'Помірна течія' },
     images: ['https://placehold.co/800x600.png'],
     bidHistory: [
@@ -99,7 +99,7 @@ export const mockLots: Lot[] = [
   },
    {
     id: '5',
-    name: 'Ricordea Florida "Orange"',
+    name: 'Ricordea Florida "Orange"', // Цей лот має стару категорію
     description: 'Яскравий помаранчевий гриб Ricordea Florida. Легкий у догляді, ідеально підходить для нано-рифів. Один гриб.',
     imageUrl: 'https://placehold.co/400x300.png',
     dataAiHint: 'ricordea mushroom',
@@ -107,7 +107,7 @@ export const mockLots: Lot[] = [
     buyNowPrice: 700,
     endTime: new Date(Date.now() + 30 * 60 * 1000), // 30 minutes
     seller: 'NanoDelights',
-    category: 'Гриби Ricordea',
+    category: 'Гриби Ricordea', // Залишаємо як є
     parameters: { salinity: '1.024 SG', par: '50-100 PAR', flow: 'Дуже слабка течія' },
     images: ['https://placehold.co/800x600.png'],
     bidHistory: [
@@ -128,6 +128,37 @@ export const mockLots: Lot[] = [
     images: ['https://placehold.co/800x600.png', 'https://placehold.co/800x600.png'],
     bidHistory: [
       { user: 'StickCollector', amount: 600, timestamp: new Date(Date.now() - 15 * 60 * 1000) },
+    ],
+  },
+  { // Приклад лоту з новою категорією
+    id: '7',
+    name: 'Анемон Bubble Tip "Rose"',
+    description: 'Красивий рожевий бульбашковий анемон. Потребує стабільних умов та відповідного освітлення. Може симбіозувати з рибами-клоунами.',
+    imageUrl: 'https://placehold.co/400x300.png',
+    dataAiHint: 'anemone marine',
+    currentBid: 1500,
+    buyNowPrice: 2800,
+    endTime: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000), // 3 days
+    seller: 'AnemoneQueen',
+    category: 'Анемони',
+    parameters: { salinity: '1.025 SG', par: '100-200 PAR', flow: 'Помірна течія' },
+    images: ['https://placehold.co/800x600.png'],
+    bidHistory: [],
+  },
+  { // Приклад лоту з новою категорією
+    id: '8',
+    name: 'Риба-клоун Ocellaris',
+    description: 'Пара молодих риб-клоунів (Amphiprion ocellaris). Вирощені в неволі, миролюбні. Харчуються сухими та замороженими кормами.',
+    imageUrl: 'https://placehold.co/400x300.png',
+    dataAiHint: 'clownfish pair',
+    currentBid: 800,
+    endTime: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000), // 1 day
+    seller: 'FishyBusiness',
+    category: 'Риба',
+    parameters: { salinity: '1.024 SG', par: 'N/A', flow: 'N/A' },
+    images: ['https://placehold.co/800x600.png', 'https://placehold.co/800x600.png'],
+    bidHistory: [
+        { user: 'NemoFinder', amount: 800, timestamp: new Date(Date.now() - 30 * 60 * 1000) },
     ],
   }
 ];
