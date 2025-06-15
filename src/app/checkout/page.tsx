@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Button } from '@/components/ui/button';
@@ -24,7 +25,10 @@ const CheckoutPage = () => {
   const [selectedPayment, setSelectedPayment] = React.useState<string | undefined>(undefined);
   const [selectedShipping, setSelectedShipping] = React.useState<string | undefined>(undefined);
 
-  const totalAmount = mockWonLots.reduce((sum, lot) => sum + (lot as any).wonPrice, 0);
+  const itemsSubtotal = mockWonLots.reduce((sum, lot) => sum + (lot as any).wonPrice, 0);
+  const auctionCommissionRate = 0.10; // 10% commission
+  const auctionCommission = itemsSubtotal * auctionCommissionRate;
+  const totalAmount = itemsSubtotal + auctionCommission;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,7 +43,7 @@ const CheckoutPage = () => {
     // Process checkout
     toast({
       title: "Замовлення оформлено!",
-      description: `Дякуємо! Загальна сума: ${totalAmount} грн. Очікуйте на підтвердження.`,
+      description: `Дякуємо! Загальна сума до сплати (включаючи комісію): ${totalAmount.toFixed(2)} грн. Очікуйте на підтвердження.`,
     });
   };
   
@@ -134,7 +138,11 @@ const CheckoutPage = () => {
             <CardContent className="space-y-4">
               <div className="flex justify-between">
                 <span>Товари ({mockWonLots.length} шт.):</span>
-                <span>{totalAmount} грн</span>
+                <span>{itemsSubtotal.toFixed(2)} грн</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Комісія аукціону ({(auctionCommissionRate * 100).toFixed(0)}%):</span>
+                <span>{auctionCommission.toFixed(2)} грн</span>
               </div>
               <div className="flex justify-between">
                 <span>Доставка:</span>
@@ -143,7 +151,7 @@ const CheckoutPage = () => {
               <Separator />
               <div className="flex justify-between text-xl font-bold">
                 <span>Всього до сплати:</span>
-                <span className="text-primary">{totalAmount} грн</span>
+                <span className="text-primary">{totalAmount.toFixed(2)} грн</span>
               </div>
               
               <h3 className="font-semibold mt-6 mb-2">Спосіб оплати:</h3>
@@ -162,7 +170,7 @@ const CheckoutPage = () => {
 
             </CardContent>
             <CardFooter>
-              <Button type="submit" className="w-full text-lg py-3">Оплатити {totalAmount} грн</Button>
+              <Button type="submit" className="w-full text-lg py-3">Оплатити {totalAmount.toFixed(2)} грн</Button>
             </CardFooter>
           </Card>
         </div>
@@ -172,3 +180,4 @@ const CheckoutPage = () => {
 };
 
 export default CheckoutPage;
+
