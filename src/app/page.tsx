@@ -1,8 +1,10 @@
+
 import LotCard from '@/components/lots/lot-card';
 import { mockLots, type Lot } from '@/lib/mock-data';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+import { Flame } from 'lucide-react'; // Додано імпорт іконки
 
 export const metadata: Metadata = {
   title: 'Головна - ReefUA',
@@ -45,7 +47,10 @@ export default function HomePage() {
 
       <section>
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-headline font-bold text-primary">Гарячі Аукціони</h2>
+          <h2 className="text-2xl font-headline font-bold text-primary flex items-center">
+            <Flame className="mr-2 h-6 w-6 text-accent" /> {/* Додано іконку */}
+            Гарячі Аукціони
+          </h2>
            {hotLots.length > 3 && (
             <Button variant="link" asChild>
               <Link href="/auctions?sort=ending_soonest">Переглянути всі гарячі</Link>
