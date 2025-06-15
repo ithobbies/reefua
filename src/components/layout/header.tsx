@@ -77,7 +77,7 @@ const Header = () => {
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         <Link href="/" className="flex items-center gap-2 text-primary hover:opacity-80 transition-opacity">
           <WaveIcon className="h-8 w-8" />
-          <span className="font-headline text-xl font-semibold">Benthos Bazaar</span>
+          <span className="font-headline text-xl font-semibold">ReefUA</span>
         </Link>
 
         {isMobile ? (

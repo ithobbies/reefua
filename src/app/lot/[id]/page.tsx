@@ -19,11 +19,11 @@ export async function generateMetadata({ params }: LotDetailPageProps): Promise<
   const lot = mockLots.find(l => l.id === params.id);
   if (!lot) {
     return {
-      title: 'Лот не знайдено - Benthos Bazaar',
+      title: 'Лот не знайдено - ReefUA',
     }
   }
   return {
-    title: `${lot.name} - Benthos Bazaar`,
+    title: `${lot.name} - ReefUA`,
     description: `Деталі аукціону для ${lot.name}. Поточна ставка: ${lot.currentBid} грн.`,
   };
 }

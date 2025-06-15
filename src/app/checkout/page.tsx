@@ -14,7 +14,7 @@ import type { Metadata } from 'next';
 import React from 'react';
 
 // export const metadata: Metadata = { // Cannot be used in client component
-//   title: 'Оформлення замовлення - Benthos Bazaar',
+//   title: 'Оформлення замовлення - ReefUA',
 //   description: 'Перевірте ваше замовлення та виберіть спосіб оплати і доставки.',
 // };
 

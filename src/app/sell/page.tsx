@@ -4,8 +4,8 @@ import Link from 'next/link';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Продати лот - Benthos Bazaar',
-  description: 'Розпочніть продаж ваших коралів та морських мешканців на Benthos Bazaar.',
+  title: 'Продати лот - ReefUA',
+  description: 'Розпочніть продаж ваших коралів та морських мешканців на ReefUA.',
 };
 
 export default function SellPage() {

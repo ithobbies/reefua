@@ -3,8 +3,8 @@ import { mockLots } from '@/lib/mock-data';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Всі Аукціони - Benthos Bazaar',
-  description: 'Перегляньте всі активні аукціони на Benthos Bazaar.',
+  title: 'Всі Аукціони - ReefUA',
+  description: 'Перегляньте всі активні аукціони на ReefUA.',
 };
 
 export default function AuctionsPage() {

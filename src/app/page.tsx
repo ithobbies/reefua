@@ -3,8 +3,8 @@ import { mockLots } from '@/lib/mock-data';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Головна - Benthos Bazaar',
-  description: 'Найновіші лоти на аукціоні морської акваріумістики Benthos Bazaar.',
+  title: 'Головна - ReefUA',
+  description: 'Найновіші лоти на аукціоні морської акваріумістики ReefUA.',
 };
 
 export default function HomePage() {

@@ -4,7 +4,7 @@ import { Toaster } from '@/components/ui/toaster';
 import AppLayout from '@/components/layout/app-layout';
 
 export const metadata: Metadata = {
-  title: 'Benthos Bazaar - Аукціон морської акваріумістики',
+  title: 'ReefUA - Аукціон морської акваріумістики',
   description: 'Онлайн-аукціон для українських морських акваріумістів.',
 };
 

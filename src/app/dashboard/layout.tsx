@@ -42,7 +42,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
         <SidebarHeader className="items-center border-b border-sidebar-border">
            <Link href="/" className="flex items-center gap-2 text-sidebar-foreground hover:opacity-80 transition-opacity">
             <WaveIcon className="h-7 w-7" />
-            <span className="font-headline text-lg font-semibold group-data-[collapsible=icon]:hidden">Benthos Bazaar</span>
+            <span className="font-headline text-lg font-semibold group-data-[collapsible=icon]:hidden">ReefUA</span>
           </Link>
           <div className="flex-1" />
           <SidebarTrigger className="hidden md:flex text-sidebar-foreground hover:text-sidebar-accent-foreground" />

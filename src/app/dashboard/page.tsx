@@ -9,7 +9,7 @@ import Link from 'next/link';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Панель Продавця - Benthos Bazaar',
+  title: 'Панель Продавця - ReefUA',
   description: 'Керуйте вашими лотами, переглядайте статистику та продажі.',
 };
 

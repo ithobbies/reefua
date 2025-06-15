@@ -15,7 +15,7 @@ import React from 'react';
 
 // Cannot use metadata in client component directly
 // export const metadata: Metadata = {
-//   title: 'Мій Профіль - Benthos Bazaar',
+//   title: 'Мій Профіль - ReefUA',
 //   description: 'Керуйте вашими ставками, переглядайте виграні лоти та історію платежів.',
 // };
 
