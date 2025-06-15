@@ -4,18 +4,19 @@
 import Link from 'next/link';
 import SiteLogoIcon from '@/components/icons/site-logo-icon';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Search, User, ShoppingCart, Menu, LogOut } from 'lucide-react'; // ChevronDown removed
+import { Button, buttonVariants } from '@/components/ui/button'; // Added buttonVariants
+import { Search, User, ShoppingCart, Menu, LogOut } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'; // DropdownMenuLabel, DropdownMenuSeparator removed
-import { Sheet, SheetContent, SheetTrigger, SheetClose } from '@/components/ui/sheet'; // Added SheetClose
+} from '@/components/ui/dropdown-menu';
+import { Sheet, SheetContent, SheetTrigger, SheetClose } from '@/components/ui/sheet';
 import { useIsMobile } from '@/hooks/use-mobile';
 import React from 'react';
-import { Separator } from '@/components/ui/separator'; // Added Separator for mobile menu
+import { Separator } from '@/components/ui/separator';
+import { cn } from '@/lib/utils'; // Added cn
 
 const navLinks = [
   { href: '/', label: 'Головна' },
@@ -31,27 +32,32 @@ const Header = () => {
     <>
       {navLinks.map((link) => (
         <Button key={link.href} variant="ghost" asChild className="text-foreground hover:text-primary">
-          <Link href={link.href} onClick={() => isMobile && setIsSheetOpen(false)}>{link.label}</Link>
+          <Link href={link.href} onClick={() => { if (isMobile) setIsSheetOpen(false);}}>{link.label}</Link>
         </Button>
       ))}
-      {/* Категорії DropdownMenu видалено */}
     </>
   );
 
   const userActions = (
     <>
-      <Button variant="ghost" size="icon" asChild className="text-foreground hover:text-primary">
-        <Link href="/profile" onClick={() => isMobile && setIsSheetOpen(false)}>
-          <User />
-          <span className="sr-only">Профіль</span>
-        </Link>
-      </Button>
-      <Button variant="ghost" size="icon" asChild className="text-foreground hover:text-primary">
-        <Link href="/checkout" onClick={() => isMobile && setIsSheetOpen(false)}>
-          <ShoppingCart />
-          <span className="sr-only">Кошик</span>
-        </Link>
-      </Button>
+      <Link
+        href="/profile"
+        className={cn(buttonVariants({ variant: 'ghost', size: 'icon' }), "text-foreground hover:text-primary")}
+        aria-label="Профіль"
+        onClick={() => { if (isMobile) setIsSheetOpen(false);}}
+      >
+        <User />
+        <span className="sr-only">Профіль</span>
+      </Link>
+      <Link
+        href="/checkout"
+        className={cn(buttonVariants({ variant: 'ghost', size: 'icon' }), "text-foreground hover:text-primary")}
+        aria-label="Кошик"
+        onClick={() => { if (isMobile) setIsSheetOpen(false);}}
+      >
+        <ShoppingCart />
+        <span className="sr-only">Кошик</span>
+      </Link>
       <Button variant="ghost" size="icon" className="text-foreground hover:text-destructive">
         <LogOut />
         <span className="sr-only">Вийти</span>
@@ -74,7 +80,7 @@ const Header = () => {
                 <span className="sr-only">Відкрити меню</span>
               </Button>
             </SheetTrigger>
-            <SheetContent side="left" className="w-[300px] sm:w-[400px] bg-background p-6 flex flex-col"> {/* Added flex flex-col */}
+            <SheetContent side="left" className="w-[300px] sm:w-[400px] bg-background p-6 flex flex-col">
               <div className="relative mb-4">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                 <Input type="search" placeholder="Пошук лотів..." className="pl-10" />
@@ -89,7 +95,7 @@ const Header = () => {
                 ))}
               </nav>
               <Separator className="my-4" />
-              <div className="flex flex-col gap-2 mt-auto"> {/* mt-auto to push to bottom */}
+              <div className="flex flex-col gap-2 mt-auto">
                 <SheetClose asChild>
                   <Link href="/profile" className="flex items-center p-2 rounded-md hover:bg-secondary text-foreground hover:text-primary">
                     <User className="mr-2 h-5 w-5" /> Профіль
@@ -116,7 +122,7 @@ const Header = () => {
                 <Input type="search" placeholder="Пошук лотів, категорій..." className="pl-10 bg-card" />
               </div>
             </div>
-            <nav className="hidden md:flex items-center gap-1"> {/* Reduced gap from 2 to 1 */}
+            <nav className="hidden md:flex items-center gap-1">
               {commonNavItems}
             </nav>
             <div className="hidden md:flex items-center gap-1">
@@ -130,5 +136,3 @@ const Header = () => {
 };
 
 export default Header;
-
-    
