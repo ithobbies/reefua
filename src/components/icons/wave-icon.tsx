@@ -1,5 +1,7 @@
 import type React from 'react';
 
+// This file is no longer used as SiteLogoIcon is used instead.
+// Keeping it to avoid breaking potential direct imports if any, though it should be cleaned up.
 const WaveIcon = (props: React.SVGProps<SVGSVGElement>) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"

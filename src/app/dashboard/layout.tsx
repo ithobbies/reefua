@@ -13,7 +13,7 @@ import {
   SidebarTrigger,
 } from '@/components/ui/sidebar';
 import { LayoutDashboard, ListChecks, Upload, BarChart3, Star, Settings, ChevronRight } from 'lucide-react';
-import WaveIcon from '@/components/icons/wave-icon';
+import SiteLogoIcon from '@/components/icons/site-logo-icon'; // Updated import
 import React from 'react';
 
 const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
@@ -41,7 +41,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
       <Sidebar collapsible="icon" side="left" variant="sidebar">
         <SidebarHeader className="items-center border-b border-sidebar-border">
            <Link href="/" className="flex items-center gap-2 text-sidebar-foreground hover:opacity-80 transition-opacity">
-            <WaveIcon className="h-7 w-7" />
+            <SiteLogoIcon className="h-7 w-7" /> {/* Updated icon */}
             <span className="font-headline text-lg font-semibold group-data-[collapsible=icon]:hidden">ReefUA</span>
           </Link>
           <div className="flex-1" />
