@@ -4,7 +4,7 @@ import Link from 'next/link';
 import SiteLogoIcon from '@/components/icons/site-logo-icon'; // Updated import
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Search, ChevronDown, User, ShoppingCart, Menu, LogOut } from 'lucide-react';
+import { Search, ChevronDown, User, ShoppingCart, Menu } from 'lucide-react'; // Removed LogOut
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -65,10 +65,12 @@ const Header = () => {
           <span className="sr-only">Кошик</span>
         </Link>
       </Button>
+      {/* Removed LogOut Button
       <Button variant="ghost" size="icon" className="text-foreground hover:text-destructive">
         <LogOut />
         <span className="sr-only">Вийти</span>
       </Button>
+      */}
     </>
   );
 
