@@ -4,7 +4,7 @@ import Link from 'next/link';
 import SiteLogoIcon from '@/components/icons/site-logo-icon'; // Updated import
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Search, ChevronDown, User, ShoppingCart, Menu } from 'lucide-react'; // Removed LogOut
+import { Search, ChevronDown, User, ShoppingCart, Menu, LogOut } from 'lucide-react'; // Added LogOut
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -65,21 +65,19 @@ const Header = () => {
           <span className="sr-only">Кошик</span>
         </Link>
       </Button>
-      {/* Removed LogOut Button
       <Button variant="ghost" size="icon" className="text-foreground hover:text-destructive">
         <LogOut />
         <span className="sr-only">Вийти</span>
       </Button>
-      */}
     </>
   );
 
   return (
     <header className="sticky top-0 z-50 w-full bg-background/80 backdrop-blur-md border-b border-border/50 shadow-sm">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
-        <Link href="/" className="flex items-center gap-2 text-primary hover:opacity-80 transition-opacity">
-          <SiteLogoIcon className="h-8 w-8" /> {/* Updated icon */}
-          <span className="font-headline text-xl font-semibold">ReefUA</span>
+        <Link href="/" className="flex items-center text-primary hover:opacity-80 transition-opacity">
+          <SiteLogoIcon className="h-8 w-8" />
+          {/* <span className="font-headline text-xl font-semibold">ReefUA</span> Removed site name text */}
         </Link>
 
         {isMobile ? (
