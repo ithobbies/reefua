@@ -18,7 +18,7 @@ const SiteLogoIcon: React.FC<SiteLogoIconProps> = ({ className }) => {
         src={logoPath}
         alt="ReefUA Logo"
         fill
-        sizes="32px" // Максимальний розмір, в якому логотип відображається (h-8 w-8 -> 32px)
+        sizes="40px" // Максимальний розмір, в якому логотип відображається (h-10 w-10 -> 40px)
         priority // Пріоритетне завантаження для логотипу в хедері
       />
     </div>

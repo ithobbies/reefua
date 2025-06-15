@@ -69,7 +69,7 @@ const Header = () => {
     <header className="sticky top-0 z-50 w-full bg-background/80 backdrop-blur-md border-b border-border/50 shadow-sm">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         <Link href="/" className="flex items-center text-primary hover:opacity-80 transition-opacity">
-          <SiteLogoIcon className="h-8 w-8" />
+          <SiteLogoIcon className="h-10 w-10" />
         </Link>
 
         {isMobile ? (
