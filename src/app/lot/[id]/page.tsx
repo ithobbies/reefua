@@ -1,3 +1,4 @@
+
 import { mockLots, type Lot, type Bid } from '@/lib/mock-data';
 import PhotoSlider from '@/components/lots/photo-slider';
 import ParameterItem from '@/components/lots/parameter-item';
@@ -7,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Thermometer, Zap, Droplets, ShieldAlert, Info, UserCircle, CalendarDays, Tag } from 'lucide-react';
+import { Thermometer, Zap, Droplets, ShieldAlert, Info, UserCircle, CalendarDays, Tag, AlignLeft } from 'lucide-react'; // Added AlignLeft for description
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 
@@ -24,7 +25,7 @@ export async function generateMetadata({ params }: LotDetailPageProps): Promise<
   }
   return {
     title: `${lot.name} - ReefUA`,
-    description: `Деталі аукціону для ${lot.name}. Поточна ставка: ${lot.currentBid} грн.`,
+    description: lot.description || `Деталі аукціону для ${lot.name}. Поточна ставка: ${lot.currentBid} грн.`, // Use actual description
   };
 }
 
@@ -36,16 +37,17 @@ export default function LotDetailPage({ params }: LotDetailPageProps) {
     notFound();
   }
 
-  const { name, images, parameters, currentBid, buyNowPrice, endTime, seller, bidHistory } = lot;
+  const { name, images, parameters, currentBid, buyNowPrice, endTime, seller, bidHistory, description } = lot; // Added description
   const dataAiHintsForSlider = lot.images.map((_, idx) => lot.dataAiHint ? `${lot.dataAiHint} ${idx+1}` : `coral detail ${idx+1}`);
 
 
   return (
     <div className="container mx-auto py-8">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-2 space-y-8"> {/* Added space-y-8 */}
           <PhotoSlider images={images} altText={name} dataAiHints={dataAiHintsForSlider}/>
-          <Card className="mt-8">
+          
+          <Card>
             <CardHeader>
               <CardTitle className="text-3xl font-headline">{name}</CardTitle>
               <CardDescription>Продавець: <span className="text-primary font-medium">{seller}</span></CardDescription>
@@ -63,6 +65,21 @@ export default function LotDetailPage({ params }: LotDetailPageProps) {
               </Badge>
             </CardContent>
           </Card>
+
+          {description && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-xl font-headline flex items-center">
+                  <AlignLeft className="mr-2 h-5 w-5 text-primary" />
+                  Опис від продавця
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground whitespace-pre-line">{description}</p>
+              </CardContent>
+            </Card>
+          )}
+
         </div>
 
         <div className="lg:col-span-1 space-y-6">
@@ -133,9 +150,10 @@ export default function LotDetailPage({ params }: LotDetailPageProps) {
   );
 }
 
-// For dynamic routes not pre-generated at build time
 export async function generateStaticParams() {
   return mockLots.map((lot) => ({
     id: lot.id,
   }));
 }
+
+    

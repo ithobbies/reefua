@@ -1,5 +1,6 @@
+
 import StatsCard from '@/components/dashboard/stats-card';
-import CsvUploadWidget from '@/components/dashboard/csv-upload';
+// CsvUploadWidget import removed
 import { mockSellerStats } from '@/lib/mock-data';
 import { ListChecks, CheckCircle, Percent, Star, UploadCloud } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -53,14 +54,13 @@ export default function SellerDashboardPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-3"> {/* Змінено col-span на 3, щоб заповнити місце від CsvUploadWidget */}
           <Card>
             <CardHeader>
               <CardTitle className="font-headline">Останні активності</CardTitle>
               <CardDescription>Події по вашим лотам та продажам.</CardDescription>
             </CardHeader>
             <CardContent>
-              {/* Placeholder for recent activity feed */}
               <ul className="space-y-3">
                 <li className="text-sm p-3 bg-secondary rounded-md">Нова ставка на лот "Acropora Red Planet" - 1500 грн.</li>
                 <li className="text-sm p-3 bg-secondary rounded-md">Лот "Zoanthus Watermelon" продано за 500 грн.</li>
@@ -69,9 +69,11 @@ export default function SellerDashboardPage() {
             </CardContent>
           </Card>
         </div>
+        {/* CsvUploadWidget видалено звідси
         <div className="lg:col-span-1">
           <CsvUploadWidget />
-        </div>
+        </div> 
+        */}
       </div>
       
       <Card>
@@ -92,3 +94,5 @@ export default function SellerDashboardPage() {
     </div>
   );
 }
+
+    

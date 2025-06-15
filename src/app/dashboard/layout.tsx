@@ -1,4 +1,5 @@
-'use client'; // SidebarProvider and useSidebar hook require client context
+
+'use client'; 
 
 import Link from 'next/link';
 import {
@@ -12,13 +13,11 @@ import {
   SidebarInset,
   SidebarTrigger,
 } from '@/components/ui/sidebar';
-import { LayoutDashboard, ListChecks, Upload, BarChart3, Star, Settings, ChevronRight } from 'lucide-react';
-import SiteLogoIcon from '@/components/icons/site-logo-icon'; // Updated import
+import { LayoutDashboard, ListChecks, BarChart3, Star, Settings } from 'lucide-react'; // Upload icon removed
+import SiteLogoIcon from '@/components/icons/site-logo-icon';
 import React from 'react';
 
 const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
-  // Determine active path for styling links - simplified
-  // In a real app, use `usePathname` from `next/navigation`
   const [pathname, setPathname] = React.useState("/dashboard");
   React.useEffect(() => {
     if (typeof window !== "undefined") {
@@ -26,11 +25,10 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
     }
   }, []);
 
-
   const menuItems = [
     { href: '/dashboard', label: 'Оглядова панель', icon: <LayoutDashboard /> },
     { href: '/dashboard/lots', label: 'Мої лоти', icon: <ListChecks /> },
-    { href: '/dashboard/upload', label: 'Завантажити CSV', icon: <Upload /> },
+    // { href: '/dashboard/upload', label: 'Завантажити CSV', icon: <Upload /> }, // Видалено пункт "Завантажити CSV"
     { href: '/dashboard/analytics', label: 'Аналітика', icon: <BarChart3 /> },
     { href: '/dashboard/reviews', label: 'Відгуки', icon: <Star /> },
     { href: '/dashboard/settings', label: 'Налаштування', icon: <Settings />, isBottom: true },
@@ -41,7 +39,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
       <Sidebar collapsible="icon" side="left" variant="sidebar">
         <SidebarHeader className="items-center border-b border-sidebar-border">
            <Link href="/" className="flex items-center gap-2 text-sidebar-foreground hover:opacity-80 transition-opacity">
-            <SiteLogoIcon className="h-7 w-7" /> {/* Updated icon */}
+            <SiteLogoIcon className="h-7 w-7" /> 
             <span className="font-headline text-lg font-semibold group-data-[collapsible=icon]:hidden">ReefUA</span>
           </Link>
           <div className="flex-1" />
@@ -92,3 +90,5 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
 };
 
 export default DashboardLayout;
+
+    

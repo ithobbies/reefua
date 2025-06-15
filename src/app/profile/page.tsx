@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -8,19 +9,18 @@ import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { mockUserBids, mockWonLots, mockPaymentHistory } from '@/lib/mock-data';
-import { Edit3, Bell, ShieldCheck, CreditCard, Gavel, Trophy, History } from 'lucide-react';
+import { Edit3, Bell, ShieldCheck, CreditCard, Gavel, Trophy, History, LayoutDashboardIcon } from 'lucide-react'; // Added LayoutDashboardIcon
 import Image from 'next/image';
 import Link from 'next/link';
 import React from 'react';
 
-// Cannot use metadata in client component directly
-// export const metadata: Metadata = {
-//   title: 'Мій Профіль - ReefUA',
-//   description: 'Керуйте вашими ставками, переглядайте виграні лоти та історію платежів.',
-// };
-
 const UserProfilePage = () => {
   const [pushEnabled, setPushEnabled] = React.useState(true);
+
+  React.useEffect(() => {
+    document.title = 'Мій Профіль - ReefUA';
+  }, []);
+
 
   return (
     <div className="container mx-auto py-8">
@@ -33,9 +33,16 @@ const UserProfilePage = () => {
           <h1 className="text-3xl font-headline font-bold text-primary">User Aquarist</h1>
           <p className="text-muted-foreground">aquarist_user@email.com</p>
           <p className="text-sm text-muted-foreground">Учасник з: 12.03.2023</p>
-          <Button variant="outline" size="sm" className="mt-2">
-            <Edit3 className="mr-2 h-4 w-4" /> Редагувати профіль
-          </Button>
+          <div className="mt-3 flex flex-col sm:flex-row gap-2 items-center justify-center md:justify-start">
+            <Button variant="outline" size="sm" >
+              <Edit3 className="mr-2 h-4 w-4" /> Редагувати профіль
+            </Button>
+            <Button variant="outline" size="sm" asChild>
+              <Link href="/dashboard">
+                <LayoutDashboardIcon className="mr-2 h-4 w-4" /> Панель продавця
+              </Link>
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -189,3 +196,5 @@ const UserProfilePage = () => {
 };
 
 export default UserProfilePage;
+
+    
