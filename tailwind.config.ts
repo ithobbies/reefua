@@ -10,7 +10,7 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        body: ['Inter', 'sans-serif'],
+        body: ['Manrope', 'sans-serif'],
         headline: ['Inter', 'sans-serif'],
         code: ['monospace'],
       },
@@ -88,10 +88,15 @@ export default {
             height: '0',
           },
         },
+        pulseLighter: {
+          '0%, 100%': { backgroundColor: 'hsl(var(--accent))', transform: 'scale(1)' },
+          '50%': { backgroundColor: 'hsl(var(--accent) / 0.7)', transform: 'scale(1.05)' },
+        }
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
+        'pulse-lighter': 'pulseLighter 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
       },
     },
   },
