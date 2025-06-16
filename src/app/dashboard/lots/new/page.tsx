@@ -1,22 +1,24 @@
 
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { mockCategories } from '@/lib/mock-data';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, UploadCloud } from 'lucide-react';
+import { ArrowLeft, UploadCloud, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 
-// export const metadata: Metadata = { // Cannot be used in client component
-//   title: 'Створити новий лот - Панель Продавця',
-//   description: 'Додайте новий лот для продажу на аукціоні.',
-// };
+import { useAuth } from '@/context/auth-context';
+import { functions, db } from '@/lib/firebase';
+import { httpsCallable } from 'firebase/functions';
+import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+import { collection, getDocs, query, orderBy } from 'firebase/firestore';
+import { v4 as uuidv4 } from 'uuid';
 
 interface LotFormData {
   name: string;
@@ -24,35 +26,61 @@ interface LotFormData {
   category: string;
   startingBid: number;
   buyNowPrice?: number;
-  endTime: string; // Store as string for datetime-local input
+  endTime: string; 
   salinity: string;
   par: string;
   flow: string;
-  image?: File;
+  imageUrl: string;
 }
 
 export default function NewLotPage() {
   const { toast } = useToast();
+  const router = useRouter();
+  const { user, loading: authLoading } = useAuth();
+
   const [formData, setFormData] = useState<Partial<LotFormData>>({
-    category: '', // Initialize category for Select
     salinity: '1.025 SG',
     par: '150-250 PAR',
     flow: 'Помірна течія',
   });
+  
+  const [categories, setCategories] = useState<string[]>([]);
+  const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  React.useEffect(() => {
+  useEffect(() => {
     document.title = 'Створити новий лот - ReefUA';
-  }, []);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value, type } = e.target;
-    
-    if (type === 'number') {
-      setFormData(prev => ({ ...prev, [name]: value === '' ? undefined : parseFloat(value) }));
-    } else {
-      setFormData(prev => ({ ...prev, [name]: value }));
+    // Redirect if not logged in
+    if (!authLoading && !user) {
+      toast({ variant: 'destructive', title: 'Доступ заборонено', description: 'Будь ласка, увійдіть, щоб створити лот.'});
+      router.push('/auctions');
     }
+    
+    // Fetch categories from Firestore
+    const fetchCategories = async () => {
+        try {
+            const categoriesCollection = collection(db, 'categories');
+            const q = query(categoriesCollection, orderBy('name'));
+            const categorySnapshot = await getDocs(q);
+            const categoriesList = categorySnapshot.docs.map(doc => doc.data().name);
+            setCategories(categoriesList);
+        } catch (error) {
+            console.error("Error fetching categories: ", error);
+            toast({ variant: 'destructive', title: 'Помилка', description: 'Не вдалося завантажити категорії.' });
+        }
+    };
+    fetchCategories();
+
+  }, [authLoading, user, router, toast]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value, type } = e.target;
+    const parsedValue = type === 'number' && value !== '' ? parseFloat(value) : value;
+    setFormData(prev => ({ ...prev, [name]: parsedValue }));
   };
   
   const handleSelectChange = (value: string) => {
@@ -62,49 +90,106 @@ export default function NewLotPage() {
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
-      setFormData(prev => ({ ...prev, image: file }));
+      setImageFile(file);
       setImagePreview(URL.createObjectURL(file));
-    } else {
-      setFormData(prev => ({...prev, image: undefined}));
-      setImagePreview(null);
+      setFormData(prev => ({ ...prev, imageUrl: undefined })); // Reset uploaded URL if user changes image
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Basic validation
-    if (!formData.name || !formData.description || !formData.category || !formData.startingBid || !formData.endTime || !formData.image) {
-      toast({
-        title: 'Помилка валідації',
-        description: "Будь ласка, заповніть усі обов'язкові поля та завантажте зображення.",
-        variant: 'destructive',
+  const uploadImage = async (): Promise<string | null> => {
+      if (!imageFile) return null;
+      
+      setIsUploading(true);
+      setUploadProgress(0);
+
+      const storage = getStorage();
+      const fileExtension = imageFile.name.split('.').pop();
+      const fileName = `${uuidv4()}.${fileExtension}`;
+      const storageRef = ref(storage, `lot-images/${fileName}`);
+      
+      return new Promise((resolve, reject) => {
+        const uploadTask = uploadBytesResumable(storageRef, imageFile);
+
+        uploadTask.on('state_changed', 
+          (snapshot) => {
+            const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+            setUploadProgress(progress);
+          }, 
+          (error) => {
+            console.error("Upload failed:", error);
+            setIsUploading(false);
+            toast({ variant: "destructive", title: "Помилка завантаження", description: "Не вдалося завантажити зображення." });
+            reject(null);
+          }, 
+          () => {
+            getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+              setIsUploading(false);
+              setFormData(prev => ({ ...prev, imageUrl: downloadURL }));
+              resolve(downloadURL);
+            });
+          }
+        );
       });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    let uploadedImageUrl = formData.imageUrl;
+
+    // Validation
+    if (!formData.name || !formData.description || !formData.category || !formData.startingBid || !formData.endTime) {
+      toast({ variant: 'destructive', title: 'Помилка валідації', description: "Будь ласка, заповніть усі обов'язкові поля." });
       return;
     }
-    console.log('Lot data submitted:', formData);
-    toast({
-      title: 'Лот створено!',
-      description: `Лот "${formData.name}" успішно додано на аукціон.`,
-    });
-    // Here you would typically send data to your backend
-    // Reset form or redirect user
-    setFormData({
-      name: '',
-      description: '',
-      category: '',
-      startingBid: 0,
-      buyNowPrice: undefined,
-      endTime: '',
-      salinity: '1.025 SG',
-      par: '150-250 PAR',
-      flow: 'Помірна течія',
-      image: undefined,
-    });
-    setImagePreview(null);
-    if (document.getElementById('image')) {
-      (document.getElementById('image') as HTMLInputElement).value = '';
+
+    if (!uploadedImageUrl && !imageFile) {
+        toast({ variant: 'destructive', title: 'Помилка валідації', description: "Будь ласка, завантажте зображення." });
+        return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+        // Step 1: Upload image if it hasn't been uploaded yet
+        if (!uploadedImageUrl && imageFile) {
+            uploadedImageUrl = await uploadImage();
+            if (!uploadedImageUrl) {
+                // Error toast is handled inside uploadImage
+                setIsSubmitting(false);
+                return;
+            }
+        }
+        
+        // Step 2: Call the Cloud Function with form data
+        const createLot = httpsCallable(functions, 'createLot');
+        const result: any = await createLot({
+            ...formData,
+            imageUrl: uploadedImageUrl,
+            parameters: {
+                salinity: formData.salinity,
+                par: formData.par,
+                flow: formData.flow
+            }
+        });
+
+        toast({ title: 'Лот створено!', description: `Лот "${formData.name}" успішно додано.` });
+        
+        // Redirect to the new lot's page
+        router.push(`/lot/${result.data.id}`);
+
+    } catch (error: any) {
+        console.error("Failed to create lot:", error);
+        toast({ variant: 'destructive', title: 'Помилка створення лоту', description: error.message || 'Сталася невідома помилка.' });
+        setIsSubmitting(false);
     }
   };
+
+  if (authLoading || !user) {
+    return <div className="text-center py-20">Завантаження або перенаправлення...</div>;
+  }
+
+  const isLoading = isUploading || isSubmitting;
 
   return (
     <div className="space-y-6">
@@ -112,7 +197,6 @@ export default function NewLotPage() {
         <Button variant="outline" size="icon" asChild>
           <Link href="/dashboard/lots">
             <ArrowLeft className="h-4 w-4" />
-            <span className="sr-only">Назад до Моїх лотів</span>
           </Link>
         </Button>
         <h1 className="text-2xl font-headline font-semibold text-primary">Створити Новий Лот</h1>
@@ -121,29 +205,22 @@ export default function NewLotPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-6">
             <Card>
-              <CardHeader>
-                <CardTitle>Основна інформація</CardTitle>
-                <CardDescription>Надайте деталі про ваш лот.</CardDescription>
-              </CardHeader>
+              <CardHeader><CardTitle>Основна інформація</CardTitle></CardHeader>
               <CardContent className="space-y-4">
                 <div>
                   <Label htmlFor="name">Назва лоту*</Label>
-                  <Input id="name" name="name" value={formData.name || ''} onChange={handleChange} placeholder="Наприклад, Фраг Acropora Red Planet" required />
+                  <Input id="name" name="name" onChange={handleChange} placeholder="Наприклад, Фраг Acropora Red Planet" required disabled={isLoading} />
                 </div>
                 <div>
                   <Label htmlFor="description">Опис лоту*</Label>
-                  <Textarea id="description" name="description" value={formData.description || ''} onChange={handleChange} placeholder="Детальний опис вашого коралу, його особливості, розмір тощо." required />
+                  <Textarea id="description" name="description" onChange={handleChange} placeholder="Детальний опис вашого коралу..." required disabled={isLoading} />
                 </div>
                 <div>
                   <Label htmlFor="category">Категорія*</Label>
-                  <Select name="category" onValueChange={handleSelectChange} value={formData.category || ''} required>
-                    <SelectTrigger id="category">
-                      <SelectValue placeholder="Оберіть категорію" />
-                    </SelectTrigger>
+                  <Select name="category" onValueChange={handleSelectChange} required disabled={isLoading || categories.length === 0}>
+                    <SelectTrigger><SelectValue placeholder="Оберіть категорію" /></SelectTrigger>
                     <SelectContent>
-                      {mockCategories.map(cat => (
-                        <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                      ))}
+                      {categories.map(cat => <SelectItem key={cat} value={cat}>{cat}</SelectItem>)}
                     </SelectContent>
                   </Select>
                 </div>
@@ -151,82 +228,69 @@ export default function NewLotPage() {
             </Card>
 
             <Card>
-              <CardHeader>
-                <CardTitle>Ціноутворення та аукціон</CardTitle>
-              </CardHeader>
+              <CardHeader><CardTitle>Ціноутворення та аукціон</CardTitle></CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="startingBid">Стартова ціна (грн)*</Label>
-                    <Input id="startingBid" name="startingBid" type="number" value={formData.startingBid || ''} onChange={handleChange} placeholder="100" min="0" step="10" required />
+                    <Input id="startingBid" name="startingBid" type="number" onChange={handleChange} placeholder="100" min="0" step="10" required disabled={isLoading} />
                   </div>
                   <div>
-                    <Label htmlFor="buyNowPrice">Ціна "Купити зараз" (грн, необов'язково)</Label>
-                    <Input id="buyNowPrice" name="buyNowPrice" type="number" value={formData.buyNowPrice || ''} onChange={handleChange} placeholder="500" min="0" step="10" />
+                    <Label htmlFor="buyNowPrice">Ціна "Купити зараз" (грн)</Label>
+                    <Input id="buyNowPrice" name="buyNowPrice" type="number" onChange={handleChange} placeholder="500" min="0" step="10" disabled={isLoading} />
                   </div>
                 </div>
                 <div>
                   <Label htmlFor="endTime">Час завершення аукціону*</Label>
-                  <Input id="endTime" name="endTime" type="datetime-local" value={formData.endTime || ''} onChange={handleChange} required 
-                         min={new Date(Date.now() + 60*60*1000).toISOString().slice(0, 16)} // Min 1 hour from now
-                  />
+                  <Input id="endTime" name="endTime" type="datetime-local" onChange={handleChange} required disabled={isLoading}
+                         min={new Date(Date.now() + 60*60*1000).toISOString().slice(0, 16)} />
                 </div>
               </CardContent>
             </Card>
-
+            
             <Card>
-              <CardHeader>
-                <CardTitle>Параметри утримання</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div>
+              <CardHeader><CardTitle>Параметри утримання</CardTitle></CardHeader>
+              <CardContent className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                 <div>
                     <Label htmlFor="salinity">Солоність</Label>
-                    <Input id="salinity" name="salinity" value={formData.salinity || ''} onChange={handleChange} placeholder="1.025 SG" />
+                    <Input id="salinity" name="salinity" defaultValue={formData.salinity} onChange={handleChange} placeholder="1.025 SG" disabled={isLoading}/>
                   </div>
                   <div>
                     <Label htmlFor="par">PAR</Label>
-                    <Input id="par" name="par" value={formData.par || ''} onChange={handleChange} placeholder="250-350" />
+                    <Input id="par" name="par" defaultValue={formData.par} onChange={handleChange} placeholder="250-350" disabled={isLoading}/>
                   </div>
                   <div>
                     <Label htmlFor="flow">Течія</Label>
-                    <Input id="flow" name="flow" value={formData.flow || ''} onChange={handleChange} placeholder="Помірна" />
+                    <Input id="flow" name="flow" defaultValue={formData.flow} onChange={handleChange} placeholder="Помірна" disabled={isLoading}/>
                   </div>
-                </div>
               </CardContent>
             </Card>
           </div>
 
           <div className="lg:col-span-1 space-y-6">
             <Card>
-              <CardHeader>
-                <CardTitle>Зображення лоту*</CardTitle>
-                <CardDescription>Завантажте основне фото вашого лоту.</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <Label htmlFor="image" className="block w-full cursor-pointer">
+              <CardHeader><CardTitle>Зображення лоту*</CardTitle></CardHeader>
+              <CardContent>
+                <Label htmlFor="image" className={`block w-full cursor-pointer ${isLoading ? 'cursor-not-allowed' : ''}`}>
                   <div className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-muted rounded-md hover:border-primary transition-colors">
                     {imagePreview ? (
-                      // eslint-disable-next-line @next/next/no-img-element
                       <img src={imagePreview} alt="Попередній перегляд" className="max-h-48 rounded-md object-contain" />
                     ) : (
                       <>
                         <UploadCloud className="h-12 w-12 text-muted-foreground" />
                         <p className="mt-2 text-sm text-muted-foreground">Натисніть, щоб завантажити</p>
-                        <p className="text-xs text-muted-foreground">(PNG, JPG, WEBP до 5MB)</p>
                       </>
                     )}
                   </div>
                 </Label>
-                <Input id="image" name="image" type="file" onChange={handleImageChange} accept="image/png, image/jpeg, image/webp" className="sr-only" required />
-                
-                {/* Placeholder for multiple images - could be expanded later */}
-                <p className="text-xs text-muted-foreground text-center">Для додавання більше фотографій, відредагуйте лот після створення.</p>
+                <Input id="image" name="image" type="file" onChange={handleImageChange} accept="image/png, image/jpeg, image/webp" className="sr-only" required disabled={isLoading}/>
+                {isUploading && <div className="w-full bg-muted rounded-full h-2.5 mt-2"><div className="bg-primary h-2.5 rounded-full" style={{width: `${uploadProgress}%`}}></div></div>}
               </CardContent>
             </Card>
             
-            <Button type="submit" className="w-full text-lg py-3">
-              Створити лот
+            <Button type="submit" className="w-full text-lg py-3" disabled={isLoading}>
+              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {isSubmitting ? 'Створення лоту...' : isUploading ? 'Завантаження фото...' : 'Створити лот'}
             </Button>
           </div>
         </div>

@@ -1,5 +1,13 @@
 
-import { mockLots, type Lot, type Bid } from '@/lib/mock-data';
+'use client';
+
+import React, { useState, useEffect } from 'react';
+import { notFound } from 'next/navigation';
+import { doc, getDoc, collection, query, orderBy, getDocs } from 'firebase/firestore';
+import { httpsCallable } from 'firebase/functions';
+import { db, functions, auth } from '@/lib/firebase';
+import { useAuthState } from 'react-firebase-hooks/auth';
+
 import PhotoSlider from '@/components/lots/photo-slider';
 import ParameterItem from '@/components/lots/parameter-item';
 import CountdownBadge from '@/components/ui/countdown-badge';
@@ -8,52 +16,137 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Thermometer, Zap, Droplets, ShieldAlert, Info, UserCircle, CalendarDays, Tag, AlignLeft, Trophy } from 'lucide-react'; // Added AlignLeft for description and Trophy for winner
-import type { Metadata } from 'next';
-import { notFound } from 'next/navigation';
+import { Thermometer, Zap, Droplets, ShieldAlert, Info, UserCircle, CalendarDays, Tag, AlignLeft, Trophy } from 'lucide-react';
+
+import type { Lot, Bid } from '@/lib/mock-data'; // Re-using types for now
+import { useToast } from '@/hooks/use-toast';
+
 
 interface LotDetailPageProps {
   params: { id: string };
 }
 
-export async function generateMetadata({ params }: LotDetailPageProps): Promise<Metadata> {
-  const lot = mockLots.find(l => l.id === params.id);
-  if (!lot) {
-    return {
-      title: 'Лот не знайдено - ReefUA',
-    }
-  }
-  return {
-    title: `${lot.name} - ReefUA`,
-    description: lot.description || `Деталі аукціону для ${lot.name}. Поточна ставка: ${lot.currentBid} грн.`, // Use actual description
-  };
+// Extend Bid type to include a potential id
+interface BidWithId extends Bid {
+    id: string;
 }
 
-
 export default function LotDetailPage({ params }: LotDetailPageProps) {
-  const lot = mockLots.find(l => l.id === params.id);
+  const [lot, setLot] = useState<Lot | null>(null);
+  const [bids, setBids] = useState<BidWithId[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [bidAmount, setBidAmount] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  const { toast } = useToast();
+  const [user, authLoading] = useAuthState(auth);
+
+
+  useEffect(() => {
+    const fetchLotData = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        // Fetch Lot
+        const lotRef = doc(db, 'lots', params.id);
+        const lotSnap = await getDoc(lotRef);
+
+        if (!lotSnap.exists()) {
+          notFound();
+          return;
+        }
+        
+        const lotData = {
+            ...lotSnap.data(),
+            id: lotSnap.id,
+            endTime: lotSnap.data().endTime.toDate(),
+        } as Lot;
+
+        setLot(lotData);
+
+        // Fetch Bids
+        const bidsRef = collection(db, 'lots', params.id, 'bids');
+        const q = query(bidsRef, orderBy('timestamp', 'desc'));
+        const bidsSnap = await getDocs(q);
+        const bidsList = bidsSnap.docs.map(doc => ({
+            ...doc.data(),
+            id: doc.id,
+            timestamp: doc.data().timestamp.toDate(),
+        })) as BidWithId[];
+        setBids(bidsList);
+
+      } catch (e) {
+        console.error("Error fetching document:", e);
+        setError("Не вдалося завантажити лот. Спробуйте оновити сторінку.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchLotData();
+  }, [params.id]);
+  
+  const handleBidSubmit = async (e: React.FormEvent) => {
+      e.preventDefault();
+      if (!user) {
+          toast({ variant: "destructive", title: "Помилка", description: "Ви повинні увійти в систему, щоб робити ставки." });
+          return;
+      }
+      if (!lot) return;
+
+      const amount = parseInt(bidAmount, 10);
+      const minBid = (lot.currentBid || 0) + 10;
+      if (isNaN(amount) || amount < minBid) {
+          toast({ variant: "destructive", title: "Помилка", description: `Ваша ставка має бути не менше ${minBid} грн.` });
+          return;
+      }
+
+      setIsSubmitting(true);
+      try {
+        const placeBid = httpsCallable(functions, 'placeBid');
+        await placeBid({ lotId: lot.id, amount });
+        
+        toast({ title: "Успіх!", description: "Вашу ставку прийнято." });
+        setBidAmount('');
+        // Optimistically update UI or re-fetch data
+        // For simplicity, we can just update the current bid locally
+        setLot(prevLot => prevLot ? { ...prevLot, currentBid: amount } : null);
+        const newBid: BidWithId = { id: 'temp-id', user: user.displayName || 'You', amount: amount, timestamp: new Date() };
+        setBids(prevBids => [newBid, ...prevBids]);
+
+      } catch (error: any) {
+          console.error("Error placing bid:", error);
+          toast({ variant: "destructive", title: "Помилка ставки", description: error.message || "Не вдалося зробити ставку." });
+      } finally {
+          setIsSubmitting(false);
+      }
+  };
+
+  if (loading || authLoading) {
+    return <div className="text-center py-20">Завантаження...</div>;
+  }
+
+  if (error) {
+    return <div className="text-center py-20 text-red-500">{error}</div>;
+  }
 
   if (!lot) {
-    notFound();
+    return null; // notFound() is called in useEffect, so this is a fallback
   }
 
-  const { name, images, parameters, currentBid, buyNowPrice, endTime, seller, bidHistory, description } = lot; // Added description
-  const dataAiHintsForSlider = lot.images.map((_, idx) => lot.dataAiHint ? `${lot.dataAiHint} ${idx+1}` : `coral detail ${idx+1}`);
-
+  const { name, images, parameters, currentBid, buyNowPrice, endTime, seller, description } = lot;
   const isAuctionActive = new Date(endTime) > new Date();
-  let winnerNickname: string | null = null;
-
-  if (!isAuctionActive && bidHistory.length > 0) {
-    // Assuming bidHistory is sorted with the highest/latest bid first
-    winnerNickname = bidHistory[0].user;
-  }
+  
+  // Determine winner based on lot status (set by backend function)
+  const winnerNickname = lot.status === 'sold' && lot.winner ? lot.winner : null; 
 
 
   return (
     <div className="container mx-auto py-8">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 space-y-8"> {/* Added space-y-8 */}
-          <PhotoSlider images={images} altText={name} dataAiHints={dataAiHintsForSlider}/>
+        <div className="lg:col-span-2 space-y-8">
+          <PhotoSlider images={images} altText={name} />
           
           <Card>
             <CardHeader>
@@ -61,7 +154,7 @@ export default function LotDetailPage({ params }: LotDetailPageProps) {
               <CardDescription>Продавець: <span className="text-primary font-medium">{seller}</span></CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <h3 className="text-xl font-semibold mb-2 font-headline">Параметри утримання:</h3>
+               <h3 className="text-xl font-semibold mb-2 font-headline">Параметри утримання:</h3>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <ParameterItem label="Солоність" value={parameters.salinity} icon={<Droplets className="h-5 w-5" />} />
                 <ParameterItem label="PAR" value={parameters.par} icon={<Zap className="h-5 w-5" />} />
@@ -87,7 +180,6 @@ export default function LotDetailPage({ params }: LotDetailPageProps) {
               </CardContent>
             </Card>
           )}
-
         </div>
 
         <div className="lg:col-span-1 space-y-6">
@@ -97,7 +189,7 @@ export default function LotDetailPage({ params }: LotDetailPageProps) {
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <p className="text-sm text-muted-foreground">Поточна/Фінальна ставка:</p>
+                <p className="text-sm text-muted-foreground">{isAuctionActive ? "Поточна ставка:" : "Фінальна ціна:"}</p>
                 <p className="text-4xl font-bold text-primary semibold">{currentBid} грн</p>
               </div>
               
@@ -105,28 +197,24 @@ export default function LotDetailPage({ params }: LotDetailPageProps) {
 
               {isAuctionActive ? (
                 <>
-                  {buyNowPrice && (
-                    <div>
-                      <p className="text-sm text-muted-foreground">Або купити зараз за:</p>
-                      <p className="text-2xl font-semibold text-accent">{buyNowPrice} грн</p>
-                    </div>
-                  )}
-                  <form className="space-y-3">
-                    <Input type="number" placeholder={`Ваша ставка (мін. ${currentBid + 10})`} aria-label="Сума ставки" className="text-base" />
-                    <Button type="submit" className="w-full text-lg py-3">Зробити ставку</Button>
-                    {buyNowPrice && (
-                      <Button type="button" variant="outline" className="w-full text-lg py-3 border-accent text-accent hover:bg-accent/10">
-                        <Tag className="mr-2 h-5 w-5" /> Купити зараз
-                      </Button>
-                    )}
+                  <form className="space-y-3" onSubmit={handleBidSubmit}>
+                    <Input 
+                      type="number" 
+                      placeholder={`Ваша ставка (мін. ${currentBid + 10})`} 
+                      aria-label="Сума ставки" 
+                      className="text-base"
+                      value={bidAmount}
+                      onChange={(e) => setBidAmount(e.target.value)}
+                      disabled={isSubmitting || !user}
+                    />
+                    <Button type="submit" className="w-full text-lg py-3" disabled={isSubmitting || authLoading || !user}>
+                      {isSubmitting ? "Обробка..." : "Зробити ставку"}
+                    </Button>
+                    {!user && !authLoading && <p className="text-xs text-center text-muted-foreground">Будь ласка, увійдіть, щоб робити ставки.</p>}
                   </form>
-                  <div className="text-xs text-muted-foreground">
-                    <Info className="inline h-3 w-3 mr-1" />
-                    Ви можете встановити максимальну ставку (проксі-бід), система автоматично підніматиме її за вас.
-                  </div>
                 </>
               ) : (
-                <div className="text-center py-4">
+                 <div className="text-center py-4">
                   {winnerNickname ? (
                     <>
                       <Trophy className="h-10 w-10 text-yellow-500 mx-auto mb-2" />
@@ -134,7 +222,7 @@ export default function LotDetailPage({ params }: LotDetailPageProps) {
                       <p className="text-xl text-primary font-bold">{winnerNickname}</p>
                     </>
                   ) : (
-                    <p className="text-lg text-muted-foreground">Аукціон завершено. Переможця не визначено (не було ставок).</p>
+                    <p className="text-lg text-muted-foreground">Аукціон завершено. Переможця не визначено.</p>
                   )}
                 </div>
               )}
@@ -146,7 +234,7 @@ export default function LotDetailPage({ params }: LotDetailPageProps) {
               <CardTitle className="text-xl font-headline">Історія ставок</CardTitle>
             </CardHeader>
             <CardContent>
-              {bidHistory.length > 0 ? (
+              {bids.length > 0 ? (
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -156,8 +244,8 @@ export default function LotDetailPage({ params }: LotDetailPageProps) {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {bidHistory.map((bid, index) => (
-                      <TableRow key={index}>
+                    {bids.map((bid) => (
+                      <TableRow key={bid.id}>
                         <TableCell>{bid.user}</TableCell>
                         <TableCell className="font-semibold">{bid.amount} грн</TableCell>
                         <TableCell>{new Date(bid.timestamp).toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' })}</TableCell>
@@ -175,11 +263,3 @@ export default function LotDetailPage({ params }: LotDetailPageProps) {
     </div>
   );
 }
-
-export async function generateStaticParams() {
-  return mockLots.map((lot) => ({
-    id: lot.id,
-  }));
-}
-
-    
