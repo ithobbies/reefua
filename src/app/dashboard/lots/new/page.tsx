@@ -14,10 +14,10 @@ import { ArrowLeft, UploadCloud, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 
 import { useAuth } from '@/context/auth-context';
-import { functions, db } from '@/lib/firebase';
+import { functions, db, app } from '@/lib/firebase'; // Import the firebase app
 import { httpsCallable } from 'firebase/functions';
-import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
-import { collection, getDocs, query, orderBy } from 'firebase/firestore';
+import { getStorage, ref, uploadBytesResumable, getDownloadURL, FirebaseStorage } from "firebase/storage";
+import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
 import { v4 as uuidv4 } from 'uuid';
 
 interface LotFormData {
@@ -30,7 +30,7 @@ interface LotFormData {
   salinity: string;
   par: string;
   flow: string;
-  imageUrl: string;
+  images: string[];
 }
 
 export default function NewLotPage() {
@@ -54,26 +54,22 @@ export default function NewLotPage() {
   useEffect(() => {
     document.title = 'Створити новий лот - ReefUA';
 
-    // Redirect if not logged in
     if (!authLoading && !user) {
       toast({ variant: 'destructive', title: 'Доступ заборонено', description: 'Будь ласка, увійдіть, щоб створити лот.'});
       router.push('/auctions');
     }
     
-    // Fetch categories from Firestore
-    const fetchCategories = async () => {
-        try {
-            const categoriesCollection = collection(db, 'categories');
-            const q = query(categoriesCollection, orderBy('name'));
-            const categorySnapshot = await getDocs(q);
-            const categoriesList = categorySnapshot.docs.map(doc => doc.data().name);
-            setCategories(categoriesList);
-        } catch (error) {
-            console.error("Error fetching categories: ", error);
-            toast({ variant: 'destructive', title: 'Помилка', description: 'Не вдалося завантажити категорії.' });
-        }
-    };
-    fetchCategories();
+    const categoriesCollection = collection(db, 'categories');
+    const q = query(categoriesCollection, orderBy('name'));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+        const categoriesList = snapshot.docs.map(doc => doc.data().name);
+        setCategories(categoriesList);
+    }, (error) => {
+        console.error("Error fetching categories: ", error);
+        toast({ variant: 'destructive', title: 'Помилка', description: 'Не вдалося завантажити категорії.' });
+    });
+
+    return () => unsubscribe();
 
   }, [authLoading, user, router, toast]);
 
@@ -92,17 +88,25 @@ export default function NewLotPage() {
       const file = e.target.files[0];
       setImageFile(file);
       setImagePreview(URL.createObjectURL(file));
-      setFormData(prev => ({ ...prev, imageUrl: undefined })); // Reset uploaded URL if user changes image
+      setFormData(prev => ({ ...prev, images: [] }));
     }
   };
 
-  const uploadImage = async (): Promise<string | null> => {
-      if (!imageFile) return null;
+  const uploadImage = async (): Promise<string> => {
+      if (!imageFile) {
+        throw new Error("Файл зображення не вибрано.");
+      }
+      if (!user) {
+        throw new Error("Користувач не автентифікований.");
+      }
       
       setIsUploading(true);
       setUploadProgress(0);
 
-      const storage = getStorage();
+      // Get storage instance and increase the timeout
+      const storage: FirebaseStorage = getStorage(app);
+      storage.maxUploadRetryTime = 60000; // 60 seconds
+
       const fileExtension = imageFile.name.split('.').pop();
       const fileName = `${uuidv4()}.${fileExtension}`;
       const storageRef = ref(storage, `lot-images/${fileName}`);
@@ -118,14 +122,17 @@ export default function NewLotPage() {
           (error) => {
             console.error("Upload failed:", error);
             setIsUploading(false);
-            toast({ variant: "destructive", title: "Помилка завантаження", description: "Не вдалося завантажити зображення." });
-            reject(null);
+            // The toast is now handled in the catch block of handleSubmit
+            reject(error);
           }, 
           () => {
             getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
               setIsUploading(false);
-              setFormData(prev => ({ ...prev, imageUrl: downloadURL }));
               resolve(downloadURL);
+            }).catch(error => {
+               console.error("Failed to get download URL:", error);
+               setIsUploading(false);
+               reject(error);
             });
           }
         );
@@ -135,15 +142,11 @@ export default function NewLotPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    let uploadedImageUrl = formData.imageUrl;
-
-    // Validation
     if (!formData.name || !formData.description || !formData.category || !formData.startingBid || !formData.endTime) {
       toast({ variant: 'destructive', title: 'Помилка валідації', description: "Будь ласка, заповніть усі обов'язкові поля." });
       return;
     }
-
-    if (!uploadedImageUrl && !imageFile) {
+    if (!imageFile) {
         toast({ variant: 'destructive', title: 'Помилка валідації', description: "Будь ласка, завантажте зображення." });
         return;
     }
@@ -151,37 +154,46 @@ export default function NewLotPage() {
     setIsSubmitting(true);
 
     try {
-        // Step 1: Upload image if it hasn't been uploaded yet
-        if (!uploadedImageUrl && imageFile) {
-            uploadedImageUrl = await uploadImage();
-            if (!uploadedImageUrl) {
-                // Error toast is handled inside uploadImage
-                setIsSubmitting(false);
-                return;
-            }
-        }
+        const imageUrl = await uploadImage();
         
-        // Step 2: Call the Cloud Function with form data
-        const createLot = httpsCallable(functions, 'createLot');
-        const result: any = await createLot({
-            ...formData,
-            imageUrl: uploadedImageUrl,
+        const payload: any = {
+            name: formData.name,
+            description: formData.description,
+            category: formData.category,
+            startingBid: formData.startingBid,
+            endTime: new Date(formData.endTime).toISOString(),
+            images: [imageUrl],
             parameters: {
                 salinity: formData.salinity,
                 par: formData.par,
-                flow: formData.flow
-            }
-        });
+                flow: formData.flow,
+            },
+        };
+
+        if (formData.buyNowPrice) {
+            payload.buyNowPrice = formData.buyNowPrice;
+        }
+
+        const createLotFunc = httpsCallable(functions, 'createLot');
+        const result: any = await createLotFunc(payload);
 
         toast({ title: 'Лот створено!', description: `Лот "${formData.name}" успішно додано.` });
         
-        // Redirect to the new lot's page
         router.push(`/lot/${result.data.id}`);
 
     } catch (error: any) {
         console.error("Failed to create lot:", error);
-        toast({ variant: 'destructive', title: 'Помилка створення лоту', description: error.message || 'Сталася невідома помилка.' });
+        
+        if (error.code === 'storage/retry-limit-exceeded') {
+             toast({ variant: "destructive", title: "Помилка мережі", description: "Не вдалося завантажити зображення. Перевірте з'єднання та спробуйте ще раз." });
+        } else if (error.message.includes("Користувач не автентифікований.")) {
+            toast({ variant: "destructive", title: "Помилка автентифікації", description: "Схоже, ви не увійшли в систему. Будь ласка, оновіть сторінку та спробуйте ще раз." });
+        } else {
+             toast({ variant: "destructive", title: "Помилка створення лоту", description: "Будь ласка, перевірте дані та спробуйте ще раз." });
+        }
+    } finally {
         setIsSubmitting(false);
+        setIsUploading(false);
     }
   };
 
@@ -193,13 +205,13 @@ export default function NewLotPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-4">
-        <Button variant="outline" size="icon" asChild>
-          <Link href="/dashboard/lots">
-            <ArrowLeft className="h-4 w-4" />
-          </Link>
+       <div className="flex items-center gap-4">
+         <Button variant="outline" size="icon" asChild>
+            <Link href="/dashboard/lots">
+                <ArrowLeft className="h-4 w-4" />
+            </Link>
         </Button>
-        <h1 className="text-2xl font-headline font-semibold text-primary">Створити Новий Лот</h1>
+        <h1 className="text-2xl font.headline font-semibold text-primary">Створити Новий Лот</h1>
       </div>
       <form onSubmit={handleSubmit}>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -218,7 +230,7 @@ export default function NewLotPage() {
                 <div>
                   <Label htmlFor="category">Категорія*</Label>
                   <Select name="category" onValueChange={handleSelectChange} required disabled={isLoading || categories.length === 0}>
-                    <SelectTrigger><SelectValue placeholder="Оберіть категорію" /></SelectTrigger>
+                    <SelectTrigger><SelectValue placeholder={categories.length > 0 ? "Оберіть категорію" : "Завантаження категорій..."} /></SelectTrigger>
                     <SelectContent>
                       {categories.map(cat => <SelectItem key={cat} value={cat}>{cat}</SelectItem>)}
                     </SelectContent>

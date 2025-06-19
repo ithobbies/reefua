@@ -1,21 +1,15 @@
 
-// functions/src/index.ts
+import * as admin from "firebase-admin";
 
-// This file is the entry point for all your Firebase Functions.
-// It exports the functions from other files, making them deployable.
+// Initialize Firebase Admin SDK.
+// This is done once here. Other files should not re-initialize without checking admin.apps.length.
+if (admin.apps.length === 0) {
+  admin.initializeApp();
+}
 
-import { onUserCreate } from './user';
-import { createLot, placeBid } from './lot';
-import { endAuctions } from './auction';
-
-export {
-    // User-related functions
-    onUserCreate,
-
-    // Lot and bid-related functions
-    createLot,
-    placeBid,
-
-    // Scheduled functions
-    endAuctions,
-};
+// Export all functions from their respective files
+export * from './lot';       // Exports createLot, placeBid, buyNow
+export * from './user';      // Exports createUserDocument, updateUserProfile (if exists)
+export * from './auction';   // Exports endAuctions
+export * from './bids';      // Exports getMyBids
+// export * from './seeder'; // Example, if you have a seeder

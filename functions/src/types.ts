@@ -20,6 +20,12 @@ export interface User {
   sellerRating?: number;
 }
 
+export interface LotParameters {
+    salinity?: string;
+    par?: string;
+    flow?: string;
+}
+
 export interface Lot {
   id: string;
   name: string;
@@ -35,6 +41,7 @@ export interface Lot {
   winnerUid?: string | null;
   finalPrice?: number | null;
   createdAt: IsoDateString;
+  parameters?: LotParameters; // Added optional parameters
 }
 
 export interface Bid {

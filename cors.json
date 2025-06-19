@@ -1,0 +1,13 @@
+
+[
+  {
+    "origin": [
+      "https://6000-firebase-studio-1750002677252.cluster-6vyo4gb53jczovun3dxslzjahs.cloudworkstations.dev",
+      "https://reefua.web.app",
+      "http://localhost:3000"
+    ],
+    "method": ["GET", "POST", "PUT", "HEAD"],
+    "responseHeader": ["Content-Type", "Access-Control-Allow-Origin"],
+    "maxAgeSeconds": 3600
+  }
+]

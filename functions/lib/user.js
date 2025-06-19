@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.onUserCreate = void 0;
+exports.createUserDocument = void 0;
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
 // This is a global initialization, safe to run once
@@ -14,7 +14,7 @@ const db = admin.firestore();
 /**
  * Triggered on new user creation to create a corresponding Firestore document.
  */
-exports.onUserCreate = functions.auth.user().onCreate(async (user) => {
+exports.createUserDocument = functions.auth.user().onCreate(async (user) => {
     const { uid, email, displayName, photoURL } = user;
     const now = new Date().toISOString();
     // Fallback for username if displayName is not available

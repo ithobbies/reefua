@@ -32,7 +32,7 @@ const PhotoSlider: React.FC<PhotoSliderProps> = ({ images, altText, dataAiHints 
   };
 
   return (
-    <div className="relative w-full aspect-[16/10] overflow-hidden rounded-lg shadow-lg group">
+    <div className="relative w-full aspect-[16/10] overflow-hidden rounded-lg shadow-lg group bg-muted">
       {images.map((src, index) => (
         <div
           key={index}
@@ -45,8 +45,8 @@ const PhotoSlider: React.FC<PhotoSliderProps> = ({ images, altText, dataAiHints 
             src={src}
             alt={`${altText} - зображення ${index + 1}`}
             fill
-            priority={index === 0}
-            className="object-cover"
+            priority={index === 0} // Prioritize loading for the first image (LCP)
+            className="object-contain"
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 1000px"
             data-ai-hint={dataAiHints && dataAiHints[index] ? dataAiHints[index] : "coral detail"}
           />

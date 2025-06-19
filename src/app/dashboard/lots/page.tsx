@@ -1,20 +1,55 @@
+
+'use client';
+
+import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { db } from '@/lib/firebase';
+import { useAuth } from '@/context/auth-context';
+import { collection, getDocs, query, where, orderBy } from 'firebase/firestore';
+import type { Lot } from '@/functions/src/types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { mockLots } from '@/lib/mock-data';
 import { Badge } from '@/components/ui/badge';
-import Link from 'next/link';
-import { PlusCircle, Edit, Trash2 } from 'lucide-react';
-import type { Metadata } from 'next';
-
-export const metadata: Metadata = {
-  title: 'Мої лоти - Панель Продавця',
-  description: 'Керування вашими активними та завершеними лотами.',
-};
+import { PlusCircle, Edit, Trash2, Loader2 } from 'lucide-react';
 
 export default function DashboardLotsPage() {
-  // Filter lots by a mock seller for demonstration
-  const sellerLots = mockLots.filter(lot => lot.seller === 'ReefMasterUA' || lot.seller === 'FragHub').slice(0,5);
+  const { user, loading: authLoading } = useAuth();
+  const [lots, setLots] = useState<Lot[]>([]);
+  const [loadingLots, setLoadingLots] = useState(true);
+
+  useEffect(() => {
+    // Set document title
+    document.title = 'Мої лоти - Панель Продавця';
+    
+    if (user) {
+      const fetchUserLots = async () => {
+        try {
+          const lotsCollection = collection(db, 'lots');
+          const q = query(
+            lotsCollection,
+            where('sellerUid', '==', user.uid),
+            orderBy('createdAt', 'desc')
+          );
+          const lotSnapshot = await getDocs(q);
+          const userLots = lotSnapshot.docs.map(doc => ({
+            ...doc.data(),
+            id: doc.id,
+          })) as Lot[];
+          setLots(userLots);
+        } catch (error) {
+          console.error("Error fetching user lots: ", error);
+        } finally {
+          setLoadingLots(false);
+        }
+      };
+      
+      fetchUserLots();
+    } else if (!authLoading) {
+        // If user is not logged in and auth is not loading, stop loading lots
+        setLoadingLots(false);
+    }
+  }, [user, authLoading]);
 
   return (
     <div className="space-y-6">
@@ -32,7 +67,13 @@ export default function DashboardLotsPage() {
           <CardDescription>Переглядайте та керуйте вашими лотами.</CardDescription>
         </CardHeader>
         <CardContent>
-          {sellerLots.length > 0 ? (
+          {authLoading || loadingLots ? (
+             <div className="flex justify-center items-center py-10">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+             </div>
+          ) : !user ? (
+            <p className="text-muted-foreground text-center">Будь ласка, увійдіть, щоб переглянути ваші лоти.</p>
+          ) : lots.length > 0 ? (
             <Table>
               <TableHeader>
                 <TableRow>
@@ -44,30 +85,38 @@ export default function DashboardLotsPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {sellerLots.map((lot) => (
-                  <TableRow key={lot.id}>
-                    <TableCell className="font-medium">{lot.name}</TableCell>
-                    <TableCell>{lot.currentBid} грн</TableCell>
-                    <TableCell>{lot.buyNowPrice ? `${lot.buyNowPrice} грн` : '-'}</TableCell>
-                    <TableCell>
-                      <Badge variant={new Date(lot.endTime) > new Date() ? 'default' : 'secondary'}>
-                        {new Date(lot.endTime) > new Date() ? 'Активний' : 'Завершений'}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="space-x-2">
-                      <Button variant="outline" size="icon" aria-label="Редагувати лот">
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button variant="destructive" size="icon" aria-label="Видалити лот">
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                {lots.map((lot) => {
+                  const isActive = new Date(lot.endTime) > new Date();
+                  return (
+                    <TableRow key={lot.id}>
+                      <TableCell className="font-medium">{lot.name}</TableCell>
+                      <TableCell>{lot.currentBid} грн</TableCell>
+                      <TableCell>{lot.buyNowPrice ? `${lot.buyNowPrice} грн` : '–'}</TableCell>
+                      <TableCell>
+                        <Badge variant={isActive ? 'default' : 'secondary'}>
+                          {isActive ? 'Активний' : 'Завершений'}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="space-x-2">
+                        <Button variant="outline" size="icon" aria-label="Редагувати лот" disabled>
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button variant="destructive" size="icon" aria-label="Видалити лот" disabled>
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
           ) : (
-            <p className="text-muted-foreground">У вас ще немає створених лотів.</p>
+            <div className="text-center py-10">
+                <p className="text-muted-foreground mb-4">У вас ще немає створених лотів.</p>
+                <Button asChild>
+                    <Link href="/dashboard/lots/new">Створити перший лот</Link>
+                </Button>
+            </div>
           )}
         </CardContent>
       </Card>

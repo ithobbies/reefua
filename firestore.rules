@@ -1,0 +1,42 @@
+
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Default deny all reads and writes
+    // match /{document=**} {
+    //   allow read, write: if false;
+    // }
+
+    // Allow public read access to lots, categories, and users
+    match /lots/{lotId} {
+      allow read: if true;
+      // Allow signed-in users to create/update their own lots
+      allow create: if request.auth != null;
+      allow update: if request.auth != null && request.auth.uid == resource.data.sellerUid;
+    }
+    
+    match /lots/{lotId}/bids/{bidId} {
+      allow read: if true;
+      // Allow signed-in users to place bids
+      allow create: if request.auth != null && request.auth.uid != get(/databases/$(database)/documents/lots/$(lotId)).data.sellerUid;
+    }
+
+    // This rule is specifically for the collectionGroup query on the profile page
+    match /{path=**}/bids/{bidId} {
+      allow read: if request.auth != null && request.auth.uid == resource.data.userUid;
+    }
+
+    match /categories/{categoryId} {
+      allow read: if true;
+      allow write: if false; // Categories should be managed from the backend/console
+    }
+
+    match /users/{userId} {
+      allow read: if true;
+      // Users can only create and update their own document
+      allow create, update: if request.auth != null && request.auth.uid == userId;
+    }
+  }
+}

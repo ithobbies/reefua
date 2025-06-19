@@ -5,7 +5,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import LotCard from '@/components/lots/lot-card';
 import { db } from '@/lib/firebase';
 import { collection, getDocs, query, where, orderBy } from 'firebase/firestore';
-import { type Lot } from '@/lib/mock-data';
+import { type Lot } from '@/functions/src/types';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Search } from 'lucide-react';
@@ -29,8 +29,6 @@ export default function AuctionsPage() {
         const lotsList = lotSnapshot.docs.map(doc => ({
           ...doc.data(),
           id: doc.id,
-          // Convert Firestore Timestamp to JS Date
-          endTime: doc.data().endTime.toDate(),
         })) as Lot[];
         setLots(lotsList);
 
@@ -41,7 +39,6 @@ export default function AuctionsPage() {
 
       } catch (error) {
         console.error("Error fetching data: ", error);
-        // Here you could set an error state and display a message to the user
       } finally {
         setLoading(false);
       }
@@ -90,7 +87,7 @@ export default function AuctionsPage() {
       {loading ? (
         <div className="text-center py-10">Завантаження лотів...</div>
       ) : filteredLots.length > 0 ? (
-        <div className="columns-1 sm:columns-2 md:columns-3 lg:columns-4 gap-6 space-y-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {filteredLots.map((lot) => (
             <LotCard key={lot.id} lot={lot} />
           ))}

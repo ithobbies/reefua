@@ -17,7 +17,7 @@ exports.createLot = functions.https.onCall(async (data, context) => {
         throw new functions.https.HttpsError("not-found", "Seller profile does not exist.");
     }
     const sellerUsername = userDoc.data().username;
-    const { name, description, category, startingBid, buyNowPrice, endTime, images } = data;
+    const { name, description, category, startingBid, buyNowPrice, endTime, images, parameters } = data;
     if (!name || !description || !category || typeof startingBid !== 'number' || !endTime || !images || images.length === 0) {
         throw new functions.https.HttpsError("invalid-argument", "Required lot information is missing or invalid.");
     }
@@ -36,9 +36,10 @@ exports.createLot = functions.https.onCall(async (data, context) => {
         category,
         status: 'active',
         createdAt: now,
+        parameters: parameters || {}, // Save parameters, even if empty
     };
     await lotRef.set(newLot);
-    return { success: true, lotId: newLot.id };
+    return { success: true, id: newLot.id };
 });
 /**
  * A callable function for a user to place a bid on a lot.
