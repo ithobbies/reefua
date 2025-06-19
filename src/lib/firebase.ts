@@ -4,15 +4,17 @@ import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getFunctions } from "firebase/functions";
 
+// Your web app's Firebase configuration pulled from environment variables
 const firebaseConfig = {
-  apiKey: "AIzaSyAdTHghtC6EapiesS1beHswN5EHJaQ4DEo",
-  authDomain: "reefua.firebaseapp.com",
-  projectId: "reefua",
-  storageBucket: "reefua.firebasestorage.app",
-  messagingSenderId: "655785668574",
-  appId: "1:655785668574:web:6db232c21f495107af374f"
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
+// Initialize Firebase
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 
 const auth = getAuth(app);
