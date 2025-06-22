@@ -69,7 +69,8 @@ const UserProfilePage = () => {
         const lotDocs = await Promise.all(lotsPromises);
         const bidsInfo: UserBidInfo[] = lotDocs
           .filter(doc => doc.exists())
-          .map(doc => ({ lot: { ...doc.data(), id: doc.id } as Lot, userLastBid: userBidsData[doc.id] }));
+          .map(doc => ({ lot: { ...doc.data(), id: doc.id } as Lot, userLastBid: userBidsData[doc.id] }))
+          .filter(({ lot }) => new Date(lot.endTime) > new Date());
         setUserBids(bidsInfo);
       } else {
         setUserBids([]);
@@ -230,9 +231,14 @@ const UserProfilePage = () => {
                         <p className="text-sm text-muted-foreground">Продавець: {lot.sellerUsername}</p>
                         <p className="text-md font-semibold text-primary">Виграшна ціна: {lot.currentBid} грн</p>
                       </div>
-                      <Button asChild className="w-full sm:w-auto">
-                        <Link href="/checkout">Оформити замовлення</Link>
-                      </Button>
+                      <div className="flex flex-col sm:flex-row gap-2 self-center sm:self-end">
+                        <Button variant="outline" asChild>
+                            <Link href={`/lot/${lot.id}`}>Переглянути</Link>
+                        </Button>
+                        <Button asChild>
+                            <Link href="/checkout">Оформити замовлення</Link>
+                        </Button>
+                      </div>
                     </Card>
                   ))}
                 </div>

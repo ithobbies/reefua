@@ -854,7 +854,7 @@ const DashboardLayout = ({ children })=>{
             label: 'Оглядова панель',
             icon: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$layout$2d$dashboard$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__LayoutDashboard$3e$__["LayoutDashboard"], {}, void 0, false, {
                 fileName: "[project]/src/app/dashboard/layout.tsx",
-                lineNumber: 29,
+                lineNumber: 28,
                 columnNumber: 59
             }, this)
         },
@@ -863,7 +863,7 @@ const DashboardLayout = ({ children })=>{
             label: 'Мої лоти',
             icon: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$list$2d$checks$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__ListChecks$3e$__["ListChecks"], {}, void 0, false, {
                 fileName: "[project]/src/app/dashboard/layout.tsx",
-                lineNumber: 30,
+                lineNumber: 29,
                 columnNumber: 57
             }, this)
         },
@@ -873,7 +873,7 @@ const DashboardLayout = ({ children })=>{
             label: 'Аналітика',
             icon: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$chart$2d$column$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__BarChart3$3e$__["BarChart3"], {}, void 0, false, {
                 fileName: "[project]/src/app/dashboard/layout.tsx",
-                lineNumber: 32,
+                lineNumber: 31,
                 columnNumber: 63
             }, this)
         },
@@ -882,7 +882,7 @@ const DashboardLayout = ({ children })=>{
             label: 'Відгуки',
             icon: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$star$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Star$3e$__["Star"], {}, void 0, false, {
                 fileName: "[project]/src/app/dashboard/layout.tsx",
-                lineNumber: 33,
+                lineNumber: 32,
                 columnNumber: 59
             }, this)
         },
@@ -891,7 +891,7 @@ const DashboardLayout = ({ children })=>{
             label: 'Налаштування',
             icon: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$settings$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Settings$3e$__["Settings"], {}, void 0, false, {
                 fileName: "[project]/src/app/dashboard/layout.tsx",
-                lineNumber: 34,
+                lineNumber: 33,
                 columnNumber: 65
             }, this),
             isBottom: true
@@ -913,10 +913,10 @@ const DashboardLayout = ({ children })=>{
                                 className: "flex items-center gap-2 text-sidebar-foreground hover:opacity-80 transition-opacity",
                                 children: [
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$icons$2f$site$2d$logo$2d$icon$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
-                                        className: "h-8 w-8"
+                                        className: "h-10 w-10"
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/dashboard/layout.tsx",
-                                        lineNumber: 42,
+                                        lineNumber: 41,
                                         columnNumber: 13
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -924,33 +924,33 @@ const DashboardLayout = ({ children })=>{
                                         children: "ReefUA"
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/dashboard/layout.tsx",
-                                        lineNumber: 43,
+                                        lineNumber: 42,
                                         columnNumber: 13
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/app/dashboard/layout.tsx",
-                                lineNumber: 41,
+                                lineNumber: 40,
                                 columnNumber: 12
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                 className: "flex-1"
                             }, void 0, false, {
                                 fileName: "[project]/src/app/dashboard/layout.tsx",
-                                lineNumber: 45,
+                                lineNumber: 44,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$sidebar$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["SidebarTrigger"], {
                                 className: "hidden md:flex text-sidebar-foreground hover:text-sidebar-accent-foreground"
                             }, void 0, false, {
                                 fileName: "[project]/src/app/dashboard/layout.tsx",
-                                lineNumber: 46,
+                                lineNumber: 45,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/app/dashboard/layout.tsx",
-                        lineNumber: 40,
+                        lineNumber: 39,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$sidebar$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["SidebarContent"], {
@@ -976,28 +976,28 @@ const DashboardLayout = ({ children })=>{
                                                         children: item.label
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/app/dashboard/layout.tsx",
-                                                        lineNumber: 59,
+                                                        lineNumber: 58,
                                                         columnNumber: 21
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/app/dashboard/layout.tsx",
-                                                lineNumber: 57,
+                                                lineNumber: 56,
                                                 columnNumber: 19
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "[project]/src/app/dashboard/layout.tsx",
-                                            lineNumber: 52,
+                                            lineNumber: 51,
                                             columnNumber: 17
                                         }, this)
                                     }, item.href, false, {
                                         fileName: "[project]/src/app/dashboard/layout.tsx",
-                                        lineNumber: 51,
+                                        lineNumber: 50,
                                         columnNumber: 15
                                     }, this))
                             }, void 0, false, {
                                 fileName: "[project]/src/app/dashboard/layout.tsx",
-                                lineNumber: 49,
+                                lineNumber: 48,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$sidebar$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["SidebarMenu"], {
@@ -1019,40 +1019,40 @@ const DashboardLayout = ({ children })=>{
                                                         children: item.label
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/app/dashboard/layout.tsx",
-                                                        lineNumber: 75,
+                                                        lineNumber: 74,
                                                         columnNumber: 21
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/app/dashboard/layout.tsx",
-                                                lineNumber: 73,
+                                                lineNumber: 72,
                                                 columnNumber: 19
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "[project]/src/app/dashboard/layout.tsx",
-                                            lineNumber: 68,
+                                            lineNumber: 67,
                                             columnNumber: 17
                                         }, this)
                                     }, item.href, false, {
                                         fileName: "[project]/src/app/dashboard/layout.tsx",
-                                        lineNumber: 67,
+                                        lineNumber: 66,
                                         columnNumber: 15
                                     }, this))
                             }, void 0, false, {
                                 fileName: "[project]/src/app/dashboard/layout.tsx",
-                                lineNumber: 65,
+                                lineNumber: 64,
                                 columnNumber: 12
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/app/dashboard/layout.tsx",
-                        lineNumber: 48,
+                        lineNumber: 47,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/app/dashboard/layout.tsx",
-                lineNumber: 39,
+                lineNumber: 38,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$sidebar$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["SidebarInset"], {
@@ -1062,18 +1062,18 @@ const DashboardLayout = ({ children })=>{
                     children: children
                 }, void 0, false, {
                     fileName: "[project]/src/app/dashboard/layout.tsx",
-                    lineNumber: 84,
+                    lineNumber: 83,
                     columnNumber: 9
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/src/app/dashboard/layout.tsx",
-                lineNumber: 83,
+                lineNumber: 82,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/src/app/dashboard/layout.tsx",
-        lineNumber: 38,
+        lineNumber: 37,
         columnNumber: 5
     }, this);
 };

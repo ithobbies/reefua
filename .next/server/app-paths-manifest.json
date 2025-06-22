@@ -1,9 +1,13 @@
 {
+  "/_not-found/page": "app/_not-found/page.js",
   "/auctions/page": "app/auctions/page.js",
   "/checkout/page": "app/checkout/page.js",
+  "/dashboard/analytics/page": "app/dashboard/analytics/page.js",
+  "/dashboard/lots/edit/[id]/page": "app/dashboard/lots/edit/[id]/page.js",
   "/dashboard/lots/new/page": "app/dashboard/lots/new/page.js",
   "/dashboard/lots/page": "app/dashboard/lots/page.js",
   "/dashboard/page": "app/dashboard/page.js",
+  "/dashboard/reviews/page": "app/dashboard/reviews/page.js",
   "/favicon.ico/route": "app/favicon.ico/route.js",
   "/lot/[id]/page": "app/lot/[id]/page.js",
   "/page": "app/page.js",

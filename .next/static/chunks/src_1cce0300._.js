@@ -946,6 +946,8 @@ const UserProfilePage = ()=>{
                                 },
                                 userLastBid: userBidsData[doc.id]
                             })
+                    }["UserProfilePage.useCallback[fetchTabsData].bidsInfo"]).filter({
+                        "UserProfilePage.useCallback[fetchTabsData].bidsInfo": ({ lot })=>new Date(lot.endTime) > new Date()
                     }["UserProfilePage.useCallback[fetchTabsData].bidsInfo"]);
                     setUserBids(bidsInfo);
                 } else {
@@ -1027,7 +1029,7 @@ const UserProfilePage = ()=>{
                     className: "h-16 w-16 animate-spin text-primary"
                 }, void 0, false, {
                     fileName: "[project]/src/app/profile/page.tsx",
-                    lineNumber: 123,
+                    lineNumber: 124,
                     columnNumber: 9
                 }, this),
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -1035,13 +1037,13 @@ const UserProfilePage = ()=>{
                     children: "Завантаження даних профілю..."
                 }, void 0, false, {
                     fileName: "[project]/src/app/profile/page.tsx",
-                    lineNumber: 124,
+                    lineNumber: 125,
                     columnNumber: 9
                 }, this)
             ]
         }, void 0, true, {
             fileName: "[project]/src/app/profile/page.tsx",
-            lineNumber: 122,
+            lineNumber: 123,
             columnNumber: 7
         }, this);
     }
@@ -1054,20 +1056,20 @@ const UserProfilePage = ()=>{
                     children: "Будь ласка, увійдіть, щоб переглянути свій профіль."
                 }, void 0, false, {
                     fileName: "[project]/src/app/profile/page.tsx",
-                    lineNumber: 132,
+                    lineNumber: 133,
                     columnNumber: 9
                 }, this),
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
                     children: "Увійдіть за допомогою кнопки у верхньому меню."
                 }, void 0, false, {
                     fileName: "[project]/src/app/profile/page.tsx",
-                    lineNumber: 133,
+                    lineNumber: 134,
                     columnNumber: 9
                 }, this)
             ]
         }, void 0, true, {
             fileName: "[project]/src/app/profile/page.tsx",
-            lineNumber: 131,
+            lineNumber: 132,
             columnNumber: 7
         }, this);
     }
@@ -1087,20 +1089,20 @@ const UserProfilePage = ()=>{
                                 alt: firestoreUser.username || 'User Avatar'
                             }, void 0, false, {
                                 fileName: "[project]/src/app/profile/page.tsx",
-                                lineNumber: 145,
+                                lineNumber: 146,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$avatar$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["AvatarFallback"], {
                                 children: fallbackInitial
                             }, void 0, false, {
                                 fileName: "[project]/src/app/profile/page.tsx",
-                                lineNumber: 146,
+                                lineNumber: 147,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/app/profile/page.tsx",
-                        lineNumber: 144,
+                        lineNumber: 145,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1111,7 +1113,7 @@ const UserProfilePage = ()=>{
                                 children: firestoreUser.username
                             }, void 0, false, {
                                 fileName: "[project]/src/app/profile/page.tsx",
-                                lineNumber: 149,
+                                lineNumber: 150,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -1119,7 +1121,7 @@ const UserProfilePage = ()=>{
                                 children: firestoreUser.email
                             }, void 0, false, {
                                 fileName: "[project]/src/app/profile/page.tsx",
-                                lineNumber: 150,
+                                lineNumber: 151,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -1130,7 +1132,7 @@ const UserProfilePage = ()=>{
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/app/profile/page.tsx",
-                                lineNumber: 151,
+                                lineNumber: 152,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1145,19 +1147,19 @@ const UserProfilePage = ()=>{
                                                     className: "mr-2 h-4 w-4"
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/app/profile/page.tsx",
-                                                    lineNumber: 155,
+                                                    lineNumber: 156,
                                                     columnNumber: 17
                                                 }, this),
                                                 " Редагувати профіль"
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/app/profile/page.tsx",
-                                            lineNumber: 154,
+                                            lineNumber: 155,
                                             columnNumber: 15
                                         }, this)
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/profile/page.tsx",
-                                        lineNumber: 153,
+                                        lineNumber: 154,
                                         columnNumber: 13
                                     }, this),
                                     firestoreUser.roles?.includes('seller') && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Button"], {
@@ -1171,37 +1173,37 @@ const UserProfilePage = ()=>{
                                                     className: "mr-2 h-4 w-4"
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/app/profile/page.tsx",
-                                                    lineNumber: 161,
+                                                    lineNumber: 162,
                                                     columnNumber: 19
                                                 }, this),
                                                 " Панель продавця"
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/app/profile/page.tsx",
-                                            lineNumber: 160,
+                                            lineNumber: 161,
                                             columnNumber: 17
                                         }, this)
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/profile/page.tsx",
-                                        lineNumber: 159,
+                                        lineNumber: 160,
                                         columnNumber: 15
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/app/profile/page.tsx",
-                                lineNumber: 152,
+                                lineNumber: 153,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/app/profile/page.tsx",
-                        lineNumber: 148,
+                        lineNumber: 149,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/app/profile/page.tsx",
-                lineNumber: 143,
+                lineNumber: 144,
                 columnNumber: 8
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$tabs$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Tabs"], {
@@ -1219,14 +1221,14 @@ const UserProfilePage = ()=>{
                                         className: "inline h-4 w-4 mr-1 md:mr-2"
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/profile/page.tsx",
-                                        lineNumber: 171,
+                                        lineNumber: 172,
                                         columnNumber: 78
                                     }, this),
                                     "Мої ставки"
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/app/profile/page.tsx",
-                                lineNumber: 171,
+                                lineNumber: 172,
                                 columnNumber: 12
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$tabs$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["TabsTrigger"], {
@@ -1237,14 +1239,14 @@ const UserProfilePage = ()=>{
                                         className: "inline h-4 w-4 mr-1 md:mr-2"
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/profile/page.tsx",
-                                        lineNumber: 172,
+                                        lineNumber: 173,
                                         columnNumber: 76
                                     }, this),
                                     "Виграні лоти"
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/app/profile/page.tsx",
-                                lineNumber: 172,
+                                lineNumber: 173,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$tabs$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["TabsTrigger"], {
@@ -1255,14 +1257,14 @@ const UserProfilePage = ()=>{
                                         className: "inline h-4 w-4 mr-1 md:mr-2"
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/profile/page.tsx",
-                                        lineNumber: 173,
+                                        lineNumber: 174,
                                         columnNumber: 81
                                     }, this),
                                     "Історія платежів"
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/app/profile/page.tsx",
-                                lineNumber: 173,
+                                lineNumber: 174,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$tabs$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["TabsTrigger"], {
@@ -1273,20 +1275,20 @@ const UserProfilePage = ()=>{
                                         className: "inline h-4 w-4 mr-1 md:mr-2"
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/profile/page.tsx",
-                                        lineNumber: 174,
+                                        lineNumber: 175,
                                         columnNumber: 81
                                     }, this),
                                     "Сповіщення"
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/app/profile/page.tsx",
-                                lineNumber: 174,
+                                lineNumber: 175,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/app/profile/page.tsx",
-                        lineNumber: 170,
+                        lineNumber: 171,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$tabs$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["TabsContent"], {
@@ -1300,20 +1302,20 @@ const UserProfilePage = ()=>{
                                             children: "Мої активні ставки"
                                         }, void 0, false, {
                                             fileName: "[project]/src/app/profile/page.tsx",
-                                            lineNumber: 179,
+                                            lineNumber: 180,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["CardDescription"], {
                                             children: "Список лотів, на які ви зробили ставки."
                                         }, void 0, false, {
                                             fileName: "[project]/src/app/profile/page.tsx",
-                                            lineNumber: 180,
+                                            lineNumber: 181,
                                             columnNumber: 15
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/app/profile/page.tsx",
-                                    lineNumber: 178,
+                                    lineNumber: 179,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["CardContent"], {
@@ -1323,12 +1325,12 @@ const UserProfilePage = ()=>{
                                             className: "h-8 w-8 animate-spin"
                                         }, void 0, false, {
                                             fileName: "[project]/src/app/profile/page.tsx",
-                                            lineNumber: 183,
+                                            lineNumber: 184,
                                             columnNumber: 73
                                         }, this)
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/profile/page.tsx",
-                                        lineNumber: 183,
+                                        lineNumber: 184,
                                         columnNumber: 30
                                     }, this) : userBids.length > 0 ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$table$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Table"], {
                                         children: [
@@ -1339,46 +1341,46 @@ const UserProfilePage = ()=>{
                                                             children: "Лот"
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/app/profile/page.tsx",
-                                                            lineNumber: 188,
+                                                            lineNumber: 189,
                                                             columnNumber: 23
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$table$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["TableHead"], {
                                                             children: "Ваша остання ставка"
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/app/profile/page.tsx",
-                                                            lineNumber: 189,
+                                                            lineNumber: 190,
                                                             columnNumber: 23
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$table$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["TableHead"], {
                                                             children: "Поточна ставка"
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/app/profile/page.tsx",
-                                                            lineNumber: 190,
+                                                            lineNumber: 191,
                                                             columnNumber: 23
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$table$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["TableHead"], {
                                                             children: "Статус"
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/app/profile/page.tsx",
-                                                            lineNumber: 191,
+                                                            lineNumber: 192,
                                                             columnNumber: 23
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$table$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["TableHead"], {
                                                             children: "Дії"
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/app/profile/page.tsx",
-                                                            lineNumber: 192,
+                                                            lineNumber: 193,
                                                             columnNumber: 23
                                                         }, this)
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/src/app/profile/page.tsx",
-                                                    lineNumber: 187,
+                                                    lineNumber: 188,
                                                     columnNumber: 21
                                                 }, this)
                                             }, void 0, false, {
                                                 fileName: "[project]/src/app/profile/page.tsx",
-                                                lineNumber: 186,
+                                                lineNumber: 187,
                                                 columnNumber: 19
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$table$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["TableBody"], {
@@ -1391,7 +1393,7 @@ const UserProfilePage = ()=>{
                                                                 children: lot.name
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/app/profile/page.tsx",
-                                                                lineNumber: 200,
+                                                                lineNumber: 201,
                                                                 columnNumber: 25
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$table$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["TableCell"], {
@@ -1401,7 +1403,7 @@ const UserProfilePage = ()=>{
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/src/app/profile/page.tsx",
-                                                                lineNumber: 201,
+                                                                lineNumber: 202,
                                                                 columnNumber: 25
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$table$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["TableCell"], {
@@ -1412,7 +1414,7 @@ const UserProfilePage = ()=>{
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/src/app/profile/page.tsx",
-                                                                lineNumber: 202,
+                                                                lineNumber: 203,
                                                                 columnNumber: 25
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$table$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["TableCell"], {
@@ -1421,12 +1423,12 @@ const UserProfilePage = ()=>{
                                                                     children: isWinning ? 'Виграєте' : 'Перебито'
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/src/app/profile/page.tsx",
-                                                                    lineNumber: 204,
+                                                                    lineNumber: 205,
                                                                     columnNumber: 27
                                                                 }, this)
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/app/profile/page.tsx",
-                                                                lineNumber: 203,
+                                                                lineNumber: 204,
                                                                 columnNumber: 25
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$table$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["TableCell"], {
@@ -1439,58 +1441,58 @@ const UserProfilePage = ()=>{
                                                                         children: "Переглянути"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/src/app/profile/page.tsx",
-                                                                        lineNumber: 208,
+                                                                        lineNumber: 209,
                                                                         columnNumber: 80
                                                                     }, this)
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/src/app/profile/page.tsx",
-                                                                    lineNumber: 208,
+                                                                    lineNumber: 209,
                                                                     columnNumber: 36
                                                                 }, this)
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/app/profile/page.tsx",
-                                                                lineNumber: 208,
+                                                                lineNumber: 209,
                                                                 columnNumber: 25
                                                             }, this)
                                                         ]
                                                     }, lot.id, true, {
                                                         fileName: "[project]/src/app/profile/page.tsx",
-                                                        lineNumber: 199,
+                                                        lineNumber: 200,
                                                         columnNumber: 23
                                                     }, this);
                                                 })
                                             }, void 0, false, {
                                                 fileName: "[project]/src/app/profile/page.tsx",
-                                                lineNumber: 195,
+                                                lineNumber: 196,
                                                 columnNumber: 19
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/app/profile/page.tsx",
-                                        lineNumber: 185,
+                                        lineNumber: 186,
                                         columnNumber: 17
                                     }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
                                         className: "text-center text-muted-foreground py-10",
                                         children: "Ви ще не зробили жодної ставки."
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/profile/page.tsx",
-                                        lineNumber: 213,
+                                        lineNumber: 214,
                                         columnNumber: 19
                                     }, this)
                                 }, void 0, false, {
                                     fileName: "[project]/src/app/profile/page.tsx",
-                                    lineNumber: 182,
+                                    lineNumber: 183,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/app/profile/page.tsx",
-                            lineNumber: 177,
+                            lineNumber: 178,
                             columnNumber: 11
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/src/app/profile/page.tsx",
-                        lineNumber: 176,
+                        lineNumber: 177,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$tabs$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["TabsContent"], {
@@ -1503,12 +1505,12 @@ const UserProfilePage = ()=>{
                                         children: "Виграні лоти"
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/profile/page.tsx",
-                                        lineNumber: 220,
+                                        lineNumber: 221,
                                         columnNumber: 25
                                     }, this)
                                 }, void 0, false, {
                                     fileName: "[project]/src/app/profile/page.tsx",
-                                    lineNumber: 220,
+                                    lineNumber: 221,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["CardContent"], {
@@ -1518,12 +1520,12 @@ const UserProfilePage = ()=>{
                                             className: "h-8 w-8 animate-spin"
                                         }, void 0, false, {
                                             fileName: "[project]/src/app/profile/page.tsx",
-                                            lineNumber: 222,
+                                            lineNumber: 223,
                                             columnNumber: 76
                                         }, this)
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/profile/page.tsx",
-                                        lineNumber: 222,
+                                        lineNumber: 223,
                                         columnNumber: 33
                                     }, this) : wonLots.length > 0 ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                         className: "space-y-4",
@@ -1538,7 +1540,7 @@ const UserProfilePage = ()=>{
                                                         className: "rounded-md object-cover"
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/app/profile/page.tsx",
-                                                        lineNumber: 227,
+                                                        lineNumber: 228,
                                                         columnNumber: 23
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1549,7 +1551,7 @@ const UserProfilePage = ()=>{
                                                                 children: lot.name
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/app/profile/page.tsx",
-                                                                lineNumber: 229,
+                                                                lineNumber: 230,
                                                                 columnNumber: 25
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -1560,7 +1562,7 @@ const UserProfilePage = ()=>{
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/src/app/profile/page.tsx",
-                                                                lineNumber: 230,
+                                                                lineNumber: 231,
                                                                 columnNumber: 25
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -1572,63 +1574,87 @@ const UserProfilePage = ()=>{
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/src/app/profile/page.tsx",
-                                                                lineNumber: 231,
+                                                                lineNumber: 232,
                                                                 columnNumber: 25
                                                             }, this)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/src/app/profile/page.tsx",
-                                                        lineNumber: 228,
+                                                        lineNumber: 229,
                                                         columnNumber: 23
                                                     }, this),
-                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Button"], {
-                                                        asChild: true,
-                                                        className: "w-full sm:w-auto",
-                                                        children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$client$2f$app$2d$dir$2f$link$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
-                                                            href: "/checkout",
-                                                            children: "Оформити замовлення"
-                                                        }, void 0, false, {
-                                                            fileName: "[project]/src/app/profile/page.tsx",
-                                                            lineNumber: 234,
-                                                            columnNumber: 25
-                                                        }, this)
-                                                    }, void 0, false, {
+                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                        className: "flex flex-col sm:flex-row gap-2 self-center sm:self-end",
+                                                        children: [
+                                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Button"], {
+                                                                variant: "outline",
+                                                                asChild: true,
+                                                                children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$client$2f$app$2d$dir$2f$link$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
+                                                                    href: `/lot/${lot.id}`,
+                                                                    children: "Переглянути"
+                                                                }, void 0, false, {
+                                                                    fileName: "[project]/src/app/profile/page.tsx",
+                                                                    lineNumber: 236,
+                                                                    columnNumber: 29
+                                                                }, this)
+                                                            }, void 0, false, {
+                                                                fileName: "[project]/src/app/profile/page.tsx",
+                                                                lineNumber: 235,
+                                                                columnNumber: 25
+                                                            }, this),
+                                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Button"], {
+                                                                asChild: true,
+                                                                children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$client$2f$app$2d$dir$2f$link$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
+                                                                    href: "/checkout",
+                                                                    children: "Оформити замовлення"
+                                                                }, void 0, false, {
+                                                                    fileName: "[project]/src/app/profile/page.tsx",
+                                                                    lineNumber: 239,
+                                                                    columnNumber: 29
+                                                                }, this)
+                                                            }, void 0, false, {
+                                                                fileName: "[project]/src/app/profile/page.tsx",
+                                                                lineNumber: 238,
+                                                                columnNumber: 25
+                                                            }, this)
+                                                        ]
+                                                    }, void 0, true, {
                                                         fileName: "[project]/src/app/profile/page.tsx",
-                                                        lineNumber: 233,
+                                                        lineNumber: 234,
                                                         columnNumber: 23
                                                     }, this)
                                                 ]
                                             }, lot.id, true, {
                                                 fileName: "[project]/src/app/profile/page.tsx",
-                                                lineNumber: 226,
+                                                lineNumber: 227,
                                                 columnNumber: 21
                                             }, this))
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/profile/page.tsx",
-                                        lineNumber: 224,
+                                        lineNumber: 225,
                                         columnNumber: 17
                                     }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
                                         className: "text-center text-muted-foreground py-10",
                                         children: "У вас ще немає виграних лотів."
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/profile/page.tsx",
-                                        lineNumber: 239,
+                                        lineNumber: 245,
                                         columnNumber: 19
                                     }, this)
                                 }, void 0, false, {
                                     fileName: "[project]/src/app/profile/page.tsx",
-                                    lineNumber: 221,
+                                    lineNumber: 222,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/app/profile/page.tsx",
-                            lineNumber: 219,
+                            lineNumber: 220,
                             columnNumber: 12
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/src/app/profile/page.tsx",
-                        lineNumber: 218,
+                        lineNumber: 219,
                         columnNumber: 10
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$tabs$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["TabsContent"], {
@@ -1640,12 +1666,12 @@ const UserProfilePage = ()=>{
                                         children: "Історія платежів"
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/profile/page.tsx",
-                                        lineNumber: 244,
+                                        lineNumber: 250,
                                         columnNumber: 29
                                     }, this)
                                 }, void 0, false, {
                                     fileName: "[project]/src/app/profile/page.tsx",
-                                    lineNumber: 244,
+                                    lineNumber: 250,
                                     columnNumber: 17
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["CardContent"], {
@@ -1654,23 +1680,23 @@ const UserProfilePage = ()=>{
                                         children: "Цей розділ в розробці."
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/profile/page.tsx",
-                                        lineNumber: 244,
+                                        lineNumber: 250,
                                         columnNumber: 94
                                     }, this)
                                 }, void 0, false, {
                                     fileName: "[project]/src/app/profile/page.tsx",
-                                    lineNumber: 244,
+                                    lineNumber: 250,
                                     columnNumber: 81
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/app/profile/page.tsx",
-                            lineNumber: 244,
+                            lineNumber: 250,
                             columnNumber: 11
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/src/app/profile/page.tsx",
-                        lineNumber: 243,
+                        lineNumber: 249,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$tabs$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["TabsContent"], {
@@ -1684,20 +1710,20 @@ const UserProfilePage = ()=>{
                                             children: "Налаштування сповіщень"
                                         }, void 0, false, {
                                             fileName: "[project]/src/app/profile/page.tsx",
-                                            lineNumber: 249,
+                                            lineNumber: 255,
                                             columnNumber: 21
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["CardDescription"], {
                                             children: "Керуйте тим, які сповіщення ви отримуєте."
                                         }, void 0, false, {
                                             fileName: "[project]/src/app/profile/page.tsx",
-                                            lineNumber: 250,
+                                            lineNumber: 256,
                                             columnNumber: 21
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/app/profile/page.tsx",
-                                    lineNumber: 248,
+                                    lineNumber: 254,
                                     columnNumber: 17
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["CardContent"], {
@@ -1714,7 +1740,7 @@ const UserProfilePage = ()=>{
                                                             children: "Push-сповіщення"
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/app/profile/page.tsx",
-                                                            lineNumber: 255,
+                                                            lineNumber: 261,
                                                             columnNumber: 29
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -1722,13 +1748,13 @@ const UserProfilePage = ()=>{
                                                             children: "Отримувати миттєві сповіщення про ставки, виграші та нові лоти."
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/app/profile/page.tsx",
-                                                            lineNumber: 256,
+                                                            lineNumber: 262,
                                                             columnNumber: 29
                                                         }, this)
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/src/app/profile/page.tsx",
-                                                    lineNumber: 254,
+                                                    lineNumber: 260,
                                                     columnNumber: 25
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$switch$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Switch"], {
@@ -1739,13 +1765,13 @@ const UserProfilePage = ()=>{
                                                     disabled: !firestoreUser
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/app/profile/page.tsx",
-                                                    lineNumber: 258,
+                                                    lineNumber: 264,
                                                     columnNumber: 25
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/app/profile/page.tsx",
-                                            lineNumber: 253,
+                                            lineNumber: 259,
                                             columnNumber: 21
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1759,7 +1785,7 @@ const UserProfilePage = ()=>{
                                                             children: "Email-сповіщення"
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/app/profile/page.tsx",
-                                                            lineNumber: 262,
+                                                            lineNumber: 268,
                                                             columnNumber: 29
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -1767,13 +1793,13 @@ const UserProfilePage = ()=>{
                                                             children: "Отримувати підсумки та важливі новини на пошту."
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/app/profile/page.tsx",
-                                                            lineNumber: 263,
+                                                            lineNumber: 269,
                                                             columnNumber: 29
                                                         }, this)
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/src/app/profile/page.tsx",
-                                                    lineNumber: 261,
+                                                    lineNumber: 267,
                                                     columnNumber: 25
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$switch$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Switch"], {
@@ -1784,13 +1810,13 @@ const UserProfilePage = ()=>{
                                                     disabled: !firestoreUser
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/app/profile/page.tsx",
-                                                    lineNumber: 265,
+                                                    lineNumber: 271,
                                                     columnNumber: 25
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/app/profile/page.tsx",
-                                            lineNumber: 260,
+                                            lineNumber: 266,
                                             columnNumber: 21
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Button"], {
@@ -1801,43 +1827,43 @@ const UserProfilePage = ()=>{
                                                     className: "mr-2 h-4 w-4 animate-spin"
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/app/profile/page.tsx",
-                                                    lineNumber: 268,
+                                                    lineNumber: 274,
                                                     columnNumber: 38
                                                 }, this),
                                                 isSaving ? 'Збереження...' : 'Зберегти налаштування'
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/app/profile/page.tsx",
-                                            lineNumber: 267,
+                                            lineNumber: 273,
                                             columnNumber: 21
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/app/profile/page.tsx",
-                                    lineNumber: 252,
+                                    lineNumber: 258,
                                     columnNumber: 17
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/app/profile/page.tsx",
-                            lineNumber: 247,
+                            lineNumber: 253,
                             columnNumber: 13
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/src/app/profile/page.tsx",
-                        lineNumber: 246,
+                        lineNumber: 252,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/app/profile/page.tsx",
-                lineNumber: 169,
+                lineNumber: 170,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/src/app/profile/page.tsx",
-        lineNumber: 142,
+        lineNumber: 143,
         columnNumber: 5
     }, this);
 };

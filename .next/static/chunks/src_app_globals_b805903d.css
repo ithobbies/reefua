@@ -788,6 +788,10 @@ h1, h2, h3, h4, h5, h6 {
   height: 5rem;
 }
 
+.h-40 {
+  height: 10rem;
+}
+
 .max-h-48 {
   max-height: 12rem;
 }
@@ -1218,6 +1222,10 @@ h1, h2, h3, h4, h5, h6 {
   --tw-space-y-reverse: 0;
   margin-top: calc(2rem * calc(1 - var(--tw-space-y-reverse)));
   margin-bottom: calc(2rem * var(--tw-space-y-reverse));
+}
+
+.self-center {
+  align-self: center;
 }
 
 .overflow-auto {
@@ -2935,6 +2943,10 @@ body {
     --tw-space-y-reverse: 0;
     margin-top: calc(0px * calc(1 - var(--tw-space-y-reverse)));
     margin-bottom: calc(0px * var(--tw-space-y-reverse));
+  }
+
+  .sm\:self-end {
+    align-self: flex-end;
   }
 
   .sm\:rounded-lg {
