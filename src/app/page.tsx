@@ -64,6 +64,12 @@ export default function HomePage() {
     fetchNewLots();
     fetchHotLots();
   }, []);
+  
+  const handleLotPurchased = (lotId: string) => {
+    setNewLots(prevLots => prevLots.filter(lot => lot.id !== lotId));
+    setHotLots(prevLots => prevLots.filter(lot => lot.id !== lotId));
+  };
+
 
   const renderSkeleton = () => (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -89,7 +95,7 @@ export default function HomePage() {
         {loadingNew ? renderSkeleton() : newLots.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {newLots.map((lot) => (
-              <LotCard key={lot.id} lot={lot} />
+              <LotCard key={lot.id} lot={lot} onLotPurchased={handleLotPurchased} />
             ))}
           </div>
         ) : (
@@ -110,7 +116,7 @@ export default function HomePage() {
         {loadingHot ? renderSkeleton() : hotLots.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {hotLots.map((lot) => (
-              <LotCard key={lot.id} lot={lot} />
+              <LotCard key={lot.id} lot={lot} onLotPurchased={handleLotPurchased} />
             ))}
           </div>
         ) : (

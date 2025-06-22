@@ -1,45 +1,41 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createUserDocument = void 0;
+exports.updateUserProfile = void 0;
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
-// This is a global initialization, safe to run once
-try {
+if (admin.apps.length === 0) {
     admin.initializeApp();
 }
-catch (e) {
-    // This is expected to happen on hot reloads, it's fine
-}
-const db = admin.firestore();
 /**
- * Triggered on new user creation to create a corresponding Firestore document.
+ * Updates a user's profile information in both Firestore and Firebase Auth.
  */
-exports.createUserDocument = functions.auth.user().onCreate(async (user) => {
-    const { uid, email, displayName, photoURL } = user;
-    const now = new Date().toISOString();
-    // Fallback for username if displayName is not available
-    const username = displayName || `user_${uid.substring(0, 5)}`;
-    const newUser = {
-        uid,
-        email: email || "",
-        username,
-        photoURL: photoURL || null,
-        createdAt: now,
-        updatedAt: now,
-        isActive: true,
-        roles: ["user"],
-        lastLogin: now,
-        pushEnabled: true,
-        emailNotifications: true,
-        balance: 0,
-        sellerRating: 0
-    };
+exports.updateUserProfile = functions.https.onCall(async (data, context) => {
+    if (!context.auth) {
+        throw new functions.https.HttpsError("unauthenticated", "You must be logged in to update your profile.");
+    }
+    const { uid } = context.auth;
+    const { username, photoURL } = data;
+    if (!username || typeof username !== 'string' || username.length < 3) {
+        throw new functions.https.HttpsError("invalid-argument", "Username must be a string of at least 3 characters.");
+    }
     try {
-        await db.collection("users").doc(uid).set(newUser);
-        console.log(`Successfully created user document for ${uid}`);
+        // 1. Update Firebase Authentication user
+        await admin.auth().updateUser(uid, {
+            displayName: username,
+            photoURL: photoURL,
+        });
+        // 2. Update Firestore user document
+        const userDocRef = admin.firestore().collection("users").doc(uid);
+        await userDocRef.update({
+            username: username,
+            photoURL: photoURL,
+            updatedAt: new Date().toISOString(),
+        });
+        return { success: true, message: "Profile updated successfully." };
     }
     catch (error) {
-        console.error(`Error creating user document for UID: ${uid}`, error);
+        console.error("Error updating user profile:", error);
+        throw new functions.https.HttpsError("internal", "An unexpected error occurred while updating the profile.");
     }
 });
 //# sourceMappingURL=user.js.map

@@ -1,0 +1,12 @@
+{
+  "/auctions/page": "app/auctions/page.js",
+  "/checkout/page": "app/checkout/page.js",
+  "/dashboard/lots/new/page": "app/dashboard/lots/new/page.js",
+  "/dashboard/lots/page": "app/dashboard/lots/page.js",
+  "/dashboard/page": "app/dashboard/page.js",
+  "/favicon.ico/route": "app/favicon.ico/route.js",
+  "/lot/[id]/page": "app/lot/[id]/page.js",
+  "/page": "app/page.js",
+  "/profile/page": "app/profile/page.js",
+  "/sell/page": "app/sell/page.js"
+}

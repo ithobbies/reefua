@@ -1,4 +1,3 @@
-
 'use client'; 
 
 import Link from 'next/link';
@@ -39,7 +38,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
       <Sidebar collapsible="icon" side="left" variant="sidebar">
         <SidebarHeader className="items-center border-b border-sidebar-border">
            <Link href="/" className="flex items-center gap-2 text-sidebar-foreground hover:opacity-80 transition-opacity">
-            <SiteLogoIcon className="h-8 w-8" /> 
+            <SiteLogoIcon className="h-10 w-10" /> 
             <span className="font-headline text-lg font-semibold group-data-[collapsible=icon]:hidden">ReefUA</span>
           </Link>
           <div className="flex-1" />
@@ -90,5 +89,3 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
 };
 
 export default DashboardLayout;
-
-    
