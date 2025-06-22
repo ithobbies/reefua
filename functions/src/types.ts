@@ -28,10 +28,12 @@ export interface LotParameters {
 
 export interface Lot {
   id: string;
-  name: string;
+  name:string;
   description: string;
   images: string[];
+  startingBid: number;
   currentBid: number;
+  bidCount: number;
   buyNowPrice?: number | null;
   endTime: IsoDateString;
   sellerUid: string;
@@ -41,11 +43,12 @@ export interface Lot {
   winnerUid?: string | null;
   finalPrice?: number | null;
   createdAt: IsoDateString;
-  parameters?: LotParameters; // Added optional parameters
+  parameters?: LotParameters;
 }
 
 export interface Bid {
   bidId: string;
+  lotId: string;
   userUid: string;
   username: string;
   amount: number;
