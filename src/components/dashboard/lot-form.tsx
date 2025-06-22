@@ -242,7 +242,7 @@ export function LotForm({ existingLot }: LotFormProps) {
               <CardContent className="space-y-4">
                 <div>
                   <Label htmlFor="name">Назва лоту*</Label>
-                  <Input id="name" name="name" placeholder="Наприклад, Фраг Acropora Red Planet" value={formData.name || ''} onChange={handleChange} required disabled={isLoading} />
+                  <Input id="name" name="name" placeholder="Фраг Acropora Red Planet" value={formData.name || ''} onChange={handleChange} required disabled={isLoading} />
                 </div>
                 <div>
                   <Label htmlFor="description">Опис лоту*</Label>
@@ -266,11 +266,11 @@ export function LotForm({ existingLot }: LotFormProps) {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="startingBid">Стартова ціна (грн)*</Label>
-                    <Input id="startingBid" name="startingBid" type="number" placeholder="Наприклад, 100" value={formData.startingBid || ''} onChange={handleChange} required disabled={isLoading} />
+                    <Input id="startingBid" name="startingBid" type="number" placeholder="100" value={formData.startingBid || ''} onChange={handleChange} required disabled={isLoading} />
                   </div>
                   <div>
                     <Label htmlFor="buyNowPrice">Ціна "Купити зараз" (грн, необов'язково)</Label>
-                    <Input id="buyNowPrice" name="buyNowPrice" type="number" placeholder="Наприклад, 500" value={formData.buyNowPrice || ''} onChange={handleChange} disabled={isLoading} />
+                    <Input id="buyNowPrice" name="buyNowPrice" type="number" placeholder="500" value={formData.buyNowPrice || ''} onChange={handleChange} disabled={isLoading} />
                   </div>
                 </div>
                 <div>
@@ -285,15 +285,15 @@ export function LotForm({ existingLot }: LotFormProps) {
               <CardContent className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                  <div>
                     <Label htmlFor="salinity">Солоність</Label>
-                    <Input id="salinity" name="parameters.salinity" placeholder="Наприклад, 1.025 SG" value={formData.parameters?.salinity || ''} onChange={handleChange} disabled={isLoading}/>
+                    <Input id="salinity" name="parameters.salinity" placeholder="1.025 SG" value={formData.parameters?.salinity || ''} onChange={handleChange} disabled={isLoading}/>
                   </div>
                   <div>
                     <Label htmlFor="par">PAR</Label>
-                    <Input id="par" name="parameters.par" placeholder="Наприклад, 250-350" value={formData.parameters?.par || ''} onChange={handleChange} disabled={isLoading}/>
+                    <Input id="par" name="parameters.par" placeholder="250-350" value={formData.parameters?.par || ''} onChange={handleChange} disabled={isLoading}/>
                   </div>
                   <div>
                     <Label htmlFor="flow">Течія</Label>
-                    <Input id="flow" name="parameters.flow" placeholder="Наприклад, Помірна" value={formData.parameters?.flow || ''} onChange={handleChange} disabled={isLoading}/>
+                    <Input id="flow" name="parameters.flow" placeholder="Помірна" value={formData.parameters?.flow || ''} onChange={handleChange} disabled={isLoading}/>
                   </div>
               </CardContent>
             </Card>
