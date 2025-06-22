@@ -46,6 +46,10 @@ export default function AuctionsPage() {
 
     fetchLots();
   }, []);
+  
+  const handleLotPurchased = (lotId: string) => {
+    setLots(prevLots => prevLots.filter(lot => lot.id !== lotId));
+  };
 
   const filteredLots = useMemo(() => {
     return lots.filter(lot => {
@@ -89,7 +93,7 @@ export default function AuctionsPage() {
       ) : filteredLots.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {filteredLots.map((lot) => (
-            <LotCard key={lot.id} lot={lot} />
+            <LotCard key={lot.id} lot={lot} onLotPurchased={handleLotPurchased} />
           ))}
         </div>
       ) : (

@@ -1,16 +1,29 @@
 "use strict";
-// functions/src/index.ts
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __exportStar = (this && this.__exportStar) || function(m, exports) {
+    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.endAuctions = exports.getMyBids = exports.placeBid = exports.createLot = exports.createUserDocument = void 0;
-// This file is the entry point for all your Firebase Functions.
-// It exports the functions from other files, making them deployable.
-const user_1 = require("./user");
-Object.defineProperty(exports, "createUserDocument", { enumerable: true, get: function () { return user_1.createUserDocument; } });
-const lot_1 = require("./lot");
-Object.defineProperty(exports, "createLot", { enumerable: true, get: function () { return lot_1.createLot; } });
-Object.defineProperty(exports, "placeBid", { enumerable: true, get: function () { return lot_1.placeBid; } });
-const auction_1 = require("./auction");
-Object.defineProperty(exports, "endAuctions", { enumerable: true, get: function () { return auction_1.endAuctions; } });
-const bids_1 = require("./bids");
-Object.defineProperty(exports, "getMyBids", { enumerable: true, get: function () { return bids_1.getMyBids; } });
+const admin = require("firebase-admin");
+// Initialize Firebase Admin SDK.
+// This is done once here. Other files should not re-initialize without checking admin.apps.length.
+if (admin.apps.length === 0) {
+    admin.initializeApp();
+}
+// Export all functions from their respective files
+__exportStar(require("./lot"), exports); // Exports createLot, placeBid, buyNow
+__exportStar(require("./user"), exports); // Exports createUserDocument, updateUserProfile (if exists)
+__exportStar(require("./auction"), exports); // Exports endAuctions
+__exportStar(require("./bids"), exports); // Exports getMyBids
+// export * from './seeder'; // Example, if you have a seeder
 //# sourceMappingURL=index.js.map

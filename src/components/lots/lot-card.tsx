@@ -16,12 +16,12 @@ import CountdownBadge from '@/components/ui/countdown-badge';
 
 interface LotCardProps {
   lot: Lot;
+  onLotPurchased?: (lotId: string) => void; // Callback prop
 }
 
-const LotCard: React.FC<LotCardProps> = ({ lot }) => {
+const LotCard: React.FC<LotCardProps> = ({ lot, onLotPurchased }) => {
   const { user } = useAuth();
   const { toast } = useToast();
-  const router = useRouter();
   const [isBuying, setIsBuying] = useState(false);
 
   const imageUrl = lot.images && lot.images.length > 0 ? lot.images[0] : '/placeholder.png';
@@ -58,7 +58,11 @@ const LotCard: React.FC<LotCardProps> = ({ lot }) => {
         }
         
         toast({ title: "Успіх!", description: "Ви успішно придбали цей лот." });
-        router.refresh(); 
+        
+        // Notify the parent component to remove this lot from the list
+        if (onLotPurchased) {
+            onLotPurchased(lot.id);
+        }
         
     } catch (error: any) {
         console.error("Error buying now from card:", error);
