@@ -181,7 +181,7 @@ const Header = () => {
 
   return (
     <header className="sticky top-0 z-50 w-full bg-background/80 backdrop-blur-md border-b border-border/50 shadow-sm">
-      <div className="container mx-auto flex h-20 items-center justify-between px-4">
+      <div className="container mx-auto flex h-16 items-center justify-between px-4">
         <Link href="/" className="flex items-center text-primary hover:opacity-80 transition-opacity">
           <SiteLogoIcon className="h-12 w-12" />
         </Link>
