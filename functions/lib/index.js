@@ -21,9 +21,8 @@ if (admin.apps.length === 0) {
     admin.initializeApp();
 }
 // Export all functions from their respective files
-__exportStar(require("./lot"), exports); // Exports createLot, placeBid, buyNow
-__exportStar(require("./user"), exports); // Exports createUserDocument, updateUserProfile (if exists)
+__exportStar(require("./lot"), exports); // Exports createLot, buyNow
+__exportStar(require("./user"), exports); // Exports createUserDocument, updateUserProfile
 __exportStar(require("./auction"), exports); // Exports endAuctions
-__exportStar(require("./bids"), exports); // Exports getMyBids
-// export * from './seeder'; // Example, if you have a seeder
+__exportStar(require("./bids"), exports); // Exports placeBid, getMyBids
 //# sourceMappingURL=index.js.map

@@ -23,6 +23,7 @@ import { auth } from '@/lib/firebase';
 import { GoogleAuthProvider, signInWithPopup, signOut } from 'firebase/auth';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
+import { AuthDialog } from '@/components/auth/auth-dialog';
 
 const navLinks = [
   { href: '/', label: 'Головна' },
@@ -61,7 +62,7 @@ const Header = () => {
     }
   };
 
-  const UserMenu = () => ( // This menu assumes firestoreUser is available
+  const UserMenu = () => (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-10 w-10 rounded-full">
@@ -101,10 +102,9 @@ const Header = () => {
       return isMobile ? <Loader2 className="h-6 w-6 animate-spin" /> : <Skeleton className="h-10 w-24 rounded-md" />;
     }
 
-    if (user) { // User is authenticated with Firebase Auth
-      if (firestoreUser) { // Firestore profile also exists and is loaded
+    if (user) {
+      if (firestoreUser) {
         return isMobile ? (
-          // Full mobile logged-in menu
           <div className="flex flex-col gap-2">
              <SheetClose asChild>
                 <Link href="/dashboard" className="flex items-center p-2 rounded-md hover:bg-secondary text-foreground hover:text-primary">
@@ -121,11 +121,9 @@ const Header = () => {
             </Button>
           </div>
         ) : (
-          <UserMenu /> // Full desktop user menu
+          <UserMenu />
         );
       } else {
-        // User authenticated via Firebase Auth, but Firestore profile is missing or still pending
-        // Show a simplified state: Avatar + Logout, indicating profile is loading/being set up.
         return isMobile ? (
           <div className="flex flex-col gap-2">
             <div className="p-2 text-sm text-muted-foreground">Профіль завантажується...</div>
@@ -139,7 +137,6 @@ const Header = () => {
             </Button>
           </div>
         ) : (
-          // Simplified desktop menu: Avatar + Logout only
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="relative h-10 w-10 rounded-full">
@@ -173,9 +170,7 @@ const Header = () => {
 
     // User is not authenticated
     return (
-       <Button onClick={handleSignIn} className={isMobile ? "w-full" : ""}>
-          <LogIn className="mr-2 h-5 w-5" /> {isMobile ? "Увійти через Google" : "Увійти"}
-        </Button>
+       <AuthDialog handleSignIn={handleSignIn} isMobile={isMobile} />
     );
   };
 

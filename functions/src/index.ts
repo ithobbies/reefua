@@ -8,8 +8,7 @@ if (admin.apps.length === 0) {
 }
 
 // Export all functions from their respective files
-export * from './lot';       // Exports createLot, placeBid, buyNow
-export * from './user';      // Exports createUserDocument, updateUserProfile (if exists)
+export * from './lot';       // Exports createLot, buyNow
+export * from './user';      // Exports createUserDocument, updateUserProfile
 export * from './auction';   // Exports endAuctions
-export * from './bids';      // Exports getMyBids
-// export * from './seeder'; // Example, if you have a seeder
+export * from './bids';      // Exports placeBid, getMyBids
