@@ -4,45 +4,45 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Allow public read access to lots, categories, and users
     match /lots/{lotId} {
       allow read: if true;
       allow create: if request.auth != null;
-      
-      // Allow update only if user is seller AND there are no bids.
-      // (resource.data.bidCount || 0) handles cases where bidCount might not exist on old documents.
-      allow update: if request.auth != null && request.auth.uid == resource.data.sellerUid && (resource.data.bidCount || 0) == 0;
-      
-      // Allow seller to delete if:
-      // 1. The lot is marked as 'sold'.
-      // OR
-      // 2. The lot is 'active' (or has no status) and has no bids.
+
+      // Allow update only if the user is the seller and there are no bids.
+      // Uses the 'in' operator to safely check for the existence of 'bidCount'.
+      allow update: if request.auth != null && request.auth.uid == resource.data.sellerUid &&
+                    (('bidCount' in resource.data) ? resource.data.bidCount : 0) == 0;
+
+      // Allow deletion if the user is the seller AND one of the following is true:
+      // 1. The lot is sold.
+      // 2. The lot is active (or has no status) AND has no bids.
+      // Uses the 'in' operator for safety on old documents.
       allow delete: if request.auth != null && request.auth.uid == resource.data.sellerUid &&
                     (
-                      resource.data.status == 'sold' ||
-                      ((resource.data.status || 'active') == 'active' && (resource.data.bidCount || 0) == 0)
+                      ('status' in resource.data && resource.data.status == 'sold') ||
+                      (
+                        (('status' in resource.data) ? resource.data.status : 'active') == 'active' &&
+                        (('bidCount' in resource.data) ? resource.data.bidCount : 0) == 0
+                      )
                     );
     }
-    
+
     match /lots/{lotId}/bids/{bidId} {
       allow read: if true;
-      // Allow signed-in users to place bids
       allow create: if request.auth != null && request.auth.uid != get(/databases/$(database)/documents/lots/$(lotId)).data.sellerUid;
     }
 
-    // This rule is specifically for the collectionGroup query on the profile page
     match /{path=**}/bids/{bidId} {
       allow read: if request.auth != null && request.auth.uid == resource.data.userUid;
     }
 
     match /categories/{categoryId} {
       allow read: if true;
-      allow write: if false; // Categories should be managed from the backend/console
+      allow write: if false;
     }
 
     match /users/{userId} {
       allow read: if true;
-      // Users can only create and update their own document
       allow create, update: if request.auth != null && request.auth.uid == userId;
     }
   }

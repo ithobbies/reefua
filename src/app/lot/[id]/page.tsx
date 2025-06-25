@@ -2,24 +2,27 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { notFound, useRouter, useParams } from 'next/navigation';
+import Link from 'next/link';
+import { notFound, useParams } from 'next/navigation';
 import { doc, onSnapshot, collection, query, orderBy } from 'firebase/firestore';
 import { httpsCallable } from 'firebase/functions';
-import { db, functions, auth } from '@/lib/firebase';
-import { useAuthState } from 'react-firebase-hooks/auth';
+import { db, functions } from '@/lib/firebase';
+import { useAuth } from '@/context/auth-context';
 
 import PhotoSlider from '@/components/lots/photo-slider';
 import ParameterItem from '@/components/lots/parameter-item';
 import CountdownBadge from '@/components/ui/countdown-badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Loader2, Zap, Droplets, Wind, ShieldAlert, UserCircle, CalendarDays, Tag, Trophy, AlignLeft, Info } from 'lucide-react';
 
 import type { Lot, Bid as BidType } from '@/functions/src/types'; 
 import { useToast } from '@/hooks/use-toast';
+import { useRouter } from 'next/navigation';
+
 
 export default function LotDetailPage() {
   const params = useParams();
@@ -33,11 +36,12 @@ export default function LotDetailPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const { toast } = useToast();
-  const [user, authLoading] = useAuthState(auth);
+  const { user, loading: authLoading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
     if (!lotId) return;
+
     const lotRef = doc(db, 'lots', lotId);
     const unsubscribeLot = onSnapshot(lotRef, (docSnap) => {
       if (docSnap.exists()) {
@@ -45,6 +49,7 @@ export default function LotDetailPage() {
         setLot(lotData);
         document.title = `${lotData.name} - ReefUA`;
       } else {
+        setError("Лот не знайдено.");
         setLot(null);
       }
       setLoading(false);
@@ -55,6 +60,7 @@ export default function LotDetailPage() {
     });
 
     const bidsRef = collection(db, 'lots', lotId, 'bids');
+    // Reverted query to sort by 'timestamp'
     const q = query(bidsRef, orderBy('timestamp', 'desc'));
     const unsubscribeBids = onSnapshot(q, (snapshot) => {
       setBids(snapshot.docs.map(doc => doc.data() as BidType));
@@ -75,58 +81,41 @@ export default function LotDetailPage() {
     if (!lot) return;
 
     const amount = parseInt(bidAmount, 10);
-    const minBid = (lot.currentBid || 0) + 10;
-    if (isNaN(amount) || amount < minBid) {
-      toast({ variant: "destructive", title: "Помилка", description: `Ставка має бути не менше ${minBid} грн.` });
+    const minBidAmount = lot.currentBid > 0 ? lot.currentBid + 10 : lot.startPrice;
+    
+    if (isNaN(amount) || amount < minBidAmount) {
+      toast({ variant: "destructive", title: "Помилка", description: `Ваша ставка має бути не менше ${minBidAmount} грн.` });
       return;
     }
 
     setIsSubmitting(true);
     try {
-        const placeBidFunc = httpsCallable(functions, 'placeBid');
-        await placeBidFunc({ lotId: lot.id, amount });
-        toast({ title: "Успіх!", description: "Вашу ставку прийнято." });
+        const placeBidFunction = httpsCallable(functions, 'placeBid');
+        await placeBidFunction({ lotId, amount });
+        
+        toast({ title: "Успіх!", description: "Вашу ставку успішно прийнято." });
         setBidAmount('');
     } catch (error: any) {
         console.error("Error placing bid:", error);
-        toast({ variant: "destructive", title: "Помилка ставки", description: error.message || "Не вдалося зробити ставку." });
+        const errorMessage = error.message || "Сталася невідома помилка.";
+        toast({ variant: "destructive", title: "Помилка ставки", description: errorMessage });
     } finally {
         setIsSubmitting(false);
     }
   };
 
   const handleBuyNow = async () => {
-    if (!user) {
-        toast({ variant: "destructive", title: "Помилка", description: "Ви повинні увійти, щоб купити лот." });
-        return;
-    }
-    if (!lot) return;
-
+    if (!user || !lot) return;
     setIsSubmitting(true);
     try {
-        const idToken = await user.getIdToken();
-        const response = await fetch(`https://us-central1-reefua.cloudfunctions.net/buyNow`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${idToken}`
-            },
-            body: JSON.stringify({ data: { lotId: lot.id } })
-        });
-
-        const result = await response.json();
-        
-        if (!response.ok) {
-            throw new Error(result.error || 'Failed to buy the lot.');
-        }
-        
-        toast({ title: "Успіх!", description: "Ви успішно придбали цей лот. Перенаправляємо вас до профілю." });
-        
+        const buyNowFunction = httpsCallable(functions, 'buyNow');
+        await buyNowFunction({ lotId });
+        toast({ title: "Успіх!", description: "Ви успішно придбали лот! Перенаправляємо до вашого профілю." });
         router.push('/profile');
-
     } catch (error: any) {
         console.error("Error buying now:", error);
-        toast({ variant: "destructive", title: "Помилка покупки", description: error.message || "Не вдалося придбати лот." });
+        const errorMessage = error.message || "Сталася невідома помилка.";
+        toast({ variant: "destructive", title: "Помилка покупки", description: errorMessage });
     } finally {
         setIsSubmitting(false);
     }
@@ -135,21 +124,25 @@ export default function LotDetailPage() {
   if (loading || authLoading) {
     return <div className="container mx-auto py-8 text-center"><Loader2 className="h-16 w-16 animate-spin mx-auto text-primary" /></div>;
   }
+  
   if (error) {
-    return <div className="text-center py-20 text-red-500">{error}</div>;
-  }
-  if (!lot) {
-     return (
+    return (
         <div className="text-center py-20">
-            <h1 className="text-2xl font-bold">Лот не знайдено</h1>
+            <h1 className="text-2xl font-bold text-destructive">{error}</h1>
             <p className="text-muted-foreground">Можливо, він був проданий або видалений.</p>
             <Button asChild className="mt-4"><Link href="/auctions">Повернутись до аукціонів</Link></Button>
         </div>
     );
   }
 
+  if (!lot) {
+    notFound();
+  }
+
   const isAuctionActive = lot.status === 'active' && new Date(lot.endTime) > new Date();
   const hasParameters = lot.parameters && Object.values(lot.parameters).some(p => p);
+  const minBid = lot.currentBid > 0 ? lot.currentBid + 10 : lot.startPrice;
+  const isOwner = user?.uid === lot.sellerUid;
   
   return (
     <div className="container mx-auto py-8">
@@ -161,7 +154,7 @@ export default function LotDetailPage() {
           <Card>
             <CardHeader>
               <CardTitle className="text-3xl font-headline">{lot.name}</CardTitle>
-              <CardDescription>Продавець: <span className="text-primary font-medium">{lot.sellerUsername}</span></CardDescription>
+              <CardDescription>Продавець: <Link href={`/profile/${lot.sellerUid}`} className="text-primary font-medium hover:underline">{lot.sellerUsername}</Link></CardDescription>
             </CardHeader>
             {hasParameters && (
             <CardContent className="space-y-4">
@@ -211,31 +204,48 @@ export default function LotDetailPage() {
               {isAuctionActive ? (
                 <>
                   <form className="space-y-3" onSubmit={handleBidSubmit}>
-                    <Input type="number" placeholder={`мін. ${lot.currentBid + 10} грн`} aria-label="Сума ставки" className="text-base" value={bidAmount} onChange={(e) => setBidAmount(e.target.value)} disabled={isSubmitting || !user || user.uid === lot.sellerUid} />
-                    <Button type="submit" className="w-full text-lg py-3" disabled={isSubmitting || authLoading || !user || user.uid === lot.sellerUid}>
+                    <Input 
+                      type="number" 
+                      placeholder={`мін. ${minBid} грн`} 
+                      aria-label="Сума ставки" 
+                      className="text-base" 
+                      value={bidAmount} 
+                      onChange={(e) => setBidAmount(e.target.value)} 
+                      disabled={isSubmitting || !user || isOwner} 
+                    />
+                    <Button 
+                      type="submit" 
+                      className="w-full text-lg py-3" 
+                      disabled={isSubmitting || authLoading || !user || isOwner}
+                    >
                       {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : "Зробити ставку"}
                     </Button>
-                     {user?.uid === lot.sellerUid && <p className="text-xs text-center text-red-500">Ви не можете робити ставки на свій лот.</p>}
+                     {isOwner && <p className="text-xs text-center text-red-500">Ви не можете робити ставки на свій лот.</p>}
                   </form>
                   
                   {lot.buyNowPrice && (
                     <>
                       <div className="relative my-2"><div className="absolute inset-0 flex items-center"><span className="w-full border-t"></span></div><div className="relative flex justify-center text-xs uppercase"><span className="bg-background px-2 text-muted-foreground">або</span></div></div>
-                      <Button type="button" variant="outline" className="w-full text-lg py-3 border-accent text-accent hover:bg-accent/10 hover:text-accent" onClick={handleBuyNow} disabled={isSubmitting || !user || user.uid === lot.sellerUid}>
+                      <Button 
+                        type="button" 
+                        variant="outline" 
+                        className="w-full text-lg py-3 border-accent text-accent hover:bg-accent/10 hover:text-accent" 
+                        onClick={handleBuyNow} 
+                        disabled={isSubmitting || !user || isOwner}
+                      >
                         {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <><Tag className="mr-2 h-5 w-5" /> Купити зараз за {lot.buyNowPrice} грн</>}
                       </Button>
                     </>
                   )}
-
-                  <div className="text-xs text-muted-foreground pt-2">
-                    <Info className="inline h-3 w-3 mr-1" />
-                    Ви можете встановити максимальну ставку, система автоматично підніматиме її за вас.
-                  </div>
                 </>
               ) : (
                  <div className="text-center py-4">
-                  {lot.winnerUid ? (
-                    <><Trophy className="h-10 w-10 text-yellow-500 mx-auto mb-2" /><p className="text-lg font-semibold">Переможець:</p><p className="text-xl text-primary font-bold">{lot.winnerUid}</p></>
+                  {lot.winnerUid && lot.winnerUsername ? (
+                    <>
+                      <Trophy className="h-10 w-10 text-yellow-500 mx-auto mb-2" />
+                      <p className="text-lg font-semibold">Переможець:</p>
+                      <p className="text-xl text-primary font-bold">{lot.winnerUsername}</p>
+                    </>
                   ) : (
                     <p className="text-lg text-muted-foreground">Аукціон завершено. Переможця не визначено.</p>
                   )}
@@ -258,9 +268,11 @@ export default function LotDetailPage() {
                   </TableHeader>
                   <TableBody>
                     {bids.map((bid) => (
+                      // Reverted to use 'bidId' as key
                       <TableRow key={bid.bidId}>
                         <TableCell>{bid.username}</TableCell>
                         <TableCell className="font-semibold">{bid.amount} грн</TableCell>
+                        {/* Reverted to use 'timestamp' */}
                         <TableCell>{new Date(bid.timestamp).toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' })}</TableCell>
                       </TableRow>
                     ))}

@@ -64,10 +64,32 @@ export function LotForm({ existingLot }: LotFormProps) {
     }
     
     if (isEditMode && existingLot) {
+        const {
+            name,
+            description,
+            category,
+            startingBid,
+            buyNowPrice,
+            endTime,
+            images,
+            parameters,
+        } = existingLot;
+
         setFormData({
-            ...existingLot,
-            endTime: new Date(existingLot.endTime).toISOString().slice(0, 16),
+            name,
+            description,
+            category,
+            startingBid,
+            buyNowPrice,
+            endTime: new Date(endTime).toISOString().slice(0, 16),
+            images,
+            parameters: {
+                salinity: parameters?.salinity || '',
+                par: parameters?.par || '',
+                flow: parameters?.flow || '',
+            },
         });
+        
         if (existingLot.images && existingLot.images.length > 0) {
             setImagePreview(existingLot.images[0]);
         }
