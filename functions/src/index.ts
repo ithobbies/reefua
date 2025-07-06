@@ -12,3 +12,7 @@ export * from './lot';       // Exports createLot, buyNow
 export * from './user';      // Exports createUserDocument, updateUserProfile
 export * from './auction';   // Exports endAuctions
 export * from './bids';      // Exports placeBid, getMyBids
+export * from './reviews';   // Exports leaveReview
+export * from './chat';      // Exports startOrGetChat, sendMessage
+export * from './orders';    // Exports createOrder, onOrderUpdate
+export * from './notifications'; // Exports onOrderCreatedSendEmail

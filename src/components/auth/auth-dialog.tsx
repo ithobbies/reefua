@@ -21,6 +21,7 @@ import {
   GoogleAuthProvider,
   signInWithPopup
 } from "firebase/auth";
+import GoogleIcon from '@/components/icons/google-icon'; // Import the new icon
 
 export function AuthDialog() {
   const [open, setOpen] = useState(false);
@@ -56,6 +57,17 @@ export function AuthDialog() {
     }
   };
 
+  const GoogleSignInButton = ({ children }: { children: React.ReactNode }) => (
+    <Button 
+      variant="outline" 
+      className="w-full border-slate-300 hover:bg-slate-50 text-slate-700" 
+      onClick={handleGoogleSignIn}
+    >
+      <GoogleIcon className="mr-2 h-5 w-5" />
+      {children}
+    </Button>
+  );
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -84,9 +96,7 @@ export function AuthDialog() {
               </div>
               {error && <p className="text-red-500 text-sm">{error}</p>}
               <Button className="w-full" onClick={handleSignIn}>Увійти</Button>
-              <Button variant="outline" className="w-full" onClick={handleGoogleSignIn}>
-                Увійти з Google
-              </Button>
+              <GoogleSignInButton>Продовжити з Google</GoogleSignInButton>
             </div>
           </TabsContent>
           <TabsContent value="signup">
@@ -101,9 +111,7 @@ export function AuthDialog() {
               </div>
               {error && <p className="text-red-500 text-sm">{error}</p>}
               <Button className="w-full" onClick={handleSignUp}>Зареєструватися</Button>
-              <Button variant="outline" className="w-full" onClick={handleGoogleSignIn}>
-                Зареєструватися з Google
-              </Button>
+              <GoogleSignInButton>Продовжити з Google</GoogleSignInButton>
             </div>
           </TabsContent>
         </Tabs>

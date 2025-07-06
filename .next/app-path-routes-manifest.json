@@ -1,0 +1,20 @@
+{
+  "/_not-found/page": "/_not-found",
+  "/favicon.ico/route": "/favicon.ico",
+  "/checkout/page": "/checkout",
+  "/auctions/page": "/auctions",
+  "/lot/[id]/page": "/lot/[id]",
+  "/page": "/",
+  "/profile/[id]/page": "/profile/[id]",
+  "/profile/page": "/profile",
+  "/sell/page": "/sell",
+  "/dashboard/lots/edit/[id]/page": "/dashboard/lots/edit/[id]",
+  "/dashboard/lots/page": "/dashboard/lots",
+  "/dashboard/lots/new/page": "/dashboard/lots/new",
+  "/dashboard/messages/page": "/dashboard/messages",
+  "/dashboard/reviews/page": "/dashboard/reviews",
+  "/dashboard/upload/page": "/dashboard/upload",
+  "/dashboard/settings/page": "/dashboard/settings",
+  "/dashboard/page": "/dashboard",
+  "/dashboard/analytics/page": "/dashboard/analytics"
+}

@@ -5,11 +5,18 @@ import { Bid, Lot } from "./types";
 
 const db = admin.firestore();
 
+// Helper function to determine the minimum bid step based on the current price
+const getMinBidStep = (currentPrice: number): number => {
+    if (currentPrice < 500) return 20;
+    if (currentPrice < 2000) return 50;
+    if (currentPrice < 5000) return 100;
+    return 250;
+};
+
 /**
- * Places a bid on a lot. This function is transactional to ensure data consistency.
- * This version manually increments the bid count to isolate a potential issue with FieldValue.increment.
+ * Places a bid on a lot. This function is transactional and includes dynamic bid step logic.
  */
-export const placeBid = functions.https.onCall(async (data, context) => {
+export const placeBid = functions.region('us-central1').https.onCall(async (data, context) => {
     if (!context.auth) {
         throw new functions.https.HttpsError("unauthenticated", "You must be logged in to place a bid.");
     }
@@ -40,12 +47,15 @@ export const placeBid = functions.https.onCall(async (data, context) => {
             if (lotData.sellerUid === userUid) {
                 throw new functions.https.HttpsError("failed-precondition", "You cannot bid on your own lot.");
             }
+            
+            // --- DYNAMIC BID STEP LOGIC ---
+            const minStep = getMinBidStep(lotData.currentBid);
+            const minimumNextBid = lotData.currentBid + minStep;
 
-            if (amount <= lotData.currentBid) {
-                throw new functions.https.HttpsError("failed-precondition", `Your bid must be higher than the current bid of ${lotData.currentBid}.`);
+            if (amount < minimumNextBid) {
+                throw new functions.https.HttpsError("failed-precondition", `Your bid is too low. The next minimum bid is ${minimumNextBid.toFixed(2)} грн (крок ${minStep} грн).`);
             }
 
-            // --- Manual Increment Logic ---
             const currentBidCount = lotData.bidCount || 0;
             const newBidCount = currentBidCount + 1;
 
@@ -53,21 +63,19 @@ export const placeBid = functions.https.onCall(async (data, context) => {
             
             const bidData: Bid = {
                 bidId: newBidRef.id,
-                lotId: lotId, // Correctly including lotId to match the Bid type
+                lotId: lotId,
                 userUid,
                 username: username || "Anonymous",
                 amount,
                 timestamp: new Date().toISOString(),
             };
 
-            // Update the lot with the manually calculated bid count.
             transaction.update(lotRef, {
                 currentBid: amount,
-                bidCount: newBidCount, // Using the new, manually calculated value
+                bidCount: newBidCount,
                 lastBidderUid: userUid,
             });
 
-            // Create the new bid document in the subcollection.
             transaction.set(newBidRef, bidData);
         });
 
