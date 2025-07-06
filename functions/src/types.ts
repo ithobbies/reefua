@@ -18,6 +18,7 @@ export interface User {
   emailNotifications: boolean;
   balance?: number;
   sellerRating?: number;
+  sellerReviewCount?: number;
 }
 
 export interface LotParameters {
@@ -39,11 +40,13 @@ export interface Lot {
   sellerUid: string;
   sellerUsername: string;
   category: string;
-  status: 'active' | 'sold' | 'unsold';
+  status: 'active' | 'sold' | 'processing' | 'shipped' | 'completed' | 'unsold' | 'cancelled';
   winnerUid?: string | null;
+  winnerUsername?: string | null;
   finalPrice?: number | null;
   createdAt: IsoDateString;
   parameters?: LotParameters;
+  reviewLeft?: boolean;
 }
 
 export interface Bid {
@@ -53,4 +56,73 @@ export interface Bid {
   username: string;
   amount: number;
   timestamp: IsoDateString;
+}
+
+export interface Review {
+  id: string;
+  sellerUid: string;
+  buyerUid: string;
+  buyerUsername: string;
+  lotId: string;
+  lotName: string;
+  rating: number; // 1 to 5
+  comment: string;
+  createdAt: IsoDateString;
+}
+
+// --- Chat System Types ---
+
+export interface ChatMessage {
+  id: string;
+  senderUid: string;
+  text: string;
+  timestamp: IsoDateString;
+}
+
+export interface Chat {
+  id: string; // Composite ID: lotId_buyerUid
+  participantUids: string[]; // [buyerUid, sellerUid]
+  participantInfo: {
+    [uid: string]: {
+      username: string;
+      photoURL?: string | null;
+    }
+  };
+  lotId: string;
+  lotName: string;
+  lotImage: string;
+  lastMessage: {
+    text: string;
+    timestamp: IsoDateString;
+    senderUid: string;
+  } | null;
+  createdAt: IsoDateString;
+  updatedAt: IsoDateString;
+}
+
+// --- Order System Types ---
+
+export interface ShippingInfo {
+    firstName: string;
+    lastName: string;
+    phone: string;
+    shippingMethod: 'nova-poshta' | 'nova-poshta-courier' | 'pickup' | 'other';
+    city?: string;
+    department?: string;
+    details?: string; // For 'other' shipping method
+}
+
+
+export interface Order {
+    id: string;
+    buyerUid: string;
+    sellerUid: string;
+    sellerUsername: string; // To easily display seller info
+    lots: Pick<Lot, 'id' | 'name' | 'images' | 'finalPrice'>[];
+    totalAmount: number;
+    shippingInfo: ShippingInfo;
+    status: 'new' | 'processing' | 'shipped' | 'completed' | 'cancelled';
+    trackingNumber?: string;
+    createdAt: IsoDateString;
+    updatedAt: IsoDateString;
 }

@@ -5,11 +5,14 @@ import type { Lot, User } from "./types";
 
 const db = admin.firestore();
 
-export const createLot = functions.https.onCall(async (data, context) => {
+export const createLot = functions.region('us-central1').https.onCall(async (data, context) => {
     if (!context.auth) {
         throw new functions.https.HttpsError("unauthenticated", "You must be logged in to create a lot.");
     }
+
     const { uid: sellerUid } = context.auth;
+    
+    // Get the seller's username from their user document
     const userDoc = await db.collection('users').doc(sellerUid).get();
     if (!userDoc.exists) {
         throw new functions.https.HttpsError("not-found", "Seller profile does not exist.");
@@ -35,7 +38,7 @@ export const createLot = functions.https.onCall(async (data, context) => {
         buyNowPrice: buyNowPrice || null,
         endTime, 
         sellerUid,
-        sellerUsername,
+        sellerUsername, // <-- The fix is here
         category,
         status: 'active',
         createdAt: now,
@@ -43,6 +46,7 @@ export const createLot = functions.https.onCall(async (data, context) => {
         bidCount: 0,
         winnerUid: null,
         finalPrice: null,
+        reviewLeft: false, // Explicitly set to false on creation
     };
     
     await lotRef.set(newLot);

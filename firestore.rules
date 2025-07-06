@@ -4,19 +4,12 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
+    // --- Лоты (Lots) ---
     match /lots/{lotId} {
       allow read: if true;
       allow create: if request.auth != null;
-
-      // Allow update only if the user is the seller and there are no bids.
-      // Uses the 'in' operator to safely check for the existence of 'bidCount'.
       allow update: if request.auth != null && request.auth.uid == resource.data.sellerUid &&
                     (('bidCount' in resource.data) ? resource.data.bidCount : 0) == 0;
-
-      // Allow deletion if the user is the seller AND one of the following is true:
-      // 1. The lot is sold.
-      // 2. The lot is active (or has no status) AND has no bids.
-      // Uses the 'in' operator for safety on old documents.
       allow delete: if request.auth != null && request.auth.uid == resource.data.sellerUid &&
                     (
                       ('status' in resource.data && resource.data.status == 'sold') ||
@@ -27,23 +20,54 @@ service cloud.firestore {
                     );
     }
 
+    // --- Ставки (Bids) ---
     match /lots/{lotId}/bids/{bidId} {
       allow read: if true;
       allow create: if request.auth != null && request.auth.uid != get(/databases/$(database)/documents/lots/$(lotId)).data.sellerUid;
     }
 
+    // --- Группа ставок (Bids Collection Group) ---
     match /{path=**}/bids/{bidId} {
       allow read: if request.auth != null && request.auth.uid == resource.data.userUid;
     }
 
+    // --- Категории (Categories) ---
     match /categories/{categoryId} {
       allow read: if true;
       allow write: if false;
     }
 
+    // --- Пользователи (Users) ---
     match /users/{userId} {
-      allow read: if true;
+      allow read: if request.auth != null;
       allow create, update: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // --- Отзывы (Reviews) ---
+    match /reviews/{reviewId} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+
+    // --- Чаты (Chats) ---
+    match /chats/{chatId} {
+      allow read, update: if request.auth.uid in resource.data.participantUids;
+      allow create, delete: if false;
+    }
+
+    // --- Сообщения (Messages) ---
+    match /chats/{chatId}/messages/{messageId} {
+      allow read, create: if request.auth.uid in get(/databases/$(database)/documents/chats/$(chatId)).data.participantUids;
+      allow update, delete: if false;
+    }
+
+    // --- Заказы (Orders) ---
+    // ОБНОВЛЕННОЕ ПРАВИЛО: Читать заказ может только его покупатель или продавец.
+    // Обновлять заказ (статус, ТТН) может только продавец.
+    match /orders/{orderId} {
+      allow read: if request.auth != null && (request.auth.uid == resource.data.buyerUid || request.auth.uid == resource.data.sellerUid);
+      allow update: if request.auth != null && request.auth.uid == resource.data.sellerUid;
+      allow create, delete: if false; // Управляется исключительно бэкендом
     }
   }
 }

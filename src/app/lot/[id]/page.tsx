@@ -4,11 +4,11 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { notFound, useParams } from 'next/navigation';
-import { doc, onSnapshot, collection, query, orderBy } from 'firebase/firestore';
+import { doc, onSnapshot, collection, query, orderBy, getDoc } from 'firebase/firestore';
 import { httpsCallable } from 'firebase/functions';
 import { db, functions } from '@/lib/firebase';
 import { useAuth } from '@/context/auth-context';
-
+import { useChat } from '@/context/chat-context';
 import PhotoSlider from '@/components/lots/photo-slider';
 import ParameterItem from '@/components/lots/parameter-item';
 import CountdownBadge from '@/components/ui/countdown-badge';
@@ -17,18 +17,27 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Zap, Droplets, Wind, ShieldAlert, UserCircle, CalendarDays, Tag, Trophy, AlignLeft, Info } from 'lucide-react';
-
-import type { Lot, Bid as BidType } from '@/functions/src/types'; 
+import { Loader2, Zap, Droplets, Wind, ShieldAlert, UserCircle, CalendarDays, Tag, Trophy, AlignLeft, Info, MessageCircle } from 'lucide-react';
+import { RatingStars } from '@/components/ui/rating-stars';
+import type { Lot, Bid as BidType, User } from '@/functions/src/types'; 
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 
+// Helper function to determine the minimum bid step based on the current price
+// This logic MUST match the backend logic in functions/src/bids.ts
+const getMinBidStep = (currentPrice: number): number => {
+    if (currentPrice < 500) return 20;
+    if (currentPrice < 2000) return 50;
+    if (currentPrice < 5000) return 100;
+    return 250;
+};
 
 export default function LotDetailPage() {
   const params = useParams();
   const lotId = Array.isArray(params.id) ? params.id[0] : params.id;
 
   const [lot, setLot] = useState<Lot | null>(null);
+  const [sellerProfile, setSellerProfile] = useState<User | null>(null);
   const [bids, setBids] = useState<BidType[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -38,16 +47,25 @@ export default function LotDetailPage() {
   const { toast } = useToast();
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
+  const { startChatFromLot, isStarting: isChatStarting } = useChat();
 
   useEffect(() => {
     if (!lotId) return;
 
     const lotRef = doc(db, 'lots', lotId);
-    const unsubscribeLot = onSnapshot(lotRef, (docSnap) => {
-      if (docSnap.exists()) {
-        const lotData = { ...docSnap.data(), id: docSnap.id } as Lot;
+    const unsubscribeLot = onSnapshot(lotRef, (lotSnap) => {
+      if (lotSnap.exists()) {
+        const lotData = { ...lotSnap.data(), id: lotSnap.id } as Lot;
         setLot(lotData);
         document.title = `${lotData.name} - ReefUA`;
+        
+        const sellerRef = doc(db, 'users', lotData.sellerUid);
+        getDoc(sellerRef).then(sellerSnap => {
+          if (sellerSnap.exists()) {
+            setSellerProfile(sellerSnap.data() as User);
+          }
+        });
+
       } else {
         setError("Лот не знайдено.");
         setLot(null);
@@ -60,7 +78,6 @@ export default function LotDetailPage() {
     });
 
     const bidsRef = collection(db, 'lots', lotId, 'bids');
-    // Reverted query to sort by 'timestamp'
     const q = query(bidsRef, orderBy('timestamp', 'desc'));
     const unsubscribeBids = onSnapshot(q, (snapshot) => {
       setBids(snapshot.docs.map(doc => doc.data() as BidType));
@@ -72,6 +89,17 @@ export default function LotDetailPage() {
     };
   }, [lotId]);
   
+  const handleStartChat = () => {
+    if (!lot) return;
+    startChatFromLot({
+      lotId: lot.id,
+      lotName: lot.name,
+      lotImage: lot.images[0],
+      sellerUid: lot.sellerUid,
+      sellerName: lot.sellerUsername,
+    });
+  };
+  
   const handleBidSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) {
@@ -81,10 +109,12 @@ export default function LotDetailPage() {
     if (!lot) return;
 
     const amount = parseInt(bidAmount, 10);
-    const minBidAmount = lot.currentBid > 0 ? lot.currentBid + 10 : lot.startPrice;
+    const minStep = getMinBidStep(lot.currentBid);
+    const minimumNextBid = lot.currentBid + minStep;
     
-    if (isNaN(amount) || amount < minBidAmount) {
-      toast({ variant: "destructive", title: "Помилка", description: `Ваша ставка має бути не менше ${minBidAmount} грн.` });
+    // Use the new dynamic logic for validation
+    if (isNaN(amount) || amount < minimumNextBid) {
+      toast({ variant: "destructive", title: "Замала ставка", description: `Ваша ставка має бути не менше ${minimumNextBid.toFixed(2)} грн.` });
       return;
     }
 
@@ -97,6 +127,7 @@ export default function LotDetailPage() {
         setBidAmount('');
     } catch (error: any) {
         console.error("Error placing bid:", error);
+        // The backend error message is now more informative
         const errorMessage = error.message || "Сталася невідома помилка.";
         toast({ variant: "destructive", title: "Помилка ставки", description: errorMessage });
     } finally {
@@ -141,7 +172,8 @@ export default function LotDetailPage() {
 
   const isAuctionActive = lot.status === 'active' && new Date(lot.endTime) > new Date();
   const hasParameters = lot.parameters && Object.values(lot.parameters).some(p => p);
-  const minBid = lot.currentBid > 0 ? lot.currentBid + 10 : lot.startPrice;
+  // Calculate the next minimum bid using the new dynamic logic
+  const minBid = lot.currentBid > 0 ? lot.currentBid + getMinBidStep(lot.currentBid) : lot.startingBid;
   const isOwner = user?.uid === lot.sellerUid;
   
   return (
@@ -153,8 +185,26 @@ export default function LotDetailPage() {
           
           <Card>
             <CardHeader>
-              <CardTitle className="text-3xl font-headline">{lot.name}</CardTitle>
-              <CardDescription>Продавець: <Link href={`/profile/${lot.sellerUid}`} className="text-primary font-medium hover:underline">{lot.sellerUsername}</Link></CardDescription>
+              <div className="flex justify-between items-start">
+                  <div>
+                    <CardTitle className="text-3xl font-headline">{lot.name}</CardTitle>
+                    <div className="flex items-center gap-2 mt-1">
+                      <CardDescription>Продавець: <Link href={`/profile/${lot.sellerUid}`} className="text-primary font-medium hover:underline">{lot.sellerUsername}</Link></CardDescription>
+                      {sellerProfile && (
+                          <div className="flex items-center gap-1">
+                              <RatingStars rating={sellerProfile.sellerRating || 0} />
+                              <span className="text-xs text-muted-foreground">({sellerProfile.sellerReviewCount || 0})</span>
+                          </div>
+                      )}
+                    </div>
+                  </div>
+                  {user && !isOwner && (
+                      <Button variant="outline" onClick={handleStartChat} disabled={isChatStarting}>
+                          {isChatStarting ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <MessageCircle className="mr-2 h-4 w-4"/>}
+                          Повідомлення
+                      </Button>
+                  )}
+              </div>
             </CardHeader>
             {hasParameters && (
             <CardContent className="space-y-4">
@@ -206,7 +256,7 @@ export default function LotDetailPage() {
                   <form className="space-y-3" onSubmit={handleBidSubmit}>
                     <Input 
                       type="number" 
-                      placeholder={`мін. ${minBid} грн`} 
+                      placeholder={`мін. ${minBid.toFixed(2)} грн`} 
                       aria-label="Сума ставки" 
                       className="text-base" 
                       value={bidAmount} 
@@ -244,7 +294,11 @@ export default function LotDetailPage() {
                     <>
                       <Trophy className="h-10 w-10 text-yellow-500 mx-auto mb-2" />
                       <p className="text-lg font-semibold">Переможець:</p>
-                      <p className="text-xl text-primary font-bold">{lot.winnerUsername}</p>
+                      <p className="text-xl text-primary font-bold">
+                        <Link href={`/profile/${lot.winnerUid}`} className="hover:underline">
+                            {lot.winnerUsername}
+                        </Link>
+                      </p>
                     </>
                   ) : (
                     <p className="text-lg text-muted-foreground">Аукціон завершено. Переможця не визначено.</p>
@@ -268,11 +322,9 @@ export default function LotDetailPage() {
                   </TableHeader>
                   <TableBody>
                     {bids.map((bid) => (
-                      // Reverted to use 'bidId' as key
                       <TableRow key={bid.bidId}>
                         <TableCell>{bid.username}</TableCell>
                         <TableCell className="font-semibold">{bid.amount} грн</TableCell>
-                        {/* Reverted to use 'timestamp' */}
                         <TableCell>{new Date(bid.timestamp).toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' })}</TableCell>
                       </TableRow>
                     ))}

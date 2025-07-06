@@ -25,4 +25,8 @@ __exportStar(require("./lot"), exports); // Exports createLot, buyNow
 __exportStar(require("./user"), exports); // Exports createUserDocument, updateUserProfile
 __exportStar(require("./auction"), exports); // Exports endAuctions
 __exportStar(require("./bids"), exports); // Exports placeBid, getMyBids
+__exportStar(require("./reviews"), exports); // Exports leaveReview
+__exportStar(require("./chat"), exports); // Exports startOrGetChat, sendMessage
+__exportStar(require("./orders"), exports); // Exports createOrder, onOrderUpdate
+__exportStar(require("./notifications"), exports); // Exports onOrderCreatedSendEmail
 //# sourceMappingURL=index.js.map

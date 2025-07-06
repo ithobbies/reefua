@@ -39,12 +39,15 @@ export const endAuctions = functions.pubsub
         console.log(`Lot ${doc.id} (${lotData.name}) is unsold.`);
         return lotRef.update({ status: "unsold" });
       } else {
-        // If there's a winner
+        // If there's a winner, get their data from the winning bid
         const winningBid = bidsSnapshot.docs[0].data() as Bid;
         console.log(`Lot ${doc.id} (${lotData.name}) sold to ${winningBid.username} for ${winningBid.amount}.`);
+        
+        // Update the lot with winner's UID, username, and the final price
         return lotRef.update({
           status: "sold",
           winnerUid: winningBid.userUid,
+          winnerUsername: winningBid.username, // Added winner's username
           finalPrice: winningBid.amount,
         });
       }
