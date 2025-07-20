@@ -18,12 +18,12 @@ import {
 import { LayoutDashboard, ListChecks, BarChart3, Star, Settings, MessageSquare, ShoppingCart, ShieldCheck } from 'lucide-react'; 
 import SiteLogoIcon from '@/components/icons/site-logo-icon';
 import React from 'react';
-import { useAuth } from '@/context/auth-context'; // Correctly import the useAuth hook
+import { useAuth } from '@/context/auth-context';
 
 const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   const pathname = usePathname();
-  const { firestoreUser } = useAuth(); // Use the hook to get user data
-  const roles = firestoreUser?.roles || []; // Safely access roles from firestoreUser
+  const { firestoreUser } = useAuth();
+  const roles = firestoreUser?.roles || [];
 
   const menuItems = [
     { href: '/dashboard', label: 'Оглядова панель', icon: <LayoutDashboard /> },
@@ -46,7 +46,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   };
 
   return (
-    <SidebarProvider defaultOpen>
+    <SidebarProvider>
       <Sidebar collapsible="icon" side="left" variant="sidebar">
         <SidebarHeader className="items-center border-b border-sidebar-border">
            <Link href="/" className="flex items-center gap-2 text-sidebar-foreground hover:opacity-80 transition-opacity">
@@ -54,6 +54,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
             <span className="font-headline text-lg font-semibold group-data-[collapsible=icon]:hidden">ReefUA</span>
           </Link>
           <div className="flex-1" />
+          {/* Trigger for desktop, hidden on mobile */}
           <SidebarTrigger className="hidden md:flex text-sidebar-foreground hover:text-sidebar-accent-foreground" />
         </SidebarHeader>
         <SidebarContent className="p-2 flex flex-col">
@@ -79,7 +80,6 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
                 );
             })}
 
-            {/* Conditionally render admin link */}
             {roles.includes('admin') && (
               <>
                 <SidebarSeparator className="my-2" />
@@ -118,6 +118,13 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
         </SidebarContent>
       </Sidebar>
       <SidebarInset className="bg-background">
+        {/* Mobile-only header with the trigger */}
+        <header className="md:hidden sticky top-0 z-40 w-full bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b p-2 flex items-center h-16">
+            <SidebarTrigger />
+            <Link href="/" className="flex items-center gap-2 text-foreground hover:opacity-80 transition-opacity ml-4">
+                <span className="font-headline text-lg font-semibold">Панель керування</span>
+            </Link>
+        </header>
         <div className="p-4 md:p-8">
          {children}
         </div>

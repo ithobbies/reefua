@@ -22,7 +22,7 @@ import { doc, updateDoc, collection, query, orderBy, onSnapshot } from 'firebase
 import { getStorage, ref, uploadBytesResumable, getDownloadURL, FirebaseStorage } from "firebase/storage";
 import { v4 as uuidv4 } from 'uuid';
 import type { Lot } from '@/functions/src/types';
-import { FLOW_OPTIONS, PAR_OPTIONS } from '@/lib/options';
+import { FLOW_OPTIONS, PAR_OPTIONS, difficultyOptions } from '@/lib/options';
 
 type SaleType = 'auction' | 'direct';
 
@@ -32,7 +32,7 @@ interface LotFormData {
   category: string;
   images: string[];
   parameters: {
-    salinity: string;
+    difficulty: string;
     par: string;
     flow: string;
   };
@@ -74,7 +74,7 @@ export function LotForm({ existingLot }: LotFormProps) {
   const [saleType, setSaleType] = useState<SaleType>('auction');
   const [formData, setFormData] = useState<Partial<LotFormData>>({
       durationDays: 5, 
-      parameters: { salinity: '', par: '', flow: '' },
+      parameters: { difficulty: '', par: '', flow: '' },
       type: 'auction',
   });
   
@@ -311,9 +311,17 @@ export function LotForm({ existingLot }: LotFormProps) {
               <CardHeader><CardTitle>Параметри утримання</CardTitle></CardHeader>
               <CardContent className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                  <div>
-                    <Label htmlFor="salinity">Солоність</Label>
-                    <Input id="salinity" name="parameters.salinity" placeholder="1.025 SG" value={formData.parameters?.salinity || ''} onChange={handleChange} disabled={isLoading}/>
-                 </div>
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <Label htmlFor="difficulty">Складність</Label>
+                      <InfoTooltip title="Складність утримання" items={difficultyOptions} />
+                    </div>
+                    <Select name="parameters.difficulty" value={formData.parameters?.difficulty || ''} onValueChange={(val) => handleSelectChange('parameters.difficulty', val)} disabled={isLoading}>
+                        <SelectTrigger><SelectValue placeholder="Оберіть складність" /></SelectTrigger>
+                        <SelectContent>
+                            {difficultyOptions.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
+                        </SelectContent>
+                    </Select>
+                  </div>
                  <div>
                     <div className="flex items-center gap-2 mb-1.5">
                       <Label htmlFor="par">PAR</Label>

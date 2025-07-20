@@ -22,6 +22,7 @@ import { RatingStars } from '@/components/ui/rating-stars';
 import type { Lot, Bid as BidType, User } from '@/functions/src/types'; 
 import { useToast } from '@/hooks/use-toast';
 import { getFunctions, httpsCallable as httpsCallableApp } from 'firebase/functions';
+import { difficultyOptions, getLabelByValue } from '@/lib/options';
 
 const getMinBidStep = (currentPrice: number): number => {
     if (currentPrice < 500) return 20;
@@ -241,7 +242,7 @@ export default function LotDetailPage() {
             <CardContent className="space-y-4">
               <h3 className="text-xl font-semibold mb-2 font-headline">Параметри утримання:</h3>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                {lot.parameters?.salinity && <ParameterItem icon={<Droplets className="h-5 w-5" />} label="Солоність" value={lot.parameters.salinity}/>}
+                {lot.parameters?.difficulty && <ParameterItem icon={<ShieldAlert className="h-5 w-5" />} label="Складність" value={getLabelByValue(difficultyOptions, lot.parameters.difficulty)} />}
                 {lot.parameters?.par && <ParameterItem icon={<Zap className="h-5 w-5" />} label="PAR" value={lot.parameters.par} />}
                 {lot.parameters?.flow && <ParameterItem icon={<Wind className="h-5 w-5" />} label="Течія" value={lot.parameters.flow} />}
               </div>

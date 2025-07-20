@@ -1,7 +1,7 @@
 
 import type React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { getLabelByValue, FLOW_OPTIONS, PAR_OPTIONS } from '@/lib/options';
+import { getLabelByValue, FLOW_OPTIONS, PAR_OPTIONS, difficultyOptions } from '@/lib/options';
 
 interface ParameterItemProps {
   label: string;
@@ -18,6 +18,8 @@ const ParameterItem: React.FC<ParameterItemProps> = ({ label, value, icon }) => 
     displayValue = getLabelByValue(FLOW_OPTIONS, value);
   } else if (label === 'PAR' && value) {
     displayValue = getLabelByValue(PAR_OPTIONS, value);
+  } else if (label === 'Складність' && value) {
+    displayValue = getLabelByValue(difficultyOptions, value);
   }
 
   return (
