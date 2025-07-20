@@ -36,6 +36,7 @@ export interface Lot {
   currentBid: number;
   bidCount: number;
   buyNowPrice?: number | null;
+  price?: number | null; // For direct sales
   endTime: IsoDateString;
   sellerUid: string;
   sellerUsername: string;
@@ -47,6 +48,7 @@ export interface Lot {
   createdAt: IsoDateString;
   parameters?: LotParameters;
   reviewLeft?: boolean;
+  type: 'auction' | 'direct';
 }
 
 export interface Bid {

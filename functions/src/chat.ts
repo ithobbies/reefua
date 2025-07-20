@@ -83,11 +83,6 @@ export const sendMessage = functions.https.onCall(async (data, context) => {
     const chatRef = db.collection('chats').doc(chatId);
     const messageRef = chatRef.collection('messages').doc();
 
-    const chatDoc = await chatRef.get();
-    if (!chatDoc.exists || !(chatDoc.data() as Chat).participantUids.includes(senderUid)) {
-        throw new functions.https.HttpsError("permission-denied", "You are not a participant in this chat.");
-    }
-    
     const newMessage: ChatMessage = {
         id: messageRef.id,
         senderUid: senderUid,

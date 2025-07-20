@@ -1,14 +1,26 @@
+
+'use client';
+
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import Link from 'next/link';
-import type { Metadata } from 'next';
-
-export const metadata: Metadata = {
-  title: 'Продати лот - ReefUA',
-  description: 'Розпочніть продаж ваших коралів та морських мешканців на ReefUA.',
-};
+import { useAuth } from '@/context/auth-context';
+import { useRouter } from 'next/navigation';
+import { Loader2 } from 'lucide-react';
 
 export default function SellPage() {
+  const { user, loading } = useAuth();
+  const router = useRouter();
+
+  const handleNavigation = (path: string) => {
+    if (loading) return; 
+
+    if (user) {
+      router.push(path);
+    } else {
+      router.push(`/login?returnUrl=${encodeURIComponent(path)}`);
+    }
+  };
+
   return (
     <div className="container mx-auto py-8">
       <div className="max-w-2xl mx-auto">
@@ -25,11 +37,13 @@ export default function SellPage() {
               панеллю продавця для масового завантаження та управління вашими товарами.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" asChild>
-                <Link href="/dashboard/lots/new">Створити новий лот</Link>
+              <Button size="lg" onClick={() => handleNavigation('/dashboard/lots/new')} disabled={loading}>
+                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Створити новий лот
               </Button>
-              <Button variant="outline" size="lg" asChild>
-                <Link href="/dashboard">До панелі продавця</Link>
+              <Button variant="outline" size="lg" onClick={() => handleNavigation('/dashboard')} disabled={loading}>
+                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                До панелі продавця
               </Button>
             </div>
           </CardContent>

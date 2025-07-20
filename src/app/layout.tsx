@@ -9,7 +9,7 @@ import { GlobalChatWidget } from '@/components/chat/global-chat-widget';
 
 export const metadata: Metadata = {
   title: 'ReefUA - Аукціон морської акваріумістики',
-  description: 'Онлайн-аукціон для українських морських акваріумістів.',
+  description: 'Онлайн-аукціон та маркетплейс для українських морських акваріумістів.',
 };
 
 export default function RootLayout({
