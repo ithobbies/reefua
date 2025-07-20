@@ -33,6 +33,13 @@ const navLinks = [
 
 const Header = () => {
   const isMobile = useIsMobile();
+  const pathname = usePathname();
+
+  // Do not render the header on dashboard pages
+  if (pathname.startsWith('/dashboard')) {
+    return null;
+  }
+  
   return (
     <header className="sticky top-0 z-50 w-full bg-background/80 backdrop-blur-md border-b border-border/50 shadow-sm">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">

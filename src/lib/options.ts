@@ -42,6 +42,29 @@ export const PAR_OPTIONS = [
   }
 ];
 
+export const difficultyOptions = [
+  { 
+    value: 'EASY', 
+    label: 'Легка',
+    description: 'Ідеальний вибір для новачків.'
+  }, 
+  { 
+    value: 'MODERATE', 
+    label: 'Помірна',
+    description: 'Дещо суворіші вимоги, ніж у «легких», але без потреби підтримувати лабораторну точність.'
+  }, 
+  { 
+    value: 'HARD', 
+    label: 'Складна',
+    description: 'Високі, але не екстремальні параметри; такі корали чутливі, але більш витривалі, ніж «дуже складні».'
+  }, 
+  { 
+    value: 'VERY_HARD', 
+    label: 'Дуже складна',
+    description: 'Максимальні вимоги до освітлення, течії та стабільності; прощають практично нуль помилок.'
+  }
+];
+
 // Helper to get a label from a value for display purposes
 export const getLabelByValue = (
     options: { value: string; label: string }[], 

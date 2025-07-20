@@ -321,6 +321,7 @@ var { g: global, __dirname } = __turbopack_context__;
 __turbopack_context__.s({
     "FLOW_OPTIONS": (()=>FLOW_OPTIONS),
     "PAR_OPTIONS": (()=>PAR_OPTIONS),
+    "difficultyOptions": (()=>difficultyOptions),
     "getLabelByValue": (()=>getLabelByValue)
 });
 const FLOW_OPTIONS = [
@@ -360,6 +361,28 @@ const PAR_OPTIONS = [
         value: "PAR_VERY_HIGH",
         label: "Дуже високий",
         description: "Діапазон: > 400 µmol/m²/s. Підходить для світлолюбивих Acropora та інших «High-end» SPS."
+    }
+];
+const difficultyOptions = [
+    {
+        value: 'EASY',
+        label: 'Легка',
+        description: 'Ідеальний вибір для новачків.'
+    },
+    {
+        value: 'MODERATE',
+        label: 'Помірна',
+        description: 'Дещо суворіші вимоги, ніж у «легких», але без потреби підтримувати лабораторну точність.'
+    },
+    {
+        value: 'HARD',
+        label: 'Складна',
+        description: 'Високі, але не екстремальні параметри; такі корали чутливі, але більш витривалі, ніж «дуже складні».'
+    },
+    {
+        value: 'VERY_HARD',
+        label: 'Дуже складна',
+        description: 'Максимальні вимоги до освітлення, течії та стабільності; прощають практично нуль помилок.'
     }
 ];
 const getLabelByValue = (options, value)=>{
@@ -511,7 +534,7 @@ function LotForm({ existingLot }) {
     const [formData, setFormData] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])({
         durationDays: 5,
         parameters: {
-            salinity: '',
+            difficulty: '',
             par: '',
             flow: ''
         },
@@ -1246,24 +1269,68 @@ function LotForm({ existingLot }) {
                                             children: [
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                                     children: [
-                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$label$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Label"], {
-                                                            htmlFor: "salinity",
-                                                            children: "Солоність"
-                                                        }, void 0, false, {
+                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                            className: "flex items-center gap-2 mb-1.5",
+                                                            children: [
+                                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$label$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Label"], {
+                                                                    htmlFor: "difficulty",
+                                                                    children: "Складність"
+                                                                }, void 0, false, {
+                                                                    fileName: "[project]/src/components/dashboard/lot-form.tsx",
+                                                                    lineNumber: 315,
+                                                                    columnNumber: 23
+                                                                }, this),
+                                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(InfoTooltip, {
+                                                                    title: "Складність утримання",
+                                                                    items: __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$options$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["difficultyOptions"]
+                                                                }, void 0, false, {
+                                                                    fileName: "[project]/src/components/dashboard/lot-form.tsx",
+                                                                    lineNumber: 316,
+                                                                    columnNumber: 23
+                                                                }, this)
+                                                            ]
+                                                        }, void 0, true, {
                                                             fileName: "[project]/src/components/dashboard/lot-form.tsx",
                                                             lineNumber: 314,
                                                             columnNumber: 21
                                                         }, this),
-                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$input$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Input"], {
-                                                            id: "salinity",
-                                                            name: "parameters.salinity",
-                                                            placeholder: "1.025 SG",
-                                                            value: formData.parameters?.salinity || '',
-                                                            onChange: handleChange,
-                                                            disabled: isLoading
-                                                        }, void 0, false, {
+                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Select"], {
+                                                            name: "parameters.difficulty",
+                                                            value: formData.parameters?.difficulty || '',
+                                                            onValueChange: (val)=>handleSelectChange('parameters.difficulty', val),
+                                                            disabled: isLoading,
+                                                            children: [
+                                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["SelectTrigger"], {
+                                                                    children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["SelectValue"], {
+                                                                        placeholder: "Оберіть складність"
+                                                                    }, void 0, false, {
+                                                                        fileName: "[project]/src/components/dashboard/lot-form.tsx",
+                                                                        lineNumber: 319,
+                                                                        columnNumber: 40
+                                                                    }, this)
+                                                                }, void 0, false, {
+                                                                    fileName: "[project]/src/components/dashboard/lot-form.tsx",
+                                                                    lineNumber: 319,
+                                                                    columnNumber: 25
+                                                                }, this),
+                                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["SelectContent"], {
+                                                                    children: __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$options$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["difficultyOptions"].map((opt)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["SelectItem"], {
+                                                                            value: opt.value,
+                                                                            children: opt.label
+                                                                        }, opt.value, false, {
+                                                                            fileName: "[project]/src/components/dashboard/lot-form.tsx",
+                                                                            lineNumber: 321,
+                                                                            columnNumber: 59
+                                                                        }, this))
+                                                                }, void 0, false, {
+                                                                    fileName: "[project]/src/components/dashboard/lot-form.tsx",
+                                                                    lineNumber: 320,
+                                                                    columnNumber: 25
+                                                                }, this)
+                                                            ]
+                                                        }, void 0, true, {
                                                             fileName: "[project]/src/components/dashboard/lot-form.tsx",
-                                                            lineNumber: 315,
+                                                            lineNumber: 318,
                                                             columnNumber: 21
                                                         }, this)
                                                     ]
@@ -1282,7 +1349,7 @@ function LotForm({ existingLot }) {
                                                                     children: "PAR"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/src/components/dashboard/lot-form.tsx",
-                                                                    lineNumber: 319,
+                                                                    lineNumber: 327,
                                                                     columnNumber: 23
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(InfoTooltip, {
@@ -1290,13 +1357,13 @@ function LotForm({ existingLot }) {
                                                                     items: __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$options$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["PAR_OPTIONS"]
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/src/components/dashboard/lot-form.tsx",
-                                                                    lineNumber: 320,
+                                                                    lineNumber: 328,
                                                                     columnNumber: 23
                                                                 }, this)
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/src/components/dashboard/lot-form.tsx",
-                                                            lineNumber: 318,
+                                                            lineNumber: 326,
                                                             columnNumber: 21
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Select"], {
@@ -1310,12 +1377,12 @@ function LotForm({ existingLot }) {
                                                                         placeholder: "Оберіть PAR"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/src/components/dashboard/lot-form.tsx",
-                                                                        lineNumber: 323,
+                                                                        lineNumber: 331,
                                                                         columnNumber: 40
                                                                     }, this)
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/src/components/dashboard/lot-form.tsx",
-                                                                    lineNumber: 323,
+                                                                    lineNumber: 331,
                                                                     columnNumber: 25
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["SelectContent"], {
@@ -1324,24 +1391,24 @@ function LotForm({ existingLot }) {
                                                                             children: opt.label
                                                                         }, opt.value, false, {
                                                                             fileName: "[project]/src/components/dashboard/lot-form.tsx",
-                                                                            lineNumber: 325,
+                                                                            lineNumber: 333,
                                                                             columnNumber: 53
                                                                         }, this))
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/src/components/dashboard/lot-form.tsx",
-                                                                    lineNumber: 324,
+                                                                    lineNumber: 332,
                                                                     columnNumber: 25
                                                                 }, this)
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/src/components/dashboard/lot-form.tsx",
-                                                            lineNumber: 322,
+                                                            lineNumber: 330,
                                                             columnNumber: 21
                                                         }, this)
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/src/components/dashboard/lot-form.tsx",
-                                                    lineNumber: 317,
+                                                    lineNumber: 325,
                                                     columnNumber: 18
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1354,7 +1421,7 @@ function LotForm({ existingLot }) {
                                                                     children: "Течія"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/src/components/dashboard/lot-form.tsx",
-                                                                    lineNumber: 331,
+                                                                    lineNumber: 339,
                                                                     columnNumber: 23
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(InfoTooltip, {
@@ -1362,13 +1429,13 @@ function LotForm({ existingLot }) {
                                                                     items: __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$options$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["FLOW_OPTIONS"]
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/src/components/dashboard/lot-form.tsx",
-                                                                    lineNumber: 332,
+                                                                    lineNumber: 340,
                                                                     columnNumber: 23
                                                                 }, this)
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/src/components/dashboard/lot-form.tsx",
-                                                            lineNumber: 330,
+                                                            lineNumber: 338,
                                                             columnNumber: 21
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Select"], {
@@ -1382,12 +1449,12 @@ function LotForm({ existingLot }) {
                                                                         placeholder: "Оберіть течію"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/src/components/dashboard/lot-form.tsx",
-                                                                        lineNumber: 335,
+                                                                        lineNumber: 343,
                                                                         columnNumber: 40
                                                                     }, this)
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/src/components/dashboard/lot-form.tsx",
-                                                                    lineNumber: 335,
+                                                                    lineNumber: 343,
                                                                     columnNumber: 25
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["SelectContent"], {
@@ -1396,24 +1463,24 @@ function LotForm({ existingLot }) {
                                                                             children: opt.label
                                                                         }, opt.value, false, {
                                                                             fileName: "[project]/src/components/dashboard/lot-form.tsx",
-                                                                            lineNumber: 337,
+                                                                            lineNumber: 345,
                                                                             columnNumber: 54
                                                                         }, this))
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/src/components/dashboard/lot-form.tsx",
-                                                                    lineNumber: 336,
+                                                                    lineNumber: 344,
                                                                     columnNumber: 25
                                                                 }, this)
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/src/components/dashboard/lot-form.tsx",
-                                                            lineNumber: 334,
+                                                            lineNumber: 342,
                                                             columnNumber: 21
                                                         }, this)
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/src/components/dashboard/lot-form.tsx",
-                                                    lineNumber: 329,
+                                                    lineNumber: 337,
                                                     columnNumber: 19
                                                 }, this)
                                             ]
@@ -1445,20 +1512,20 @@ function LotForm({ existingLot }) {
                                                     children: "Зображення лоту*"
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/dashboard/lot-form.tsx",
-                                                    lineNumber: 347,
+                                                    lineNumber: 355,
                                                     columnNumber: 27
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["CardDescription"], {
                                                     children: "Завантажте основне фото вашого лоту."
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/dashboard/lot-form.tsx",
-                                                    lineNumber: 347,
+                                                    lineNumber: 355,
                                                     columnNumber: 66
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/components/dashboard/lot-form.tsx",
-                                            lineNumber: 347,
+                                            lineNumber: 355,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["CardContent"], {
@@ -1474,7 +1541,7 @@ function LotForm({ existingLot }) {
                                                             className: "max-h-48 rounded-md object-contain"
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/components/dashboard/lot-form.tsx",
-                                                            lineNumber: 351,
+                                                            lineNumber: 359,
                                                             columnNumber: 37
                                                         }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Fragment"], {
                                                             children: [
@@ -1482,7 +1549,7 @@ function LotForm({ existingLot }) {
                                                                     className: "h-12 w-12 text-muted-foreground"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/src/components/dashboard/lot-form.tsx",
-                                                                    lineNumber: 351,
+                                                                    lineNumber: 359,
                                                                     columnNumber: 142
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -1490,7 +1557,7 @@ function LotForm({ existingLot }) {
                                                                     children: "Натисніть, щоб завантажити"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/src/components/dashboard/lot-form.tsx",
-                                                                    lineNumber: 351,
+                                                                    lineNumber: 359,
                                                                     columnNumber: 201
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -1498,19 +1565,19 @@ function LotForm({ existingLot }) {
                                                                     children: "(PNG, JPG, WEBP до 5MB)"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/src/components/dashboard/lot-form.tsx",
-                                                                    lineNumber: 351,
+                                                                    lineNumber: 359,
                                                                     columnNumber: 281
                                                                 }, this)
                                                             ]
                                                         }, void 0, true)
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/components/dashboard/lot-form.tsx",
-                                                        lineNumber: 350,
+                                                        lineNumber: 358,
                                                         columnNumber: 19
                                                     }, this)
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/dashboard/lot-form.tsx",
-                                                    lineNumber: 349,
+                                                    lineNumber: 357,
                                                     columnNumber: 17
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$input$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Input"], {
@@ -1524,7 +1591,7 @@ function LotForm({ existingLot }) {
                                                     required: !isEditMode
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/dashboard/lot-form.tsx",
-                                                    lineNumber: 354,
+                                                    lineNumber: 362,
                                                     columnNumber: 17
                                                 }, this),
                                                 isUploading && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1536,12 +1603,12 @@ function LotForm({ existingLot }) {
                                                         }
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/components/dashboard/lot-form.tsx",
-                                                        lineNumber: 355,
+                                                        lineNumber: 363,
                                                         columnNumber: 90
                                                     }, this)
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/dashboard/lot-form.tsx",
-                                                    lineNumber: 355,
+                                                    lineNumber: 363,
                                                     columnNumber: 33
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -1549,19 +1616,19 @@ function LotForm({ existingLot }) {
                                                     children: "Для додавання більше фотографій, відредагуйте лот після створення."
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/dashboard/lot-form.tsx",
-                                                    lineNumber: 356,
+                                                    lineNumber: 364,
                                                     columnNumber: 17
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/components/dashboard/lot-form.tsx",
-                                            lineNumber: 348,
+                                            lineNumber: 356,
                                             columnNumber: 15
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/dashboard/lot-form.tsx",
-                                    lineNumber: 346,
+                                    lineNumber: 354,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Button"], {
@@ -1573,20 +1640,20 @@ function LotForm({ existingLot }) {
                                             className: "mr-2 h-4 w-4 animate-spin"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/dashboard/lot-form.tsx",
-                                            lineNumber: 359,
+                                            lineNumber: 367,
                                             columnNumber: 102
                                         }, this),
                                         isLoading ? 'Обробка...' : buttonText
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/dashboard/lot-form.tsx",
-                                    lineNumber: 359,
+                                    lineNumber: 367,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/dashboard/lot-form.tsx",
-                            lineNumber: 345,
+                            lineNumber: 353,
                             columnNumber: 11
                         }, this)
                     ]

@@ -22,7 +22,7 @@ export interface User {
 }
 
 export interface LotParameters {
-    salinity?: string;
+    difficulty?: string;
     par?: string;
     flow?: string;
 }
