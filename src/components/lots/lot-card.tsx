@@ -4,7 +4,6 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import type { Lot } from '@/functions/src/types';
 import { useAuth } from '@/context/auth-context';
 import { useToast } from '@/hooks/use-toast';
@@ -25,6 +24,7 @@ const LotCard: React.FC<LotCardProps> = ({ lot, onLotPurchased }) => {
   const [isBuying, setIsBuying] = useState(false);
 
   const imageUrl = lot.images && lot.images.length > 0 ? lot.images[0] : '/placeholder.png';
+  const isDirectSale = lot.type === 'direct';
 
   const handleBuyNow = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault(); 
@@ -59,7 +59,6 @@ const LotCard: React.FC<LotCardProps> = ({ lot, onLotPurchased }) => {
         
         toast({ title: "Успіх!", description: "Ви успішно придбали цей лот." });
         
-        // Notify the parent component to remove this lot from the list
         if (onLotPurchased) {
             onLotPurchased(lot.id);
         }
@@ -71,6 +70,22 @@ const LotCard: React.FC<LotCardProps> = ({ lot, onLotPurchased }) => {
         setIsBuying(false);
     }
   };
+  
+  const renderPriceInfo = () => {
+    if (isDirectSale) {
+        return {
+            label: "Ціна:",
+            value: `${lot.price} грн`,
+        };
+    }
+    // Default to auction
+    return {
+        label: "Поточна ставка:",
+        value: `${lot.currentBid} грн`,
+    };
+  };
+  
+  const {label, value} = renderPriceInfo();
 
   return (
     <Card className="overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 ease-in-out hover:scale-[1.03] transform rounded-[12px] break-inside-avoid">
@@ -87,16 +102,26 @@ const LotCard: React.FC<LotCardProps> = ({ lot, onLotPurchased }) => {
           </div>
         </CardHeader>
         <CardContent className="p-4">
-          <CardTitle className="text-lg font-headline mb-2 truncate" title={lot.name}>{lot.name}</CardTitle>
+          <CardTitle className="text-lg font.headline mb-2 truncate" title={lot.name}>{lot.name}</CardTitle>
           <div className="flex justify-between items-center mb-2">
-            <p className="text-sm text-muted-foreground">Поточна ставка:</p>
-            <p className="text-xl font-semibold text-primary">{lot.currentBid} грн</p>
+            <p className="text-sm text-muted-foreground">{label}</p>
+            <p className="text-xl font-semibold text-primary">{value}</p>
           </div>
-          <CountdownBadge endTime={new Date(lot.endTime)} />
+          {!isDirectSale && <CountdownBadge endTime={new Date(lot.endTime)} />}
         </CardContent>
       </Link>
       <CardFooter className="p-4 pt-0">
-        {lot.buyNowPrice ? (
+        {isDirectSale ? (
+             <Button 
+                variant="default" 
+                className="w-full"
+                onClick={handleBuyNow}
+                disabled={isBuying || !user || user.uid === lot.sellerUid}
+              >
+                {isBuying ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Tag className="mr-2 h-4 w-4" />}
+                {isBuying ? 'Покупка...' : `Купити за ${lot.price} грн`}
+            </Button>
+        ) : lot.buyNowPrice ? (
           <Button 
             variant="default" 
             className="w-full bg-accent hover:bg-accent/90 text-accent-foreground"

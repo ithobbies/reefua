@@ -1,18 +1,18 @@
-import type React from 'react';
+
+import React from 'react';
 import Header from './header';
 import Footer from './footer';
-import BottomNavigation from './bottom-navigation';
+import { BottomNavigation } from './bottom-navigation';
 
-interface AppLayoutProps {
-  children: React.ReactNode;
-}
-
-const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
+const AppLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <div className="flex flex-col min-h-screen">
       <Header />
-      <main className="flex-grow container mx-auto px-4 py-8">
-        {children}
+      <main className="flex-grow">
+        {/* The container was missing here, this fixes the layout for all pages */}
+        <div className="container mx-auto px-4 py-8">
+            {children}
+        </div>
       </main>
       <Footer />
       <BottomNavigation />

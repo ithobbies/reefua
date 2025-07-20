@@ -9,8 +9,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, UploadCloud, Loader2 } from 'lucide-react';
+import { ArrowLeft, UploadCloud, Loader2, Info } from 'lucide-react';
 import Link from 'next/link';
 
 import { useAuth } from '@/context/auth-context';
@@ -20,37 +22,60 @@ import { doc, updateDoc, collection, query, orderBy, onSnapshot } from 'firebase
 import { getStorage, ref, uploadBytesResumable, getDownloadURL, FirebaseStorage } from "firebase/storage";
 import { v4 as uuidv4 } from 'uuid';
 import type { Lot } from '@/functions/src/types';
+import { FLOW_OPTIONS, PAR_OPTIONS } from '@/lib/options';
 
-// The form now uses `durationDays` for new lots, instead of a full endTime string.
+type SaleType = 'auction' | 'direct';
+
 interface LotFormData {
   name: string;
   description: string;
   category: string;
-  startingBid: number;
-  buyNowPrice?: number;
-  durationDays: number; 
   images: string[];
   parameters: {
     salinity: string;
     par: string;
     flow: string;
   };
+  type: SaleType;
+  startingBid?: number;
+  buyNowPrice?: number;
+  durationDays?: number; 
+  price?: number;
 }
 
-interface LotFormProps {
-  existingLot?: Lot | null;
-}
+// Reusable Tooltip Component with structured content
+const InfoTooltip = ({ title, items }: { title: string, items: { label: string; description: string }[] }) => (
+  <TooltipProvider>
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Info className="h-4 w-4 text-muted-foreground cursor-help" />
+      </TooltipTrigger>
+      <TooltipContent className="max-w-xs p-3">
+        <div className="font-bold text-foreground mb-2">{title}</div>
+        <ul className="space-y-2">
+          {items.map((item, index) => (
+            <li key={index} className="text-sm">
+              <span className="font-semibold text-foreground">{item.label}</span>
+              <p className="text-muted-foreground">{item.description}</p>
+            </li>
+          ))}
+        </ul>
+      </TooltipContent>
+    </Tooltip>
+  </TooltipProvider>
+);
 
 export function LotForm({ existingLot }: LotFormProps) {
   const { toast } = useToast();
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
   const isEditMode = !!existingLot;
-
-  // Set default duration for new lots
+  
+  const [saleType, setSaleType] = useState<SaleType>('auction');
   const [formData, setFormData] = useState<Partial<LotFormData>>({
       durationDays: 5, 
-      parameters: { salinity: '', par: '', flow: '' }
+      parameters: { salinity: '', par: '', flow: '' },
+      type: 'auction',
   });
   
   const [categories, setCategories] = useState<string[]>([]);
@@ -68,10 +93,9 @@ export function LotForm({ existingLot }: LotFormProps) {
       router.push('/auctions');
     }
     
-    // In edit mode, we don't need durationDays, so we just load existing data.
     if (isEditMode && existingLot) {
-        const { name, description, category, startingBid, buyNowPrice, images, parameters } = existingLot;
-        setFormData({ name, description, category, startingBid, buyNowPrice, images, parameters: parameters || { salinity: '', par: '', flow: '' } });
+        setSaleType(existingLot.type);
+        setFormData(existingLot);
         if (existingLot.images && existingLot.images.length > 0) setImagePreview(existingLot.images[0]);
     }
     
@@ -102,8 +126,18 @@ export function LotForm({ existingLot }: LotFormProps) {
   };
   
   const handleSelectChange = (name: string, value: string | number) => {
-    setFormData(prev => ({ ...prev, [name]: value }));
+    if (name.includes('.')) {
+        const [parent, child] = name.split('.');
+        setFormData(prev => ({ ...prev, [parent]: { ...(prev as any)[parent], [child]: value }}));
+    } else {
+        setFormData(prev => ({ ...prev, [name]: value }));
+    }
   };
+  
+  const handleSaleTypeChange = (type: SaleType) => {
+      setSaleType(type);
+      setFormData(prev => ({...prev, type: type}));
+  }
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -141,10 +175,18 @@ export function LotForm({ existingLot }: LotFormProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Simplified validation check
-    if (!formData.name || !formData.description || !formData.category || !formData.startingBid) {
+    const isAuction = saleType === 'auction';
+    if (!formData.name || !formData.description || !formData.category) {
       toast({ variant: 'destructive', title: 'Помилка валідації', description: "Будь ласка, заповніть усі обов'язкові поля." });
       return;
+    }
+     if (isAuction && !formData.startingBid) {
+        toast({ variant: 'destructive', title: 'Помилка валідації', description: "Будь ласка, вкажіть стартову ціну для аукціону." });
+        return;
+    }
+     if (!isAuction && !formData.price) {
+        toast({ variant: 'destructive', title: 'Помилка валідації', description: "Будь ласка, вкажіть ціну для прямого продажу." });
+        return;
     }
     if (!imageFile && !isEditMode) {
         toast({ variant: 'destructive', title: 'Помилка валідації', description: "Будь ласка, завантажте зображення." });
@@ -156,15 +198,14 @@ export function LotForm({ existingLot }: LotFormProps) {
     try {
         const imageUrl = await uploadImage();
         
-        // Prepare payload, excluding temporary fields like durationDays
         const { durationDays, ...restOfFormData } = formData;
         const payload: any = {
             ...restOfFormData,
             images: [imageUrl],
+            type: saleType
         };
         
-        // Calculate endTime just before submission for new lots
-        if (!isEditMode && durationDays) {
+        if (!isEditMode && saleType === 'auction' && durationDays) {
             const endDate = new Date();
             endDate.setDate(endDate.getDate() + durationDays);
             payload.endTime = endDate.toISOString();
@@ -198,7 +239,7 @@ export function LotForm({ existingLot }: LotFormProps) {
     <div className="space-y-6">
        <div className="flex items-center gap-4">
          <Button variant="outline" size="icon" asChild><Link href="/dashboard/lots"><ArrowLeft className="h-4 w-4" /></Link></Button>
-        <h1 className="text-2xl font.headline font-semibold text-primary">{pageTitle}</h1>
+        <h1 className="text-2xl font-headline font-semibold text-primary">{pageTitle}</h1>
       </div>
       <form onSubmit={handleSubmit}>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -219,25 +260,49 @@ export function LotForm({ existingLot }: LotFormProps) {
             </Card>
 
             <Card>
-              <CardHeader><CardTitle>Ціноутворення та аукціон</CardTitle></CardHeader>
+                 <CardHeader>
+                    <CardTitle>Тип продажу</CardTitle>
+                    {!isEditMode && <CardDescription>Виберіть, як ви хочете продати товар.</CardDescription>}
+                 </CardHeader>
+                <CardContent>
+                    <RadioGroup value={saleType} onValueChange={handleSaleTypeChange} className="flex gap-4" disabled={isEditMode}>
+                        <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="auction" id="auction" />
+                            <Label htmlFor="auction">Аукціон</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="direct" id="direct" />
+                            <Label htmlFor="direct">Прямий продаж</Label>
+                        </div>
+                    </RadioGroup>
+                </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader><CardTitle>{saleType === 'auction' ? "Налаштування аукціону" : "Ціна"}</CardTitle></CardHeader>
               <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div><Label htmlFor="startingBid">Стартова ціна (грн)*</Label><Input id="startingBid" name="startingBid" type="number" placeholder="100" value={formData.startingBid || ''} onChange={handleChange} required disabled={isLoading} /></div>
-                  <div><Label htmlFor="buyNowPrice">Ціна "Купити зараз" (грн, необов'язково)</Label><Input id="buyNowPrice" name="buyNowPrice" type="number" placeholder="500" value={formData.buyNowPrice || ''} onChange={handleChange} disabled={isLoading} /></div>
-                </div>
-                {/* Auction duration is only available for new lots */}
-                {!isEditMode && (
-                <div>
-                  <Label htmlFor="durationDays">Тривалість аукціону*</Label>
-                   <Select name="durationDays" value={String(formData.durationDays || 5)} onValueChange={(val) => handleSelectChange('durationDays', parseInt(val, 10))} required>
-                        <SelectTrigger><SelectValue placeholder="Оберіть тривалість" /></SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="3">3 дні</SelectItem>
-                            <SelectItem value="5">5 днів</SelectItem>
-                            <SelectItem value="7">7 днів</SelectItem>
-                        </SelectContent>
-                    </Select>
-                </div>
+                {saleType === 'auction' ? (
+                <>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div><Label htmlFor="startingBid">Стартова ціна (грн)*</Label><Input id="startingBid" name="startingBid" type="number" placeholder="100" value={formData.startingBid || ''} onChange={handleChange} required disabled={isLoading} /></div>
+                      <div><Label htmlFor="buyNowPrice">Ціна "Купити зараз" (грн, необов'язково)</Label><Input id="buyNowPrice" name="buyNowPrice" type="number" placeholder="500" value={formData.buyNowPrice || ''} onChange={handleChange} disabled={isLoading} /></div>
+                    </div>
+                    {!isEditMode && (
+                    <div>
+                      <Label htmlFor="durationDays">Тривалість аукціону*</Label>
+                       <Select name="durationDays" value={String(formData.durationDays || 5)} onValueChange={(val) => handleSelectChange('durationDays', parseInt(val, 10))} required>
+                            <SelectTrigger><SelectValue placeholder="Оберіть тривалість" /></SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="3">3 дні</SelectItem>
+                                <SelectItem value="5">5 днів</SelectItem>
+                                <SelectItem value="7">7 днів</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    )}
+                </>
+                ) : (
+                    <div><Label htmlFor="price">Ціна (грн)*</Label><Input id="price" name="price" type="number" placeholder="300" value={formData.price || ''} onChange={handleChange} required disabled={isLoading} /></div>
                 )}
               </CardContent>
             </Card>
@@ -245,9 +310,34 @@ export function LotForm({ existingLot }: LotFormProps) {
             <Card>
               <CardHeader><CardTitle>Параметри утримання</CardTitle></CardHeader>
               <CardContent className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                 <div><Label htmlFor="salinity">Солоність</Label><Input id="salinity" name="parameters.salinity" placeholder="1.025 SG" value={formData.parameters?.salinity || ''} onChange={handleChange} disabled={isLoading}/></div>
-                  <div><Label htmlFor="par">PAR</Label><Input id="par" name="parameters.par" placeholder="250-350" value={formData.parameters?.par || ''} onChange={handleChange} disabled={isLoading}/></div>
-                  <div><Label htmlFor="flow">Течія</Label><Input id="flow" name="parameters.flow" placeholder="Помірна" value={formData.parameters?.flow || ''} onChange={handleChange} disabled={isLoading}/></div>
+                 <div>
+                    <Label htmlFor="salinity">Солоність</Label>
+                    <Input id="salinity" name="parameters.salinity" placeholder="1.025 SG" value={formData.parameters?.salinity || ''} onChange={handleChange} disabled={isLoading}/>
+                 </div>
+                 <div>
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <Label htmlFor="par">PAR</Label>
+                      <InfoTooltip title="Рівень освітлення (PAR)" items={PAR_OPTIONS} />
+                    </div>
+                    <Select name="parameters.par" value={formData.parameters?.par || ''} onValueChange={(val) => handleSelectChange('parameters.par', val)} disabled={isLoading}>
+                        <SelectTrigger><SelectValue placeholder="Оберіть PAR" /></SelectTrigger>
+                        <SelectContent>
+                            {PAR_OPTIONS.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
+                        </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <Label htmlFor="flow">Течія</Label>
+                      <InfoTooltip title="Сила течії" items={FLOW_OPTIONS} />
+                    </div>
+                    <Select name="parameters.flow" value={formData.parameters?.flow || ''} onValueChange={(val) => handleSelectChange('parameters.flow', val)} disabled={isLoading}>
+                        <SelectTrigger><SelectValue placeholder="Оберіть течію" /></SelectTrigger>
+                        <SelectContent>
+                            {FLOW_OPTIONS.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
+                        </SelectContent>
+                    </Select>
+                  </div>
               </CardContent>
             </Card>
           </div>

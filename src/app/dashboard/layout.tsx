@@ -2,7 +2,7 @@
 'use client'; 
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation'; // 1. Import the hook
+import { usePathname } from 'next/navigation';
 import {
   SidebarProvider,
   Sidebar,
@@ -13,24 +13,37 @@ import {
   SidebarMenuButton,
   SidebarInset,
   SidebarTrigger,
+  SidebarSeparator,
 } from '@/components/ui/sidebar';
-import { LayoutDashboard, ListChecks, BarChart3, Star, Settings, MessageSquare, ShoppingCart } from 'lucide-react'; 
+import { LayoutDashboard, ListChecks, BarChart3, Star, Settings, MessageSquare, ShoppingCart, ShieldCheck } from 'lucide-react'; 
 import SiteLogoIcon from '@/components/icons/site-logo-icon';
 import React from 'react';
+import { useAuth } from '@/context/auth-context'; // Correctly import the useAuth hook
 
 const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
-  // 2. Use the hook to get the current path
   const pathname = usePathname();
+  const { firestoreUser } = useAuth(); // Use the hook to get user data
+  const roles = firestoreUser?.roles || []; // Safely access roles from firestoreUser
 
   const menuItems = [
     { href: '/dashboard', label: 'Оглядова панель', icon: <LayoutDashboard /> },
     { href: '/dashboard/lots', label: 'Мої лоти', icon: <ListChecks /> },
-    { href: '/dashboard/sales', label: 'Мої Продажі', icon: <ShoppingCart /> },
+    { href: '/dashboard/sales', label: 'Мої продажі', icon: <ShoppingCart /> },
     { href: '/dashboard/messages', label: 'Повідомлення', icon: <MessageSquare /> },
     { href: '/dashboard/analytics', label: 'Аналітика', icon: <BarChart3 /> },
     { href: '/dashboard/reviews', label: 'Відгуки', icon: <Star /> },
-    { href: '/dashboard/settings', label: 'Налаштування', icon: <Settings />, isBottom: true },
   ];
+
+  const bottomMenuItems = [
+     { href: '/dashboard/settings', label: 'Налаштування', icon: <Settings /> },
+  ];
+
+  const adminMenuItem = { 
+    href: '/admin/dashboard', 
+    label: 'Адмін-панель', 
+    icon: <ShieldCheck className="text-red-600" />,
+    className: 'text-red-600 hover:text-red-700 font-semibold'
+  };
 
   return (
     <SidebarProvider defaultOpen>
@@ -43,10 +56,9 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
           <div className="flex-1" />
           <SidebarTrigger className="hidden md:flex text-sidebar-foreground hover:text-sidebar-accent-foreground" />
         </SidebarHeader>
-        <SidebarContent className="p-2">
+        <SidebarContent className="p-2 flex flex-col">
           <SidebarMenu className="flex-1">
-            {menuItems.filter(item => !item.isBottom).map((item) => {
-                // 3. Simplified and more robust active check
+            {menuItems.map((item) => {
                 const isActive = item.href === '/dashboard' 
                     ? pathname === item.href 
                     : pathname.startsWith(item.href);
@@ -66,9 +78,29 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
                   </SidebarMenuItem>
                 );
             })}
+
+            {/* Conditionally render admin link */}
+            {roles.includes('admin') && (
+              <>
+                <SidebarSeparator className="my-2" />
+                <SidebarMenuItem key={adminMenuItem.href}>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={pathname.startsWith(adminMenuItem.href)}
+                    tooltip={{ children: adminMenuItem.label, side: 'right' }}
+                    className={adminMenuItem.className}
+                  >
+                    <Link href={adminMenuItem.href} className="flex items-center">
+                      {adminMenuItem.icon}
+                      <span className="group-data-[collapsible=icon]:hidden ml-2">{adminMenuItem.label}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </>
+            )}
           </SidebarMenu>
            <SidebarMenu>
-             {menuItems.filter(item => item.isBottom).map((item) => (
+             {bottomMenuItems.map((item) => (
               <SidebarMenuItem key={item.href}>
                 <SidebarMenuButton
                   asChild

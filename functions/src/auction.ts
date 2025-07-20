@@ -15,7 +15,8 @@ export const endAuctions = functions.pubsub
     const query = db
       .collection("lots")
       .where("endTime", "<=", now)
-      .where("status", "==", "active");
+      .where("status", "==", "active")
+      .where("type", "==", "auction");
 
     const snapshot = await query.get();
 

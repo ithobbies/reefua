@@ -14,7 +14,8 @@ exports.endAuctions = functions.pubsub
     const query = db
         .collection("lots")
         .where("endTime", "<=", now)
-        .where("status", "==", "active");
+        .where("status", "==", "active")
+        .where("type", "==", "auction");
     const snapshot = await query.get();
     if (snapshot.empty) {
         console.log("No auctions to end at this time.");

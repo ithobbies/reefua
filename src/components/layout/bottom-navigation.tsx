@@ -1,41 +1,53 @@
+
 'use client';
 
 import Link from 'next/link';
-import { Home, Gavel, PlusSquare, User, ShoppingCart } from 'lucide-react';
-import { useIsMobile } from '@/hooks/use-mobile'; // Assuming this hook correctly determines mobile view (e.g., width <= 640px)
+import { usePathname } from 'next/navigation';
+import { Home, GanttChartSquare, PlusSquare, User } from 'lucide-react';
+import { useAuth } from '@/context/auth-context';
 
-const BottomNavigation = () => {
-  const isMobile = useIsMobile(); // The prompt mentions logic for <= 640px, useIsMobile should reflect this or similar.
+const navItems = [
+  { href: '/', label: 'Головна', icon: Home },
+  { href: '/auctions', label: 'Аукціони', icon: GanttChartSquare },
+  { href: '/sell', label: 'Продати', icon: PlusSquare },
+  { href: '/profile', label: 'Профіль', icon: User },
+];
 
-  if (!isMobile) {
+export const BottomNavigation = () => {
+  const pathname = usePathname();
+  const { user } = useAuth();
+
+  // Don't render on dashboard pages
+  if (pathname.startsWith('/dashboard')) {
     return null;
   }
 
-  const navItems = [
-    { href: '/', icon: <Home className="h-6 w-6" />, label: 'Головна' },
-    { href: '/auctions', icon: <Gavel className="h-6 w-6" />, label: 'Аукціони' },
-    { href: '/sell', icon: <PlusSquare className="h-6 w-6" />, label: 'Продати' },
-    { href: '/checkout', icon: <ShoppingCart className="h-6 w-6" />, label: 'Кошик' },
-    { href: '/profile', icon: <User className="h-6 w-6" />, label: 'Профіль' },
-  ];
-
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-border/50 bg-background/90 backdrop-blur-md shadow-t-lg md:hidden">
-      <div className="container mx-auto flex h-16 items-center justify-around px-2">
-        {navItems.map((item) => (
-          <Link
-            key={item.href}
-            href={item.href}
-            className="flex flex-col items-center justify-center text-muted-foreground hover:text-primary transition-colors p-1"
-            aria-label={item.label}
-          >
-            {item.icon}
-            <span className="text-xs mt-0.5">{item.label}</span>
-          </Link>
-        ))}
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-background border-t border-border/50 shadow-t-md z-40">
+      <div className="flex justify-around items-center h-16">
+        {navItems.map((item) => {
+          // For the profile, we need to check if the user is logged in
+          if (item.href === '/profile' && !user) {
+            return null; // Don't show profile icon if not logged in
+          }
+          
+          const Icon = item.icon;
+          const isActive = pathname === item.href;
+
+          return (
+            <Link 
+              href={item.href} 
+              key={item.label} 
+              className={`flex flex-col items-center justify-center w-full h-full text-xs transition-colors ${
+                isActive ? 'text-primary' : 'text-muted-foreground hover:text-primary'
+              }`}
+            >
+              <Icon className="h-6 w-6 mb-1" />
+              <span>{item.label}</span>
+            </Link>
+          );
+        })}
       </div>
     </nav>
   );
 };
-
-export default BottomNavigation;

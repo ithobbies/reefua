@@ -42,12 +42,14 @@ exports.createOrder = functions.region('us-central1').https.onCall(async (data, 
             for (const sellerUid in lotsBySeller) {
                 const sellerLots = lotsBySeller[sellerUid];
                 const totalAmount = sellerLots.reduce((sum, lot) => sum + (lot.finalPrice || 0), 0);
+                const sellerUsername = sellerLots[0].sellerUsername; // Get username from the first lot
                 const orderRef = db.collection('orders').doc();
                 const now = new Date().toISOString();
                 const newOrder = {
                     id: orderRef.id,
                     buyerUid,
                     sellerUid,
+                    sellerUsername,
                     lots: sellerLots.map(l => ({
                         id: l.id,
                         name: l.name,
