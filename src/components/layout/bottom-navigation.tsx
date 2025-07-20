@@ -17,13 +17,11 @@ export const BottomNavigation = () => {
   const pathname = usePathname();
   const { user } = useAuth();
 
-  // Don't render on dashboard pages
-  if (pathname.startsWith('/dashboard')) {
-    return null;
-  }
-
+  // The bottom navigation is now displayed everywhere on mobile devices,
+  // including the dashboard pages, with a consistent set of links.
+  
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-background border-t border-border/50 shadow-t-md z-40">
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-background border-t border-border/50 shadow-t-md z-50">
       <div className="flex justify-around items-center h-16">
         {navItems.map((item) => {
           // For the profile, we need to check if the user is logged in

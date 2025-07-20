@@ -10,7 +10,7 @@ import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
 import { db, functions } from '@/lib/firebase';
 import { useAuth } from '@/context/auth-context';
 import type { ChatMessage } from '@/functions/src/types';
-import { Send, Loader2, X, MessageCircle } from 'lucide-react';
+import { Send, Loader2, X, MessageCircle, ArrowLeft } from 'lucide-react';
 import { httpsCallable } from 'firebase/functions';
 import { useToast } from '@/hooks/use-toast';
 import Image from 'next/image';
@@ -29,7 +29,6 @@ export function ChatWidget({ chatId, lotName, lotImage, sellerName, onClose }: C
   const [newMessage, setNewMessage] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [isSending, setIsSending] = useState(false);
-  // Этот ref теперь для внешней обертки
   const scrollAreaWrapperRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
@@ -52,8 +51,6 @@ export function ChatWidget({ chatId, lotName, lotImage, sellerName, onClose }: C
   }, [chatId, toast]);
 
   useEffect(() => {
-    // ИСПРАВЛЕНИЕ: Мы ищем внутренний, реальный прокручиваемый элемент (viewport)
-    // и прокручиваем именно его.
     if (scrollAreaWrapperRef.current) {
       const viewport = scrollAreaWrapperRef.current.querySelector('[data-radix-scroll-area-viewport]');
       if (viewport) {
@@ -79,27 +76,34 @@ export function ChatWidget({ chatId, lotName, lotImage, sellerName, onClose }: C
   };
 
   return (
-    <Card className="fixed bottom-4 right-4 z-50 w-full max-w-sm h-[500px] flex flex-col shadow-2xl">
+    <Card className="fixed z-50 flex flex-col shadow-2xl 
+                   inset-0 bottom-16 md:bottom-4 md:right-4 md:inset-auto 
+                   md:w-full md:max-w-sm md:h-[500px] 
+                   rounded-none md:rounded-lg">
       <CardHeader className="flex flex-row items-center justify-between p-3 border-b bg-secondary">
-        <div className="flex items-center gap-2">
-            <MessageCircle className="h-6 w-6 text-primary" />
+        <div className="flex items-center gap-3">
+            <Button variant="ghost" size="icon" onClick={onClose} className="md:hidden">
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
             <CardTitle className="text-base font-semibold">Чат з {sellerName}</CardTitle>
         </div>
-        <Button variant="ghost" size="icon" onClick={onClose}>
+        <Button variant="ghost" size="icon" onClick={onClose} className="hidden md:flex">
           <X className="h-4 w-4" />
         </Button>
       </CardHeader>
       
-      <CardContent className="flex-grow p-0 min-h-0">
-        <ScrollArea className="h-full p-4" ref={scrollAreaWrapperRef}>
+      <CardContent className="flex-grow p-0 min-h-0 flex flex-col">
+        {/* Sticky Lot Info Header */}
+        <div className="flex items-center gap-3 p-3 border-b bg-background/95 z-10">
+            <Image src={lotImage || '/placeholder.png'} alt={lotName} width={40} height={40} className="rounded-md object-cover"/>
+            <p className="text-sm font-medium text-foreground truncate">{lotName}</p>
+        </div>
+        
+        <ScrollArea className="flex-grow p-4" ref={scrollAreaWrapperRef}>
           {isLoading ? (
             <div className="flex justify-center items-center h-full"><Loader2 className="h-8 w-8 animate-spin" /></div>
           ) : (
             <div className="space-y-4">
-              <div className="flex items-center gap-2 p-2 rounded-md bg-muted">
-                <Image src={lotImage || '/placeholder.png'} alt={lotName} width={32} height={32} className="rounded object-cover"/>
-                <p className="text-xs font-medium text-muted-foreground">{lotName}</p>
-              </div>
               {messages.map((msg) => (
                 <div key={msg.id} className={`flex items-end gap-2 ${msg.senderUid === user?.uid ? 'justify-end' : 'justify-start'}`}>
                   <div className={`p-2 px-3 rounded-lg max-w-[80%] ${msg.senderUid === user?.uid ? 'bg-primary text-primary-foreground' : 'bg-accent'}`}>

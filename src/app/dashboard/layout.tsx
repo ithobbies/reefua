@@ -14,16 +14,27 @@ import {
   SidebarInset,
   SidebarTrigger,
   SidebarSeparator,
+  useSidebar, // Import the hook
 } from '@/components/ui/sidebar';
 import { LayoutDashboard, ListChecks, BarChart3, Star, Settings, MessageSquare, ShoppingCart, ShieldCheck } from 'lucide-react'; 
-import SiteLogoIcon from '@/components/icons/site-logo-icon';
 import React from 'react';
 import { useAuth } from '@/context/auth-context';
+import { BottomNavigation } from '@/components/layout/bottom-navigation';
 
-const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
+// We create a sub-component to be able to use the useSidebar hook
+// because it must be used within a SidebarProvider.
+const DashboardLayoutContent = ({ children }: { children: React.ReactNode }) => {
   const pathname = usePathname();
   const { firestoreUser } = useAuth();
+  const { isMobile, setOpenMobile } = useSidebar(); // Get sidebar state and control functions
   const roles = firestoreUser?.roles || [];
+
+  // This function will be called on link click
+  const handleLinkClick = () => {
+    if (isMobile) {
+      setOpenMobile(false); // Close the sidebar on mobile
+    }
+  };
 
   const menuItems = [
     { href: '/dashboard', label: 'Оглядова панель', icon: <LayoutDashboard /> },
@@ -46,15 +57,9 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   };
 
   return (
-    <SidebarProvider>
+    <>
       <Sidebar collapsible="icon" side="left" variant="sidebar">
-        <SidebarHeader className="items-center border-b border-sidebar-border">
-           <Link href="/" className="flex items-center gap-2 text-sidebar-foreground hover:opacity-80 transition-opacity">
-            <SiteLogoIcon className="h-10 w-10" /> 
-            <span className="font-headline text-lg font-semibold group-data-[collapsible=icon]:hidden">ReefUA</span>
-          </Link>
-          <div className="flex-1" />
-          {/* Trigger for desktop, hidden on mobile */}
+        <SidebarHeader className="items-center border-b border-sidebar-border h-16 justify-end">
           <SidebarTrigger className="hidden md:flex text-sidebar-foreground hover:text-sidebar-accent-foreground" />
         </SidebarHeader>
         <SidebarContent className="p-2 flex flex-col">
@@ -66,12 +71,8 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
 
                 return (
                   <SidebarMenuItem key={item.href}>
-                    <SidebarMenuButton
-                      asChild
-                      isActive={isActive}
-                      tooltip={{ children: item.label, side: 'right' }}
-                    >
-                      <Link href={item.href} className="flex items-center">
+                    <SidebarMenuButton asChild isActive={isActive} tooltip={{ children: item.label, side: 'right' }}>
+                      <Link href={item.href} className="flex items-center" onClick={handleLinkClick}>
                         {item.icon}
                         <span className="group-data-[collapsible=icon]:hidden ml-2">{item.label}</span>
                       </Link>
@@ -84,13 +85,8 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
               <>
                 <SidebarSeparator className="my-2" />
                 <SidebarMenuItem key={adminMenuItem.href}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={pathname.startsWith(adminMenuItem.href)}
-                    tooltip={{ children: adminMenuItem.label, side: 'right' }}
-                    className={adminMenuItem.className}
-                  >
-                    <Link href={adminMenuItem.href} className="flex items-center">
+                  <SidebarMenuButton asChild isActive={pathname.startsWith(adminMenuItem.href)} tooltip={{ children: adminMenuItem.label, side: 'right' }} className={adminMenuItem.className}>
+                    <Link href={adminMenuItem.href} className="flex items-center" onClick={handleLinkClick}>
                       {adminMenuItem.icon}
                       <span className="group-data-[collapsible=icon]:hidden ml-2">{adminMenuItem.label}</span>
                     </Link>
@@ -102,12 +98,8 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
            <SidebarMenu>
              {bottomMenuItems.map((item) => (
               <SidebarMenuItem key={item.href}>
-                <SidebarMenuButton
-                  asChild
-                  isActive={pathname.startsWith(item.href)}
-                  tooltip={{ children: item.label, side: 'right' }}
-                >
-                  <Link href={item.href} className="flex items-center">
+                <SidebarMenuButton asChild isActive={pathname.startsWith(item.href)} tooltip={{ children: item.label, side: 'right' }}>
+                  <Link href={item.href} className="flex items-center" onClick={handleLinkClick}>
                     {item.icon}
                     <span className="group-data-[collapsible=icon]:hidden ml-2">{item.label}</span>
                   </Link>
@@ -117,8 +109,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
           </SidebarMenu>
         </SidebarContent>
       </Sidebar>
-      <SidebarInset className="bg-background">
-        {/* Mobile-only header with the trigger */}
+      <SidebarInset className="bg-background pb-20 md:pb-0">
         <header className="md:hidden sticky top-0 z-40 w-full bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b p-2 flex items-center h-16">
             <SidebarTrigger />
             <Link href="/" className="flex items-center gap-2 text-foreground hover:opacity-80 transition-opacity ml-4">
@@ -129,6 +120,16 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
          {children}
         </div>
       </SidebarInset>
+      <BottomNavigation />
+    </>
+  );
+};
+
+// The main export uses the provider to make the context available to the content
+const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
+  return (
+    <SidebarProvider>
+      <DashboardLayoutContent>{children}</DashboardLayoutContent>
     </SidebarProvider>
   );
 };

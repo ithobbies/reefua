@@ -209,7 +209,7 @@ export default function LotDetailPage() {
   }
 
   return (
-    <div className="container mx-auto py-8">
+    <div className="container mx-auto py-8 pb-24 md:pb-8"> {/* Added bottom padding for mobile */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-8">
           
@@ -231,7 +231,7 @@ export default function LotDetailPage() {
                     </div>
                   </div>
                   {user && !isOwner && (
-                      <Button variant="outline" onClick={handleStartChat} disabled={isChatStarting}>
+                      <Button variant="outline" onClick={handleStartChat} disabled={isChatStarting} className="hidden md:flex"> {/* Hide on mobile */}
                           {isChatStarting ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <MessageCircle className="mr-2 h-4 w-4"/>}
                           Повідомлення
                       </Button>
@@ -372,6 +372,16 @@ export default function LotDetailPage() {
 
         </div>
       </div>
+      
+      {/* Mobile-only Bottom Action Bar */}
+      {user && !isOwner && (
+        <div className="md:hidden fixed bottom-16 left-0 right-0 bg-background/95 backdrop-blur-sm p-4 border-t z-40">
+           <Button variant="default" className="w-full" onClick={handleStartChat} disabled={isChatStarting}>
+                {isChatStarting ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <MessageCircle className="mr-2 h-4 w-4"/>}
+                Повідомлення
+            </Button>
+        </div>
+      )}
     </div>
   );
 }
