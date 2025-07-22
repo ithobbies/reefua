@@ -4,8 +4,8 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import LotCard from '@/components/lots/lot-card';
 import { db } from '@/lib/firebase';
-import { collection, getDocs, query, where, orderBy, QueryConstraint } from 'firebase/firestore';
-import { type Lot } from '@/functions/src/types';
+import { collection, getDocs, query, where, orderBy, QueryConstraint, doc, getDoc } from 'firebase/firestore';
+import { type Lot, type SellerProfile } from '@/functions/src/types';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
@@ -24,26 +24,45 @@ export default function AuctionsPage() {
   useEffect(() => {
     document.title = 'Всі лоти - ReefUA';
 
-    const fetchLots = async () => {
+    const fetchLotsAndSellers = async () => {
       setLoading(true);
       try {
         const lotsCollection = collection(db, 'lots');
-        
-        let q;
         const queryConstraints: QueryConstraint[] = [where('status', '==', 'active')];
 
-        if(saleTypeFilter !== 'all'){
-            queryConstraints.push(where('type', '==', saleTypeFilter));
+        if (saleTypeFilter !== 'all') {
+          queryConstraints.push(where('type', '==', saleTypeFilter));
         }
 
-        q = query(lotsCollection, ...queryConstraints, orderBy('endTime', 'asc'));
-
+        const q = query(lotsCollection, ...queryConstraints, orderBy('endTime', 'asc'));
         const lotSnapshot = await getDocs(q);
-        const lotsList = lotSnapshot.docs.map(doc => ({
-          ...doc.data(),
-          id: doc.id,
-        })) as Lot[];
-        setLots(lotsList);
+        const lotsList = lotSnapshot.docs.map(doc => ({ ...doc.data(), id: doc.id })) as Lot[];
+
+        const sellerUids = [...new Set(lotsList.map(lot => lot.sellerUid))];
+        const sellerProfiles: Record<string, SellerProfile> = {};
+
+        for (const uid of sellerUids) {
+          const userDoc = await getDoc(doc(db, 'users', uid));
+          if (userDoc.exists()) {
+            const userData = userDoc.data();
+            sellerProfiles[uid] = {
+              name: userData.username,
+              rating: userData.sellerRating || 0,
+              reviewsCount: userData.sellerReviewCount || 0,
+              avatar: userData.photoURL || undefined,
+            };
+          }
+        }
+        console.log('Seller Profiles:', sellerProfiles);
+
+        const lotsWithSellers = lotsList.map(lot => ({
+          ...lot,
+          sellerProfile: sellerProfiles[lot.sellerUid],
+        }));
+        
+        console.log('Lots with Sellers:', lotsWithSellers);
+
+        setLots(lotsWithSellers);
 
         const categoriesCollection = collection(db, 'categories');
         const categorySnapshot = await getDocs(categoriesCollection);
@@ -57,7 +76,7 @@ export default function AuctionsPage() {
       }
     };
 
-    fetchLots();
+    fetchLotsAndSellers();
   }, [saleTypeFilter]);
   
   const handleLotPurchased = (lotId: string) => {

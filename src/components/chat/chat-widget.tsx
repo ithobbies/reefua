@@ -77,9 +77,8 @@ export function ChatWidget({ chatId, lotName, lotImage, sellerName, onClose }: C
 
   return (
     <Card className="fixed z-50 flex flex-col shadow-2xl 
-                   inset-0 bottom-16 md:bottom-4 md:right-4 md:inset-auto 
-                   md:w-full md:max-w-sm md:h-[500px] 
-                   rounded-none md:rounded-lg">
+                   inset-0 bottom-16 rounded-none
+                   md:inset-auto md:right-4 md:bottom-4 md:w-96 md:h-[500px] md:rounded-lg">
       <CardHeader className="flex flex-row items-center justify-between p-3 border-b bg-secondary">
         <div className="flex items-center gap-3">
             <Button variant="ghost" size="icon" onClick={onClose} className="md:hidden">
