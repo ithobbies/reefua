@@ -423,6 +423,10 @@ h1, h2, h3, h4, h5, h6 {
   bottom: 0;
 }
 
+.bottom-16 {
+  bottom: 4rem;
+}
+
 .bottom-4 {
   bottom: 1rem;
 }
@@ -505,10 +509,6 @@ h1, h2, h3, h4, h5, h6 {
 
 .top-\[50\%\] {
   top: 50%;
-}
-
-.bottom-16 {
-  bottom: 4rem;
 }
 
 .z-10 {
@@ -788,10 +788,6 @@ h1, h2, h3, h4, h5, h6 {
   height: 300px;
 }
 
-.h-\[500px\] {
-  height: 500px;
-}
-
 .h-\[calc\(100vh-200px\)\] {
   height: calc(100vh - 200px);
 }
@@ -998,10 +994,6 @@ h1, h2, h3, h4, h5, h6 {
 
 .max-w-md {
   max-width: 28rem;
-}
-
-.max-w-sm {
-  max-width: 24rem;
 }
 
 .max-w-xs {
@@ -1356,12 +1348,12 @@ h1, h2, h3, h4, h5, h6 {
   border-radius: calc(var(--radius)  - 2px);
 }
 
-.rounded-sm {
-  border-radius: calc(var(--radius)  - 4px);
-}
-
 .rounded-none {
   border-radius: 0;
+}
+
+.rounded-sm {
+  border-radius: calc(var(--radius)  - 4px);
 }
 
 .border {
@@ -1713,6 +1705,14 @@ h1, h2, h3, h4, h5, h6 {
   padding-bottom: .5rem;
 }
 
+.pb-20 {
+  padding-bottom: 5rem;
+}
+
+.pb-24 {
+  padding-bottom: 6rem;
+}
+
 .pb-3 {
   padding-bottom: .75rem;
 }
@@ -1767,14 +1767,6 @@ h1, h2, h3, h4, h5, h6 {
 
 .pt-4 {
   padding-top: 1rem;
-}
-
-.pb-20 {
-  padding-bottom: 5rem;
-}
-
-.pb-24 {
-  padding-bottom: 6rem;
 }
 
 .text-left {
@@ -3221,6 +3213,10 @@ body {
 
   .md\:w-full {
     width: 100%;
+  }
+
+  .md\:w-96 {
+    width: 24rem;
   }
 
   .md\:min-w-\[200px\] {

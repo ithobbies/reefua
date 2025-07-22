@@ -1,4 +1,3 @@
-
 // functions/src/types.ts
 
 // Using string for ISO date format for consistency across client/server
@@ -27,6 +26,13 @@ export interface LotParameters {
     flow?: string;
 }
 
+export interface SellerProfile {
+  name: string;
+  rating: number;
+  reviewsCount: number;
+  avatar?: string;
+}
+
 export interface Lot {
   id: string;
   name:string;
@@ -40,6 +46,7 @@ export interface Lot {
   endTime: IsoDateString;
   sellerUid: string;
   sellerUsername: string;
+  sellerProfile?: SellerProfile;
   category: string;
   status: 'active' | 'sold' | 'processing' | 'shipped' | 'completed' | 'unsold' | 'cancelled';
   winnerUid?: string | null;

@@ -7,16 +7,47 @@ import Link from 'next/link';
 import type { Lot } from '@/functions/src/types';
 import { useAuth } from '@/context/auth-context';
 import { useToast } from '@/hooks/use-toast';
+import { useSellerProfile } from '@/hooks/use-seller-profile'; // Import the new hook
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tag, Loader2 } from 'lucide-react';
 import CountdownBadge from '@/components/ui/countdown-badge';
+import { RatingStars } from '@/components/ui/rating-stars'; // Import RatingStars
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface LotCardProps {
   lot: Lot;
-  onLotPurchased?: (lotId: string) => void; // Callback prop
+  onLotPurchased?: (lotId: string) => void; 
 }
+
+// SellerInfo sub-component to keep the main component clean
+const SellerInfo: React.FC<{ lot: Lot }> = ({ lot }) => {
+    const { sellerProfile, loading } = useSellerProfile(lot.sellerUid);
+
+    if (loading) {
+        return <Skeleton className="h-4 w-3/4 mt-2" />;
+    }
+
+    if (!sellerProfile) {
+        return null; // Or some fallback UI
+    }
+
+    return (
+        <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
+            <span>Продавець:</span>
+            <span className="text-primary font-semibold">
+                {lot.sellerUsername}
+            </span>
+            <div className="flex items-center gap-1.5">
+                <span className="font-bold text-foreground">{sellerProfile.sellerRating?.toFixed(1)}</span>
+                <RatingStars rating={sellerProfile.sellerRating || 0} starSize={12} />
+                <span>({sellerProfile.sellerReviewCount || 0})</span>
+            </div>
+        </div>
+    )
+}
+
 
 const LotCard: React.FC<LotCardProps> = ({ lot, onLotPurchased }) => {
   const { user } = useAuth();
@@ -88,8 +119,8 @@ const LotCard: React.FC<LotCardProps> = ({ lot, onLotPurchased }) => {
   const {label, value} = renderPriceInfo();
 
   return (
-    <Card className="overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 ease-in-out hover:scale-[1.03] transform rounded-[12px] break-inside-avoid">
-      <Link href={`/lot/${lot.id}`} aria-label={`Переглянути деталі лоту ${lot.name}`}>
+    <Card className="overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 ease-in-out hover:scale-[1.03] transform rounded-[12px] break-inside-avoid flex flex-col">
+      <Link href={`/lot/${lot.id}`} aria-label={`Переглянути деталі лоту ${lot.name}`} className="flex flex-col flex-grow">
         <CardHeader className="p-0">
           <div className="aspect-[4/3] relative w-full bg-muted">
             <Image
@@ -101,9 +132,12 @@ const LotCard: React.FC<LotCardProps> = ({ lot, onLotPurchased }) => {
             />
           </div>
         </CardHeader>
-        <CardContent className="p-4">
-          <CardTitle className="text-lg font.headline mb-2 truncate" title={lot.name}>{lot.name}</CardTitle>
-          <div className="flex justify-between items-center mb-2">
+        <CardContent className="p-4 flex-grow">
+          <CardTitle className="text-lg font.headline mb-1 truncate" title={lot.name}>{lot.name}</CardTitle>
+          {/* Seller Info Component */}
+          <SellerInfo lot={lot} />
+
+          <div className="flex justify-between items-center mt-3 mb-2">
             <p className="text-sm text-muted-foreground">{label}</p>
             <p className="text-xl font-semibold text-primary">{value}</p>
           </div>

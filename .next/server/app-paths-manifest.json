@@ -1,11 +1,5 @@
 {
-  "/dashboard/lots/page": "app/dashboard/lots/page.js",
-  "/dashboard/messages/page": "app/dashboard/messages/page.js",
   "/dashboard/page": "app/dashboard/page.js",
-  "/dashboard/reviews/page": "app/dashboard/reviews/page.js",
-  "/dashboard/sales/page": "app/dashboard/sales/page.js",
-  "/login/page": "app/login/page.js",
   "/lot/[id]/page": "app/lot/[id]/page.js",
-  "/page": "app/page.js",
-  "/sell/page": "app/sell/page.js"
+  "/page": "app/page.js"
 }

@@ -221,10 +221,11 @@ export default function LotDetailPage() {
                   <div>
                     <CardTitle className="text-3xl font-headline">{lot.name}</CardTitle>
                     <div className="flex items-center gap-2 mt-1">
-                      <CardDescription>Продавець: <Link href={`/profile/${lot.sellerUid}`} className="text-primary font-medium hover:underline">{lot.sellerUsername}</Link></CardDescription>
+                      <CardDescription>Продавець: <Link href={`/profile/${lot.sellerUid}`} className="text-primary font-semibold hover:underline">{lot.sellerUsername}</Link></CardDescription>
                       {sellerProfile && (
                           <div className="flex items-center gap-1">
                               <RatingStars rating={sellerProfile.sellerRating || 0} />
+                              <span className="text-sm font-bold">{sellerProfile.sellerRating?.toFixed(1)}</span>
                               <span className="text-xs text-muted-foreground">({sellerProfile.sellerReviewCount || 0})</span>
                           </div>
                       )}

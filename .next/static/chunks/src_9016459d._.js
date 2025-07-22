@@ -1035,7 +1035,7 @@ function LotDetailPage() {
                                                                         "Продавець: ",
                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$client$2f$app$2d$dir$2f$link$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
                                                                             href: `/profile/${lot.sellerUid}`,
-                                                                            className: "text-primary font-medium hover:underline",
+                                                                            className: "text-primary font-semibold hover:underline",
                                                                             children: lot.sellerUsername
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/src/app/lot/[id]/page.tsx",
@@ -1059,6 +1059,14 @@ function LotDetailPage() {
                                                                             columnNumber: 31
                                                                         }, this),
                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                                                            className: "text-sm font-bold",
+                                                                            children: sellerProfile.sellerRating?.toFixed(1)
+                                                                        }, void 0, false, {
+                                                                            fileName: "[project]/src/app/lot/[id]/page.tsx",
+                                                                            lineNumber: 228,
+                                                                            columnNumber: 31
+                                                                        }, this),
+                                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                                                             className: "text-xs text-muted-foreground",
                                                                             children: [
                                                                                 "(",
@@ -1067,7 +1075,7 @@ function LotDetailPage() {
                                                                             ]
                                                                         }, void 0, true, {
                                                                             fileName: "[project]/src/app/lot/[id]/page.tsx",
-                                                                            lineNumber: 228,
+                                                                            lineNumber: 229,
                                                                             columnNumber: 31
                                                                         }, this)
                                                                     ]
@@ -1099,20 +1107,20 @@ function LotDetailPage() {
                                                             className: "mr-2 h-4 w-4 animate-spin"
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/app/lot/[id]/page.tsx",
-                                                            lineNumber: 235,
+                                                            lineNumber: 236,
                                                             columnNumber: 45
                                                         }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$message$2d$circle$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__MessageCircle$3e$__["MessageCircle"], {
                                                             className: "mr-2 h-4 w-4"
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/app/lot/[id]/page.tsx",
-                                                            lineNumber: 235,
+                                                            lineNumber: 236,
                                                             columnNumber: 96
                                                         }, this),
                                                         "Повідомлення"
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/src/app/lot/[id]/page.tsx",
-                                                    lineNumber: 234,
+                                                    lineNumber: 235,
                                                     columnNumber: 23
                                                 }, this)
                                             ]
@@ -1134,7 +1142,7 @@ function LotDetailPage() {
                                                 children: "Параметри утримання:"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/app/lot/[id]/page.tsx",
-                                                lineNumber: 243,
+                                                lineNumber: 244,
                                                 columnNumber: 15
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1145,14 +1153,14 @@ function LotDetailPage() {
                                                             className: "h-5 w-5"
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/app/lot/[id]/page.tsx",
-                                                            lineNumber: 245,
+                                                            lineNumber: 246,
                                                             columnNumber: 69
                                                         }, void 0),
                                                         label: "Складність",
                                                         value: (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$options$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["getLabelByValue"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$options$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["difficultyOptions"], lot.parameters.difficulty)
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/app/lot/[id]/page.tsx",
-                                                        lineNumber: 245,
+                                                        lineNumber: 246,
                                                         columnNumber: 48
                                                     }, this),
                                                     lot.parameters?.par && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$lots$2f$parameter$2d$item$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
@@ -1160,14 +1168,14 @@ function LotDetailPage() {
                                                             className: "h-5 w-5"
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/app/lot/[id]/page.tsx",
-                                                            lineNumber: 246,
+                                                            lineNumber: 247,
                                                             columnNumber: 62
                                                         }, void 0),
                                                         label: "PAR",
                                                         value: lot.parameters.par
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/app/lot/[id]/page.tsx",
-                                                        lineNumber: 246,
+                                                        lineNumber: 247,
                                                         columnNumber: 41
                                                     }, this),
                                                     lot.parameters?.flow && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$lots$2f$parameter$2d$item$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
@@ -1175,20 +1183,20 @@ function LotDetailPage() {
                                                             className: "h-5 w-5"
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/app/lot/[id]/page.tsx",
-                                                            lineNumber: 247,
+                                                            lineNumber: 248,
                                                             columnNumber: 63
                                                         }, void 0),
                                                         label: "Течія",
                                                         value: lot.parameters.flow
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/app/lot/[id]/page.tsx",
-                                                        lineNumber: 247,
+                                                        lineNumber: 248,
                                                         columnNumber: 42
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/app/lot/[id]/page.tsx",
-                                                lineNumber: 244,
+                                                lineNumber: 245,
                                                 columnNumber: 15
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$badge$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Badge"], {
@@ -1199,20 +1207,20 @@ function LotDetailPage() {
                                                         className: "h-5 w-5 mr-2"
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/app/lot/[id]/page.tsx",
-                                                        lineNumber: 250,
+                                                        lineNumber: 251,
                                                         columnNumber: 17
                                                     }, this),
                                                     "Без гарантії живого товару при доставці поштою."
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/app/lot/[id]/page.tsx",
-                                                lineNumber: 249,
+                                                lineNumber: 250,
                                                 columnNumber: 15
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/app/lot/[id]/page.tsx",
-                                        lineNumber: 242,
+                                        lineNumber: 243,
                                         columnNumber: 13
                                     }, this)
                                 ]
@@ -1231,19 +1239,19 @@ function LotDetailPage() {
                                                     className: "mr-2 h-5 w-5"
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/app/lot/[id]/page.tsx",
-                                                    lineNumber: 261,
+                                                    lineNumber: 262,
                                                     columnNumber: 19
                                                 }, this),
                                                 "Опис від продавця"
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/app/lot/[id]/page.tsx",
-                                            lineNumber: 260,
+                                            lineNumber: 261,
                                             columnNumber: 17
                                         }, this)
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/lot/[id]/page.tsx",
-                                        lineNumber: 259,
+                                        lineNumber: 260,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["CardContent"], {
@@ -1252,18 +1260,18 @@ function LotDetailPage() {
                                             children: lot.description
                                         }, void 0, false, {
                                             fileName: "[project]/src/app/lot/[id]/page.tsx",
-                                            lineNumber: 266,
+                                            lineNumber: 267,
                                             columnNumber: 17
                                         }, this)
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/lot/[id]/page.tsx",
-                                        lineNumber: 265,
+                                        lineNumber: 266,
                                         columnNumber: 15
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/app/lot/[id]/page.tsx",
-                                lineNumber: 258,
+                                lineNumber: 259,
                                 columnNumber: 13
                             }, this)
                         ]
@@ -1283,12 +1291,12 @@ function LotDetailPage() {
                                             children: isAuction ? "Ставки" : "Продаж"
                                         }, void 0, false, {
                                             fileName: "[project]/src/app/lot/[id]/page.tsx",
-                                            lineNumber: 276,
+                                            lineNumber: 277,
                                             columnNumber: 17
                                         }, this)
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/lot/[id]/page.tsx",
-                                        lineNumber: 275,
+                                        lineNumber: 276,
                                         columnNumber: 13
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["CardContent"], {
@@ -1299,7 +1307,7 @@ function LotDetailPage() {
                                                 endTime: new Date(lot.endTime)
                                             }, void 0, false, {
                                                 fileName: "[project]/src/app/lot/[id]/page.tsx",
-                                                lineNumber: 282,
+                                                lineNumber: 283,
                                                 columnNumber: 33
                                             }, this),
                                             isAuctionActive && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Fragment"], {
@@ -1317,7 +1325,7 @@ function LotDetailPage() {
                                                             disabled: isSubmitting || !user || isOwner
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/app/lot/[id]/page.tsx",
-                                                            lineNumber: 287,
+                                                            lineNumber: 288,
                                                             columnNumber: 21
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Button"], {
@@ -1328,12 +1336,12 @@ function LotDetailPage() {
                                                                 className: "mr-2 h-4 w-4 animate-spin"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/app/lot/[id]/page.tsx",
-                                                                lineNumber: 301,
+                                                                lineNumber: 302,
                                                                 columnNumber: 39
                                                             }, this) : "Зробити ставку"
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/app/lot/[id]/page.tsx",
-                                                            lineNumber: 296,
+                                                            lineNumber: 297,
                                                             columnNumber: 21
                                                         }, this),
                                                         isOwner && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -1341,13 +1349,13 @@ function LotDetailPage() {
                                                             children: "Ви не можете робити ставки на свій лот."
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/app/lot/[id]/page.tsx",
-                                                            lineNumber: 303,
+                                                            lineNumber: 304,
                                                             columnNumber: 34
                                                         }, this)
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/src/app/lot/[id]/page.tsx",
-                                                    lineNumber: 286,
+                                                    lineNumber: 287,
                                                     columnNumber: 19
                                                 }, this)
                                             }, void 0, false),
@@ -1362,12 +1370,12 @@ function LotDetailPage() {
                                                                     className: "w-full border-t"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/src/app/lot/[id]/page.tsx",
-                                                                    lineNumber: 310,
+                                                                    lineNumber: 311,
                                                                     columnNumber: 116
                                                                 }, this)
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/app/lot/[id]/page.tsx",
-                                                                lineNumber: 310,
+                                                                lineNumber: 311,
                                                                 columnNumber: 64
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1377,18 +1385,18 @@ function LotDetailPage() {
                                                                     children: "або"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/src/app/lot/[id]/page.tsx",
-                                                                    lineNumber: 310,
+                                                                    lineNumber: 311,
                                                                     columnNumber: 227
                                                                 }, this)
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/app/lot/[id]/page.tsx",
-                                                                lineNumber: 310,
+                                                                lineNumber: 311,
                                                                 columnNumber: 163
                                                             }, this)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/src/app/lot/[id]/page.tsx",
-                                                        lineNumber: 310,
+                                                        lineNumber: 311,
                                                         columnNumber: 33
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Button"], {
@@ -1401,7 +1409,7 @@ function LotDetailPage() {
                                                             className: "mr-2 h-4 w-4 animate-spin"
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/app/lot/[id]/page.tsx",
-                                                            lineNumber: 318,
+                                                            lineNumber: 319,
                                                             columnNumber: 37
                                                         }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Fragment"], {
                                                             children: [
@@ -1409,7 +1417,7 @@ function LotDetailPage() {
                                                                     className: "mr-2 h-5 w-5"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/src/app/lot/[id]/page.tsx",
-                                                                    lineNumber: 318,
+                                                                    lineNumber: 319,
                                                                     columnNumber: 90
                                                                 }, this),
                                                                 " ",
@@ -1418,7 +1426,7 @@ function LotDetailPage() {
                                                         }, void 0, true)
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/app/lot/[id]/page.tsx",
-                                                        lineNumber: 311,
+                                                        lineNumber: 312,
                                                         columnNumber: 19
                                                     }, this)
                                                 ]
@@ -1431,7 +1439,7 @@ function LotDetailPage() {
                                                             className: "h-10 w-10 text-yellow-500 mx-auto mb-2"
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/app/lot/[id]/page.tsx",
-                                                            lineNumber: 327,
+                                                            lineNumber: 328,
                                                             columnNumber: 23
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -1439,7 +1447,7 @@ function LotDetailPage() {
                                                             children: "Переможець:"
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/app/lot/[id]/page.tsx",
-                                                            lineNumber: 328,
+                                                            lineNumber: 329,
                                                             columnNumber: 23
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -1450,12 +1458,12 @@ function LotDetailPage() {
                                                                 children: lot.winnerUsername
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/app/lot/[id]/page.tsx",
-                                                                lineNumber: 330,
+                                                                lineNumber: 331,
                                                                 columnNumber: 25
                                                             }, this)
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/app/lot/[id]/page.tsx",
-                                                            lineNumber: 329,
+                                                            lineNumber: 330,
                                                             columnNumber: 23
                                                         }, this)
                                                     ]
@@ -1464,24 +1472,24 @@ function LotDetailPage() {
                                                     children: "Аукціон завершено. Переможця не визначено."
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/app/lot/[id]/page.tsx",
-                                                    lineNumber: 336,
+                                                    lineNumber: 337,
                                                     columnNumber: 21
                                                 }, this)
                                             }, void 0, false, {
                                                 fileName: "[project]/src/app/lot/[id]/page.tsx",
-                                                lineNumber: 324,
+                                                lineNumber: 325,
                                                 columnNumber: 18
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/app/lot/[id]/page.tsx",
-                                        lineNumber: 278,
+                                        lineNumber: 279,
                                         columnNumber: 13
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/app/lot/[id]/page.tsx",
-                                lineNumber: 274,
+                                lineNumber: 275,
                                 columnNumber: 11
                             }, this),
                             isAuction && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Card"], {
@@ -1492,12 +1500,12 @@ function LotDetailPage() {
                                             children: "Історія ставок"
                                         }, void 0, false, {
                                             fileName: "[project]/src/app/lot/[id]/page.tsx",
-                                            lineNumber: 345,
+                                            lineNumber: 346,
                                             columnNumber: 29
                                         }, this)
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/lot/[id]/page.tsx",
-                                        lineNumber: 345,
+                                        lineNumber: 346,
                                         columnNumber: 17
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["CardContent"], {
@@ -1512,26 +1520,10 @@ function LotDetailPage() {
                                                                         className: "inline h-4 w-4 mr-1"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/src/app/lot/[id]/page.tsx",
-                                                                        lineNumber: 351,
-                                                                        columnNumber: 38
-                                                                    }, this),
-                                                                    "Учасник"
-                                                                ]
-                                                            }, void 0, true, {
-                                                                fileName: "[project]/src/app/lot/[id]/page.tsx",
-                                                                lineNumber: 351,
-                                                                columnNumber: 27
-                                                            }, this),
-                                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$table$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["TableHead"], {
-                                                                children: [
-                                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$tag$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Tag$3e$__["Tag"], {
-                                                                        className: "inline h-4 w-4 mr-1"
-                                                                    }, void 0, false, {
-                                                                        fileName: "[project]/src/app/lot/[id]/page.tsx",
                                                                         lineNumber: 352,
                                                                         columnNumber: 38
                                                                     }, this),
-                                                                    "Ставка"
+                                                                    "Учасник"
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/src/app/lot/[id]/page.tsx",
@@ -1540,29 +1532,45 @@ function LotDetailPage() {
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$table$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["TableHead"], {
                                                                 children: [
-                                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$calendar$2d$days$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__CalendarDays$3e$__["CalendarDays"], {
+                                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$tag$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Tag$3e$__["Tag"], {
                                                                         className: "inline h-4 w-4 mr-1"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/src/app/lot/[id]/page.tsx",
                                                                         lineNumber: 353,
                                                                         columnNumber: 38
                                                                     }, this),
-                                                                    "Час"
+                                                                    "Ставка"
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/src/app/lot/[id]/page.tsx",
                                                                 lineNumber: 353,
                                                                 columnNumber: 27
+                                                            }, this),
+                                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$table$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["TableHead"], {
+                                                                children: [
+                                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$calendar$2d$days$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__CalendarDays$3e$__["CalendarDays"], {
+                                                                        className: "inline h-4 w-4 mr-1"
+                                                                    }, void 0, false, {
+                                                                        fileName: "[project]/src/app/lot/[id]/page.tsx",
+                                                                        lineNumber: 354,
+                                                                        columnNumber: 38
+                                                                    }, this),
+                                                                    "Час"
+                                                                ]
+                                                            }, void 0, true, {
+                                                                fileName: "[project]/src/app/lot/[id]/page.tsx",
+                                                                lineNumber: 354,
+                                                                columnNumber: 27
                                                             }, this)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/src/app/lot/[id]/page.tsx",
-                                                        lineNumber: 350,
+                                                        lineNumber: 351,
                                                         columnNumber: 25
                                                     }, this)
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/app/lot/[id]/page.tsx",
-                                                    lineNumber: 349,
+                                                    lineNumber: 350,
                                                     columnNumber: 23
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$table$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["TableBody"], {
@@ -1572,7 +1580,7 @@ function LotDetailPage() {
                                                                     children: bid.username
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/src/app/lot/[id]/page.tsx",
-                                                                    lineNumber: 359,
+                                                                    lineNumber: 360,
                                                                     columnNumber: 29
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$table$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["TableCell"], {
@@ -1583,7 +1591,7 @@ function LotDetailPage() {
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/src/app/lot/[id]/page.tsx",
-                                                                    lineNumber: 360,
+                                                                    lineNumber: 361,
                                                                     columnNumber: 29
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$table$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["TableCell"], {
@@ -1593,48 +1601,48 @@ function LotDetailPage() {
                                                                     })
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/src/app/lot/[id]/page.tsx",
-                                                                    lineNumber: 361,
+                                                                    lineNumber: 362,
                                                                     columnNumber: 29
                                                                 }, this)
                                                             ]
                                                         }, bid.bidId, true, {
                                                             fileName: "[project]/src/app/lot/[id]/page.tsx",
-                                                            lineNumber: 358,
+                                                            lineNumber: 359,
                                                             columnNumber: 27
                                                         }, this))
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/app/lot/[id]/page.tsx",
-                                                    lineNumber: 356,
+                                                    lineNumber: 357,
                                                     columnNumber: 23
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/app/lot/[id]/page.tsx",
-                                            lineNumber: 348,
+                                            lineNumber: 349,
                                             columnNumber: 21
                                         }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
                                             className: "text-sm text-muted-foreground text-center py-4",
                                             children: "Ще ніхто не зробив ставку. Будьте першим!"
                                         }, void 0, false, {
                                             fileName: "[project]/src/app/lot/[id]/page.tsx",
-                                            lineNumber: 367,
+                                            lineNumber: 368,
                                             columnNumber: 21
                                         }, this)
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/lot/[id]/page.tsx",
-                                        lineNumber: 346,
+                                        lineNumber: 347,
                                         columnNumber: 17
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/app/lot/[id]/page.tsx",
-                                lineNumber: 344,
+                                lineNumber: 345,
                                 columnNumber: 14
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/app/lot/[id]/page.tsx",
-                        lineNumber: 273,
+                        lineNumber: 274,
                         columnNumber: 9
                     }, this)
                 ]
@@ -1655,25 +1663,25 @@ function LotDetailPage() {
                             className: "mr-2 h-4 w-4 animate-spin"
                         }, void 0, false, {
                             fileName: "[project]/src/app/lot/[id]/page.tsx",
-                            lineNumber: 380,
+                            lineNumber: 381,
                             columnNumber: 35
                         }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$message$2d$circle$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__MessageCircle$3e$__["MessageCircle"], {
                             className: "mr-2 h-4 w-4"
                         }, void 0, false, {
                             fileName: "[project]/src/app/lot/[id]/page.tsx",
-                            lineNumber: 380,
+                            lineNumber: 381,
                             columnNumber: 86
                         }, this),
                         "Повідомлення"
                     ]
                 }, void 0, true, {
                     fileName: "[project]/src/app/lot/[id]/page.tsx",
-                    lineNumber: 379,
+                    lineNumber: 380,
                     columnNumber: 12
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/src/app/lot/[id]/page.tsx",
-                lineNumber: 378,
+                lineNumber: 379,
                 columnNumber: 9
             }, this)
         ]
