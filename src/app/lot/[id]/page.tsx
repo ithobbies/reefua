@@ -17,18 +17,30 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Zap, Droplets, Wind, ShieldAlert, UserCircle, CalendarDays, Tag, Trophy, AlignLeft, Info, MessageCircle } from 'lucide-react';
+import { Loader2, Zap, Wind, ShieldAlert, UserCircle, CalendarDays, Tag, Trophy, AlignLeft, Info, MessageCircle } from 'lucide-react';
 import { RatingStars } from '@/components/ui/rating-stars';
 import type { Lot, Bid as BidType, User } from '@/functions/src/types'; 
 import { useToast } from '@/hooks/use-toast';
 import { getFunctions, httpsCallable as httpsCallableApp } from 'firebase/functions';
 import { difficultyOptions, getLabelByValue } from '@/lib/options';
+import { productCategories } from '@/lib/categories-data';
+import { getCategoryColor } from '@/lib/category-colors';
 
 const getMinBidStep = (currentPrice: number): number => {
     if (currentPrice < 500) return 20;
     if (currentPrice < 2000) return 50;
     if (currentPrice < 5000) return 100;
     return 250;
+};
+
+const CategoryBadge = ({ slug, name }: { slug?: string; name?: string }) => {
+  if (!slug || !name) return null;
+  
+  return (
+    <div className={`inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold ${getCategoryColor(slug)}`}>
+      {name}
+    </div>
+  );
 };
 
 export default function LotDetailPage() {
@@ -46,6 +58,10 @@ export default function LotDetailPage() {
   const { toast } = useToast();
   const { user, loading: authLoading } = useAuth();
   const { startChatFromLot, isStarting: isChatStarting } = useChat();
+
+  // Robust category and subcategory lookup
+  const category = useMemo(() => lot ? productCategories.find(cat => cat.slug === lot.category || cat.name === lot.category) : null, [lot]);
+  const subcategory = useMemo(() => category ? category.subcategories.find(sub => sub.slug === lot?.subcategory || sub.name === lot.subcategory) : null, [category, lot]);
 
   useEffect(() => {
     if (!lotId) return;
@@ -219,6 +235,10 @@ export default function LotDetailPage() {
             <CardHeader>
               <div className="flex justify-between items-start">
                   <div>
+                    <div className="flex flex-wrap items-center gap-2 mb-2">
+                        <CategoryBadge slug={category?.slug} name={category?.name} />
+                        <CategoryBadge slug={subcategory?.slug} name={subcategory?.name} />
+                    </div>
                     <CardTitle className="text-3xl font-headline">{lot.name}</CardTitle>
                     <div className="flex items-center gap-2 mt-1">
                       <CardDescription>Продавець: <Link href={`/profile/${lot.sellerUid}`} className="text-primary font-semibold hover:underline">{lot.sellerUsername}</Link></CardDescription>

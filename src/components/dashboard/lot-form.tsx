@@ -18,11 +18,12 @@ import Link from 'next/link';
 import { useAuth } from '@/context/auth-context';
 import { functions, db, app } from '@/lib/firebase';
 import { httpsCallable } from 'firebase/functions';
-import { doc, updateDoc, collection, query, orderBy, onSnapshot } from 'firebase/firestore';
+import { doc, updateDoc } from 'firebase/firestore';
 import { getStorage, ref, uploadBytesResumable, getDownloadURL, FirebaseStorage } from "firebase/storage";
 import { v4 as uuidv4 } from 'uuid';
 import type { Lot } from '@/functions/src/types';
 import { FLOW_OPTIONS, PAR_OPTIONS, difficultyOptions } from '@/lib/options';
+import { productCategories, Category, Subcategory } from '@/lib/categories-data';
 
 type SaleType = 'auction' | 'direct';
 
@@ -30,6 +31,7 @@ interface LotFormData {
   name: string;
   description: string;
   category: string;
+  subcategory: string;
   images: string[];
   parameters: {
     difficulty: string;
@@ -41,6 +43,10 @@ interface LotFormData {
   buyNowPrice?: number;
   durationDays?: number; 
   price?: number;
+}
+
+interface LotFormProps {
+    existingLot?: Lot & { id: string };
 }
 
 // Reusable Tooltip Component with structured content
@@ -71,16 +77,24 @@ export function LotForm({ existingLot }: LotFormProps) {
   const { user, loading: authLoading } = useAuth();
   const isEditMode = !!existingLot;
   
-  const [saleType, setSaleType] = useState<SaleType>('auction');
+  const [saleType, setSaleType] = useState<SaleType>(existingLot?.type || 'auction');
   const [formData, setFormData] = useState<Partial<LotFormData>>({
-      durationDays: 5, 
-      parameters: { difficulty: '', par: '', flow: '' },
-      type: 'auction',
+    name: existingLot?.name || '',
+    description: existingLot?.description || '',
+    category: existingLot?.category || '',
+    subcategory: existingLot?.subcategory || '',
+    images: existingLot?.images || [],
+    parameters: existingLot?.parameters || { difficulty: '', par: '', flow: '' },
+    type: existingLot?.type || 'auction',
+    startingBid: existingLot?.startingBid,
+    buyNowPrice: existingLot?.buyNowPrice,
+    durationDays: existingLot?.durationDays || 5, 
+    price: existingLot?.price,
   });
   
-  const [categories, setCategories] = useState<string[]>([]);
+  const [subcategories, setSubcategories] = useState<Subcategory[]>([]);
   const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(existingLot?.images?.[0] || null);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -93,23 +107,13 @@ export function LotForm({ existingLot }: LotFormProps) {
       router.push('/auctions');
     }
     
-    if (isEditMode && existingLot) {
-        setSaleType(existingLot.type);
-        setFormData(existingLot);
-        if (existingLot.images && existingLot.images.length > 0) setImagePreview(existingLot.images[0]);
+    // Pre-fill subcategories if editing an existing lot
+    if (existingLot?.category) {
+        const currentCategory = productCategories.find(cat => cat.slug === existingLot.category);
+        if (currentCategory) {
+            setSubcategories(currentCategory.subcategories);
+        }
     }
-    
-    const categoriesCollection = collection(db, 'categories');
-    const q = query(categoriesCollection, orderBy('name'));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-        const categoriesList = snapshot.docs.map(doc => doc.data().name);
-        setCategories(categoriesList);
-    }, (error) => {
-        console.error("Error fetching categories: ", error);
-        toast({ variant: 'destructive', title: 'Помилка', description: 'Не вдалося завантажити категорії.' });
-    });
-
-    return () => unsubscribe();
 
   }, [authLoading, user, router, toast, isEditMode, existingLot]);
 
@@ -126,7 +130,11 @@ export function LotForm({ existingLot }: LotFormProps) {
   };
   
   const handleSelectChange = (name: string, value: string | number) => {
-    if (name.includes('.')) {
+    if (name === 'category') {
+        const selectedCategory = productCategories.find(cat => cat.slug === value);
+        setSubcategories(selectedCategory ? selectedCategory.subcategories : []);
+        setFormData(prev => ({ ...prev, category: value as string, subcategory: '' })); // Reset subcategory
+    } else if (name.includes('.')) {
         const [parent, child] = name.split('.');
         setFormData(prev => ({ ...prev, [parent]: { ...(prev as any)[parent], [child]: value }}));
     } else {
@@ -176,8 +184,8 @@ export function LotForm({ existingLot }: LotFormProps) {
     e.preventDefault();
     
     const isAuction = saleType === 'auction';
-    if (!formData.name || !formData.description || !formData.category) {
-      toast({ variant: 'destructive', title: 'Помилка валідації', description: "Будь ласка, заповніть усі обов'язкові поля." });
+    if (!formData.name || !formData.description || !formData.category || !formData.subcategory) {
+      toast({ variant: 'destructive', title: 'Помилка валідації', description: "Будь ласка, заповніть усі обов'язкові поля, включаючи категорію та підкатегорію." });
       return;
     }
      if (isAuction && !formData.startingBid) {
@@ -204,6 +212,10 @@ export function LotForm({ existingLot }: LotFormProps) {
             images: [imageUrl],
             type: saleType
         };
+
+        if (payload.category !== 'corals') {
+            delete payload.parameters;
+        }
         
         if (!isEditMode && saleType === 'auction' && durationDays) {
             const endDate = new Date();
@@ -249,12 +261,21 @@ export function LotForm({ existingLot }: LotFormProps) {
               <CardContent className="space-y-4">
                 <div><Label htmlFor="name">Назва лоту*</Label><Input id="name" name="name" placeholder="Фраг Acropora Red Planet" value={formData.name || ''} onChange={handleChange} required disabled={isLoading} /></div>
                 <div><Label htmlFor="description">Опис лоту*</Label><Textarea id="description" name="description" placeholder="Детальний опис вашого коралу, його особливості, розмір тощо." value={formData.description || ''} onChange={handleChange} required disabled={isLoading} /></div>
-                <div>
-                  <Label htmlFor="category">Категорія*</Label>
-                  <Select name="category" value={formData.category || ''} onValueChange={(val) => handleSelectChange('category', val)} required disabled={isLoading || categories.length === 0}>
-                    <SelectTrigger><SelectValue placeholder={categories.length > 0 ? "Оберіть категорію" : "Завантаження..."} /></SelectTrigger>
-                    <SelectContent>{categories.map(cat => <SelectItem key={cat} value={cat}>{cat}</SelectItem>)}</SelectContent>
-                  </Select>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <Label htmlFor="category">Категорія*</Label>
+                        <Select name="category" value={formData.category || ''} onValueChange={(val) => handleSelectChange('category', val)} required disabled={isLoading}>
+                            <SelectTrigger><SelectValue placeholder="Оберіть категорію" /></SelectTrigger>
+                            <SelectContent>{productCategories.map(cat => <SelectItem key={cat.slug} value={cat.slug}>{cat.name}</SelectItem>)}</SelectContent>
+                        </Select>
+                    </div>
+                    <div>
+                        <Label htmlFor="subcategory">Підкатегорія*</Label>
+                        <Select name="subcategory" value={formData.subcategory || ''} onValueChange={(val) => handleSelectChange('subcategory', val)} required disabled={isLoading || subcategories.length === 0}>
+                            <SelectTrigger><SelectValue placeholder={subcategories.length > 0 ? "Оберіть підкатегорію" : "Спочатку оберіть категорію"} /></SelectTrigger>
+                            <SelectContent>{subcategories.map(sub => <SelectItem key={sub.slug} value={sub.slug}>{sub.name}</SelectItem>)}</SelectContent>
+                        </Select>
+                    </div>
                 </div>
               </CardContent>
             </Card>
@@ -307,47 +328,49 @@ export function LotForm({ existingLot }: LotFormProps) {
               </CardContent>
             </Card>
             
-            <Card>
-              <CardHeader><CardTitle>Параметри утримання</CardTitle></CardHeader>
-              <CardContent className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                 <div>
-                    <div className="flex items-center gap-2 mb-1.5">
-                      <Label htmlFor="difficulty">Складність</Label>
-                      <InfoTooltip title="Складність утримання" items={difficultyOptions} />
+            {formData.category === 'corals' && (
+                <Card>
+                <CardHeader><CardTitle>Параметри утримання</CardTitle></CardHeader>
+                <CardContent className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                        <div className="flex items-center gap-2 mb-1.5">
+                        <Label htmlFor="difficulty">Складність</Label>
+                        <InfoTooltip title="Складність утримання" items={difficultyOptions} />
+                        </div>
+                        <Select name="parameters.difficulty" value={formData.parameters?.difficulty || ''} onValueChange={(val) => handleSelectChange('parameters.difficulty', val)} disabled={isLoading}>
+                            <SelectTrigger><SelectValue placeholder="Оберіть складність" /></SelectTrigger>
+                            <SelectContent>
+                                {difficultyOptions.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
+                            </SelectContent>
+                        </Select>
                     </div>
-                    <Select name="parameters.difficulty" value={formData.parameters?.difficulty || ''} onValueChange={(val) => handleSelectChange('parameters.difficulty', val)} disabled={isLoading}>
-                        <SelectTrigger><SelectValue placeholder="Оберіть складність" /></SelectTrigger>
-                        <SelectContent>
-                            {difficultyOptions.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
-                        </SelectContent>
-                    </Select>
-                  </div>
-                 <div>
-                    <div className="flex items-center gap-2 mb-1.5">
-                      <Label htmlFor="par">PAR</Label>
-                      <InfoTooltip title="Рівень освітлення (PAR)" items={PAR_OPTIONS} />
+                    <div>
+                        <div className="flex items-center gap-2 mb-1.5">
+                        <Label htmlFor="par">PAR</Label>
+                        <InfoTooltip title="Рівень освітлення (PAR)" items={PAR_OPTIONS} />
+                        </div>
+                        <Select name="parameters.par" value={formData.parameters?.par || ''} onValueChange={(val) => handleSelectChange('parameters.par', val)} disabled={isLoading}>
+                            <SelectTrigger><SelectValue placeholder="Оберіть PAR" /></SelectTrigger>
+                            <SelectContent>
+                                {PAR_OPTIONS.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
+                            </SelectContent>
+                        </Select>
                     </div>
-                    <Select name="parameters.par" value={formData.parameters?.par || ''} onValueChange={(val) => handleSelectChange('parameters.par', val)} disabled={isLoading}>
-                        <SelectTrigger><SelectValue placeholder="Оберіть PAR" /></SelectTrigger>
-                        <SelectContent>
-                            {PAR_OPTIONS.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
-                        </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2 mb-1.5">
-                      <Label htmlFor="flow">Течія</Label>
-                      <InfoTooltip title="Сила течії" items={FLOW_OPTIONS} />
+                    <div>
+                        <div className="flex items-center gap-2 mb-1.5">
+                        <Label htmlFor="flow">Течія</Label>
+                        <InfoTooltip title="Сила течії" items={FLOW_OPTIONS} />
+                        </div>
+                        <Select name="parameters.flow" value={formData.parameters?.flow || ''} onValueChange={(val) => handleSelectChange('parameters.flow', val)} disabled={isLoading}>
+                            <SelectTrigger><SelectValue placeholder="Оберіть течію" /></SelectTrigger>
+                            <SelectContent>
+                                {FLOW_OPTIONS.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
+                            </SelectContent>
+                        </Select>
                     </div>
-                    <Select name="parameters.flow" value={formData.parameters?.flow || ''} onValueChange={(val) => handleSelectChange('parameters.flow', val)} disabled={isLoading}>
-                        <SelectTrigger><SelectValue placeholder="Оберіть течію" /></SelectTrigger>
-                        <SelectContent>
-                            {FLOW_OPTIONS.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
-                        </SelectContent>
-                    </Select>
-                  </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+                </Card>
+            )}
           </div>
 
           <div className="lg:col-span-1 space-y-6">

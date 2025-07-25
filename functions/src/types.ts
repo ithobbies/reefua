@@ -48,6 +48,7 @@ export interface Lot {
   sellerUsername: string;
   sellerProfile?: SellerProfile;
   category: string;
+  subcategory: string; // <-- Added this line
   status: 'active' | 'sold' | 'processing' | 'shipped' | 'completed' | 'unsold' | 'cancelled';
   winnerUid?: string | null;
   winnerUsername?: string | null;
