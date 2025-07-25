@@ -1,4 +1,3 @@
-
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
 import type { Lot, User } from "./types";
@@ -18,10 +17,12 @@ export const createLot = functions.region('us-central1').https.onCall(async (dat
     }
     const sellerUsername = (userDoc.data() as User)?.username || 'Unknown Seller';
 
-    const { name, description, category, startingBid, buyNowPrice, endTime, images, parameters, type, price } = data;
+    // FIX: Added 'subcategory' to the destructuring
+    const { name, description, category, subcategory, startingBid, buyNowPrice, endTime, images, parameters, type, price } = data;
 
-    if (!name || !description || !category || !images || !Array.isArray(images) || images.length === 0 || !type) {
-        throw new functions.https.HttpsError("invalid-argument", "Required lot information is missing or invalid.");
+    // FIX: Added 'subcategory' to the validation
+    if (!name || !description || !category || !subcategory || !images || !Array.isArray(images) || images.length === 0 || !type) {
+        throw new functions.https.HttpsError("invalid-argument", "Required lot information is missing or invalid, including subcategory.");
     }
 
     const lotRef = db.collection("lots").doc();
@@ -45,9 +46,10 @@ export const createLot = functions.region('us-central1').https.onCall(async (dat
             sellerUid,
             sellerUsername,
             category,
+            subcategory, // FIX: Added 'subcategory' to the new lot object
             status: 'active',
             createdAt: nowISO,
-            endTime: thirtyDaysFromNow.toISOString(), // Expires in 30 days
+            endTime: thirtyDaysFromNow.toISOString(),
             type: 'direct',
             parameters: parameters || {},
             bidCount: 0,
@@ -73,6 +75,7 @@ export const createLot = functions.region('us-central1').https.onCall(async (dat
             sellerUid,
             sellerUsername,
             category,
+            subcategory, // FIX: Added 'subcategory' to the new lot object
             status: 'active',
             createdAt: nowISO,
             parameters: parameters || {},

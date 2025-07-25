@@ -7,19 +7,31 @@ import Link from 'next/link';
 import type { Lot } from '@/functions/src/types';
 import { useAuth } from '@/context/auth-context';
 import { useToast } from '@/hooks/use-toast';
-import { useSellerProfile } from '@/hooks/use-seller-profile'; // Import the new hook
+import { useSellerProfile } from '@/hooks/use-seller-profile';
+import { productCategories } from '@/lib/categories-data';
+import { getCategoryColor } from '@/lib/category-colors';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tag, Loader2 } from 'lucide-react';
 import CountdownBadge from '@/components/ui/countdown-badge';
-import { RatingStars } from '@/components/ui/rating-stars'; // Import RatingStars
+import { RatingStars } from '@/components/ui/rating-stars';
 import { Skeleton } from '@/components/ui/skeleton';
 
 interface LotCardProps {
   lot: Lot;
   onLotPurchased?: (lotId: string) => void; 
 }
+
+const CategoryBadge = ({ slug, name }: { slug?: string; name?: string }) => {
+  if (!slug || !name) return null;
+  
+  return (
+    <div className={`inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold ${getCategoryColor(slug)}`}>
+      {name}
+    </div>
+  );
+};
 
 // SellerInfo sub-component to keep the main component clean
 const SellerInfo: React.FC<{ lot: Lot }> = ({ lot }) => {
@@ -48,7 +60,6 @@ const SellerInfo: React.FC<{ lot: Lot }> = ({ lot }) => {
     )
 }
 
-
 const LotCard: React.FC<LotCardProps> = ({ lot, onLotPurchased }) => {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -56,6 +67,10 @@ const LotCard: React.FC<LotCardProps> = ({ lot, onLotPurchased }) => {
 
   const imageUrl = lot.images && lot.images.length > 0 ? lot.images[0] : '/placeholder.png';
   const isDirectSale = lot.type === 'direct';
+
+  // Robust category and subcategory lookup
+  const category = productCategories.find(cat => cat.slug === lot.category || cat.name === lot.category);
+  const subcategory = category?.subcategories.find(sub => sub.slug === lot.subcategory || sub.name === lot.subcategory);
 
   const handleBuyNow = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault(); 
@@ -133,8 +148,13 @@ const LotCard: React.FC<LotCardProps> = ({ lot, onLotPurchased }) => {
           </div>
         </CardHeader>
         <CardContent className="p-4 flex-grow">
-          <CardTitle className="text-lg font.headline mb-1 truncate" title={lot.name}>{lot.name}</CardTitle>
-          {/* Seller Info Component */}
+          <CardTitle className="text-lg font.headline mb-2 truncate" title={lot.name}>{lot.name}</CardTitle>
+          
+          <div className="flex flex-wrap items-center gap-2 mb-2">
+            <CategoryBadge slug={category?.slug} name={category?.name} />
+            <CategoryBadge slug={subcategory?.slug} name={subcategory?.name} />
+          </div>
+
           <SellerInfo lot={lot} />
 
           <div className="flex justify-between items-center mt-3 mb-2">
