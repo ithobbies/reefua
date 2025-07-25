@@ -14,9 +14,9 @@ import {
   SidebarInset,
   SidebarTrigger,
   SidebarSeparator,
-  useSidebar, // Import the hook
+  useSidebar,
 } from '@/components/ui/sidebar';
-import { LayoutDashboard, ListChecks, BarChart3, Star, Settings, MessageSquare, ShoppingCart, ShieldCheck } from 'lucide-react'; 
+import { LayoutDashboard, ListChecks, Star, MessageSquare, ShoppingCart, ShieldCheck, Home } from 'lucide-react'; 
 import React from 'react';
 import { useAuth } from '@/context/auth-context';
 import { BottomNavigation } from '@/components/layout/bottom-navigation';
@@ -26,13 +26,13 @@ import { BottomNavigation } from '@/components/layout/bottom-navigation';
 const DashboardLayoutContent = ({ children }: { children: React.ReactNode }) => {
   const pathname = usePathname();
   const { firestoreUser } = useAuth();
-  const { isMobile, setOpenMobile } = useSidebar(); // Get sidebar state and control functions
+  const { isMobile, setOpenMobile } = useSidebar(); 
   const roles = firestoreUser?.roles || [];
 
   // This function will be called on link click
   const handleLinkClick = () => {
     if (isMobile) {
-      setOpenMobile(false); // Close the sidebar on mobile
+      setOpenMobile(false); 
     }
   };
 
@@ -41,12 +41,7 @@ const DashboardLayoutContent = ({ children }: { children: React.ReactNode }) => 
     { href: '/dashboard/lots', label: 'Мої лоти', icon: <ListChecks /> },
     { href: '/dashboard/sales', label: 'Мої продажі', icon: <ShoppingCart /> },
     { href: '/dashboard/messages', label: 'Повідомлення', icon: <MessageSquare /> },
-    { href: '/dashboard/analytics', label: 'Аналітика', icon: <BarChart3 /> },
     { href: '/dashboard/reviews', label: 'Відгуки', icon: <Star /> },
-  ];
-
-  const bottomMenuItems = [
-     { href: '/dashboard/settings', label: 'Налаштування', icon: <Settings /> },
   ];
 
   const adminMenuItem = { 
@@ -95,17 +90,19 @@ const DashboardLayoutContent = ({ children }: { children: React.ReactNode }) => 
               </>
             )}
           </SidebarMenu>
-           <SidebarMenu>
-             {bottomMenuItems.map((item) => (
-              <SidebarMenuItem key={item.href}>
-                <SidebarMenuButton asChild isActive={pathname.startsWith(item.href)} tooltip={{ children: item.label, side: 'right' }}>
-                  <Link href={item.href} className="flex items-center" onClick={handleLinkClick}>
-                    {item.icon}
-                    <span className="group-data-[collapsible=icon]:hidden ml-2">{item.label}</span>
-                  </Link>
-                </SidebarMenuButton>
+           <SidebarMenu className="mt-auto">
+              <SidebarMenuItem>
+                  <SidebarMenuButton 
+                    asChild 
+                    tooltip={{ children: 'Повернутись на сайт', side: 'right' }}
+                    className="bg-accent text-accent-foreground hover:bg-accent/90 font-semibold transition-colors"
+                  >
+                    <Link href="/" className="flex items-center" onClick={handleLinkClick}>
+                      <Home className="h-5 w-5" />
+                      <span className="group-data-[collapsible=icon]:hidden ml-2">На сайт</span>
+                    </Link>
+                  </SidebarMenuButton>
               </SidebarMenuItem>
-            ))}
           </SidebarMenu>
         </SidebarContent>
       </Sidebar>

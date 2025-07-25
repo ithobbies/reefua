@@ -956,8 +956,20 @@ h1, h2, h3, h4, h5, h6 {
   min-width: 0;
 }
 
+.min-w-10 {
+  min-width: 2.5rem;
+}
+
+.min-w-11 {
+  min-width: 2.75rem;
+}
+
 .min-w-5 {
   min-width: 1.25rem;
+}
+
+.min-w-9 {
+  min-width: 2.25rem;
 }
 
 .min-w-\[12rem\] {
@@ -1138,8 +1150,16 @@ h1, h2, h3, h4, h5, h6 {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+.grid-cols-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
 .grid-cols-4 {
   grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.grid-cols-5 {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
 }
 
 .flex-row {
@@ -1634,6 +1654,16 @@ h1, h2, h3, h4, h5, h6 {
 .px-4 {
   padding-left: 1rem;
   padding-right: 1rem;
+}
+
+.px-5 {
+  padding-left: 1.25rem;
+  padding-right: 1.25rem;
+}
+
+.px-6 {
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
 }
 
 .px-8 {
@@ -2357,6 +2387,10 @@ body {
   background-color: hsl(var(--destructive) / .9);
 }
 
+.hover\:bg-muted:hover {
+  background-color: hsl(var(--muted));
+}
+
 .hover\:bg-muted\/50:hover {
   background-color: hsl(var(--muted) / .5);
 }
@@ -2404,6 +2438,10 @@ body {
 
 .hover\:text-foreground:hover {
   color: hsl(var(--foreground));
+}
+
+.hover\:text-muted-foreground:hover {
+  color: hsl(var(--muted-foreground));
 }
 
 .hover\:text-primary:hover {
@@ -2717,7 +2755,7 @@ body {
   background-color: hsl(var(--primary));
 }
 
-.data-\[state\=open\]\:bg-accent[data-state="open"] {
+.data-\[state\=on\]\:bg-accent[data-state="on"], .data-\[state\=open\]\:bg-accent[data-state="open"] {
   background-color: hsl(var(--accent));
 }
 
@@ -2749,7 +2787,7 @@ body {
   color: hsl(var(--primary-foreground));
 }
 
-.data-\[state\=open\]\:text-accent-foreground[data-state="open"] {
+.data-\[state\=on\]\:text-accent-foreground[data-state="on"], .data-\[state\=open\]\:text-accent-foreground[data-state="open"] {
   color: hsl(var(--accent-foreground));
 }
 
@@ -3207,16 +3245,12 @@ body {
     width: 8rem;
   }
 
-  .md\:w-auto {
-    width: auto;
-  }
-
-  .md\:w-full {
-    width: 100%;
-  }
-
   .md\:w-96 {
     width: 24rem;
+  }
+
+  .md\:w-auto {
+    width: auto;
   }
 
   .md\:min-w-\[200px\] {
@@ -3225,10 +3259,6 @@ body {
 
   .md\:max-w-\[420px\] {
     max-width: 420px;
-  }
-
-  .md\:max-w-sm {
-    max-width: 24rem;
   }
 
   .md\:grid-cols-2 {
