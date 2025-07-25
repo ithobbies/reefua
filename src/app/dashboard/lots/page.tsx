@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { db } from '@/lib/firebase';
 import { useAuth } from '@/context/auth-context';
@@ -11,14 +11,18 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PlusCircle, Edit, Trash2, Loader2, Eye } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { DeleteLotAlertDialog } from '@/components/dashboard/delete-lot-alert-dialog';
+
+type FilterType = 'all' | 'active' | 'completed';
 
 export default function DashboardLotsPage() {
   const { user, loading: authLoading } = useAuth();
   const [lots, setLots] = useState<Lot[]>([]);
   const [loadingLots, setLoadingLots] = useState(true);
+  const [filter, setFilter] = useState<FilterType>('all');
   const { toast } = useToast();
 
   useEffect(() => {
@@ -55,8 +59,17 @@ export default function DashboardLotsPage() {
     });
 
     return () => unsubscribe();
-
   }, [user, toast]);
+
+  const filteredLots = useMemo(() => {
+    if (filter === 'active') {
+      return lots.filter(lot => new Date(lot.endTime) > new Date());
+    }
+    if (filter === 'completed') {
+      return lots.filter(lot => new Date(lot.endTime) <= new Date());
+    }
+    return lots; // 'all'
+  }, [lots, filter]);
 
   const handleDeleteLot = async (lotId: string) => {
     try {
@@ -90,6 +103,15 @@ export default function DashboardLotsPage() {
           <CardTitle>Список ваших лотів</CardTitle>
           <CardDescription>Переглядайте та керуйте вашими лотами. Оновлення відбуваються в реальному часі.</CardDescription>
         </CardHeader>
+        <div className="px-6 pb-4">
+            <Tabs defaultValue="all" value={filter} onValueChange={(value) => setFilter(value as FilterType)} className="w-full">
+                <TabsList className="grid w-full grid-cols-3">
+                    <TabsTrigger value="all">Усі</TabsTrigger>
+                    <TabsTrigger value="active">Активні</TabsTrigger>
+                    <TabsTrigger value="completed">Завершені</TabsTrigger>
+                </TabsList>
+            </Tabs>
+        </div>
         <CardContent>
           {authLoading || loadingLots ? (
              <div className="flex justify-center items-center py-10">
@@ -97,7 +119,14 @@ export default function DashboardLotsPage() {
              </div>
           ) : !user ? (
             <p className="text-muted-foreground text-center">Будь ласка, увійдіть, щоб переглянути ваші лоти.</p>
-          ) : lots.length > 0 ? (
+          ) : lots.length === 0 ? (
+            <div className="text-center py-10">
+                <p className="text-muted-foreground mb-4">У вас ще немає створених лотів.</p>
+                <Button asChild>
+                    <Link href="/dashboard/lots/new">Створити перший лот</Link>
+                </Button>
+            </div>
+          ) : filteredLots.length > 0 ? (
             <Table>
               <TableHeader>
                 <TableRow>
@@ -109,7 +138,7 @@ export default function DashboardLotsPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {lots.map((lot) => {
+                {filteredLots.map((lot) => {
                   const isActive = new Date(lot.endTime) > new Date();
                   const hasBids = lot.bidCount > 0;
                   const canBeEdited = isActive && !hasBids;
@@ -152,10 +181,7 @@ export default function DashboardLotsPage() {
             </Table>
           ) : (
             <div className="text-center py-10">
-                <p className="text-muted-foreground mb-4">У вас ще немає створених лотів.</p>
-                <Button asChild>
-                    <Link href="/dashboard/lots/new">Створити перший лот</Link>
-                </Button>
+                <p className="text-muted-foreground">Не знайдено лотів за вашим фільтром.</p>
             </div>
           )}
         </CardContent>
