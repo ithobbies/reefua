@@ -1,7 +1,11 @@
 {
+  "/_not-found/page": "app/_not-found/page.js",
+  "/admin/dashboard/page": "app/admin/dashboard/page.js",
+  "/dashboard/lots/edit/[id]/page": "app/dashboard/lots/edit/[id]/page.js",
   "/dashboard/lots/new/page": "app/dashboard/lots/new/page.js",
+  "/dashboard/lots/page": "app/dashboard/lots/page.js",
   "/dashboard/page": "app/dashboard/page.js",
+  "/dashboard/sales/page": "app/dashboard/sales/page.js",
   "/lot/[id]/page": "app/lot/[id]/page.js",
-  "/page": "app/page.js",
-  "/profile/page": "app/profile/page.js"
+  "/page": "app/page.js"
 }

@@ -29,4 +29,5 @@ __exportStar(require("./reviews"), exports); // Exports leaveReview
 __exportStar(require("./chat"), exports); // Exports startOrGetChat, sendMessage
 __exportStar(require("./orders"), exports); // Exports createOrder, onOrderUpdate
 __exportStar(require("./notifications"), exports); // Exports onOrderCreatedSendEmail
+__exportStar(require("./dashboard"), exports); // Exports getSellerDashboardData
 //# sourceMappingURL=index.js.map

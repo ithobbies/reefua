@@ -1,98 +1,119 @@
+"use client";
 
-import StatsCard from '@/components/dashboard/stats-card';
-// CsvUploadWidget import removed
-import { mockSellerStats } from '@/lib/mock-data';
-import { ListChecks, CheckCircle, Percent, Star, UploadCloud } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Progress } from "@/components/ui/progress";
-import { Button } from '@/components/ui/button';
-import Link from 'next/link';
-import type { Metadata } from 'next';
+import { useEffect, useState } from "react";
+import { getFunctions, httpsCallable } from 'firebase/functions';
+import { useAuth } from '@/context/auth-context';
 
-export const metadata: Metadata = {
-  title: 'Панель Продавця - ReefUA',
-  description: 'Керуйте вашими лотами, переглядайте статистику та продажі.',
-};
+import { DashboardSkeleton } from "@/components/dashboard/dashboard-skeleton";
+import { QuickActionsWidget } from "@/components/dashboard/quick-actions-widget";
+import { StatsWidget } from "@/components/dashboard/stats-widget";
+import { SalesChartWidget } from "@/components/dashboard/sales-chart-widget";
+import { ActivityFeedWidget } from "@/components/dashboard/activity-feed-widget";
+import { ActiveListingsWidget } from "@/components/dashboard/active-listings-widget";
+import { useToast } from "@/hooks/use-toast";
 
-export default function SellerDashboardPage() {
-  return (
-    <div className="space-y-8">
-      <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-        <h1 className="text-3xl font-headline font-bold text-primary">Панель Продавця</h1>
-        <Button asChild>
-          <Link href="/dashboard/lots/new">
-            <UploadCloud className="mr-2 h-4 w-4" /> Створити новий лот
-          </Link>
-        </Button>
-      </div>
+// --- Data Interfaces ---
+interface ListingPreview {
+  id: string;
+  name: string;
+  price: string | number;
+  imageUrl?: string;
+  endDate?: Date;
+  bids?: number;
+  stock?: number;
+}
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-        <StatsCard
-          title="Активні лоти"
-          value={mockSellerStats.activeLots}
-          icon={<ListChecks className="h-5 w-5" />}
-          description={`З ${mockSellerStats.totalListings} всіх лотів`}
-        />
-        <StatsCard
-          title="Завершені продажі"
-          value={mockSellerStats.completedSales}
-          icon={<CheckCircle className="h-5 w-5" />}
-          description="Успішно продано"
-        />
-        <StatsCard
-          title="% Продано"
-          value={`${mockSellerStats.salesPercentage}%`}
-          icon={<Percent className="h-5 w-5" />}
-          description="Відсоток успішних продажів"
-        />
-        <StatsCard
-          title="Рейтинг продавця"
-          value={mockSellerStats.rating.toFixed(1)}
-          icon={<Star className="h-5 w-5" />}
-          description="На основі відгуків покупців"
-        />
-      </div>
+interface ActivityItem {
+  id: string;
+  type: 'bid' | 'sale';
+  item: string;
+  value: string;
+  user: string;
+  timestamp: Date;
+}
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-3"> {/* Змінено col-span на 3, щоб заповнити місце від CsvUploadWidget */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="font-headline">Останні активності</CardTitle>
-              <CardDescription>Події по вашим лотам та продажам.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ul className="space-y-3">
-                <li className="text-sm p-3 bg-secondary rounded-md">Нова ставка на лот "Acropora Red Planet" - 1500 грн.</li>
-                <li className="text-sm p-3 bg-secondary rounded-md">Лот "Zoanthus Watermelon" продано за 500 грн.</li>
-                <li className="text-sm p-3 bg-secondary rounded-md">Новий відгук: 5 зірок від User123.</li>
-              </ul>
-            </CardContent>
-          </Card>
-        </div>
-        {/* CsvUploadWidget видалено звідси
-        <div className="lg:col-span-1">
-          <CsvUploadWidget />
-        </div> 
-        */}
-      </div>
+interface DashboardData {
+  stats: {
+    totalRevenue: number;
+    activeListings: number;
+    newFixedPriceOrders: number;
+    newAuctionBids: number;
+  };
+  salesChartData: { date: string; revenue: number }[];
+  activeAuctions: ListingPreview[];
+  fixedPriceItems: ListingPreview[];
+  recentActivity: ActivityItem[];
+}
+
+export default function DashboardPage() {
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [data, setData] = useState<DashboardData | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!user) {
+        setLoading(false);
+        return;
+    }
+
+    const fetchDashboardData = async () => {
+      setLoading(true);
+      const functions = getFunctions();
+      const getSellerDashboardData = httpsCallable<void, DashboardData>(functions, 'getSellerDashboardData');
       
-      <Card>
-        <CardHeader>
-          <CardTitle className="font-headline">Прогрес Продавця</CardTitle>
-          <CardDescription>Ваш прогрес до наступного рівня продавця.</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-2">
-          <div className="flex justify-between text-sm text-muted-foreground">
-            <span>Рівень: Новачок</span>
-            <span>Наступний рівень: Досвідчений</span>
-          </div>
-          <Progress value={66} aria-label="66% до наступного рівня" className="h-3"/>
-          <p className="text-xs text-muted-foreground text-right">66% до наступного рівня</p>
-        </CardContent>
-      </Card>
+      try {
+        const result = await getSellerDashboardData();
+        // Defensive check to ensure arrays exist before mapping
+        const processedData = {
+            ...result.data,
+            activeAuctions: (result.data.activeAuctions || []).map(a => ({...a, endDate: new Date(a.endDate) })),
+            fixedPriceItems: result.data.fixedPriceItems || [],
+            recentActivity: (result.data.recentActivity || []).map(a => ({...a, timestamp: new Date(a.timestamp) }))
+        }
+        setData(processedData);
+      } catch (error) {
+        console.error("Error fetching dashboard data:", error);
+        toast({
+            title: "Помилка",
+            description: "Не вдалося завантажити дані для панелі продавця.",
+            variant: "destructive"
+        })
+      } finally {
+        setLoading(false);
+      }
+    };
 
+    fetchDashboardData();
+  }, [user, toast]);
+
+  if (loading) {
+    return <DashboardSkeleton />;
+  }
+
+  if (!user) {
+    return <div>Будь ласка, увійдіть до системи, щоб побачити вашу панель.</div>;
+  }
+
+  if (!data) {
+    return <div>Не вдалося завантажити дані. Спробуйте оновити сторінку.</div>;
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <h1 className="text-2xl font-bold tracking-tight text-primary">Панель продавця</h1>
+        <QuickActionsWidget />
+      </div>
+
+      <StatsWidget stats={data.stats} />
+
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
+          <SalesChartWidget data={data.salesChartData} />
+          <ActivityFeedWidget activities={data.recentActivity} />
+      </div>
+
+      <ActiveListingsWidget auctions={data.activeAuctions} fixedPriceItems={data.fixedPriceItems} />
     </div>
   );
 }
-
-    

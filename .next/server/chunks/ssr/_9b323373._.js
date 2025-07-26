@@ -99,31 +99,18 @@ const productCategories = [
 
 var { g: global, __dirname } = __turbopack_context__;
 {
-// A centralized place to manage the colors for different categories.
-// This makes it easy to update colors across the app.
 __turbopack_context__.s({
-    "categoryColorMap": (()=>categoryColorMap),
-    "getCategoryColor": (()=>getCategoryColor)
+    "categoryColors": (()=>categoryColors)
 });
-const categoryColorMap = {
-    // Main Categories
-    livestock: 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900 dark:text-blue-300 dark:border-blue-700',
-    corals: 'bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-900 dark:text-purple-300 dark:border-purple-700',
-    equipment: 'bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-500',
-    // Subcategories for Livestock
-    fish: 'bg-sky-100 text-sky-800 border-sky-200 dark:bg-sky-900 dark:text-sky-300 dark:border-sky-700',
-    invertebrates: 'bg-indigo-100 text-indigo-800 border-indigo-200 dark:bg-indigo-900 dark:text-indigo-300 dark:border-indigo-700',
-    // Subcategories for Corals
-    soft: 'bg-pink-100 text-pink-800 border-pink-200 dark:bg-pink-900 dark:text-pink-300 dark:border-pink-700',
-    lps: 'bg-fuchsia-100 text-fuchsia-800 border-fuchsia-200 dark:bg-fuchsia-900 dark:text-fuchsia-300 dark:border-fuchsia-700',
-    sps: 'bg-violet-100 text-violet-800 border-violet-200 dark:bg-violet-900 dark:text-violet-300 dark:border-violet-700',
-    anemones: 'bg-rose-100 text-rose-800 border-rose-200 dark:bg-rose-900 dark:text-rose-300 dark:border-rose-700',
-    // Default fallback color
-    default: 'bg-stone-100 text-stone-800 border-stone-200 dark:bg-stone-700 dark:text-stone-300 dark:border-stone-500'
-};
-const getCategoryColor = (slug)=>{
-    if (!slug) return categoryColorMap.default;
-    return categoryColorMap[slug] || categoryColorMap.default;
+const categoryColors = {
+    livestock: 'bg-blue-200 text-blue-800',
+    fish: 'bg-blue-300 text-blue-900',
+    invertebrates: 'bg-blue-400 text-blue-900',
+    corals: 'bg-purple-200 text-purple-800',
+    soft: 'bg-purple-300 text-purple-900',
+    lps: 'bg-purple-400 text-purple-900',
+    sps: 'bg-purple-500 text-purple-900',
+    anemones: 'bg-purple-600 text-white'
 };
 }}),
 "[project]/src/components/ui/badge.tsx [app-ssr] (ecmascript)": ((__turbopack_context__) => {
@@ -338,8 +325,9 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$s
 ;
 const CategoryBadge = ({ slug, name })=>{
     if (!slug || !name) return null;
+    const colorClass = __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$category$2d$colors$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["categoryColors"][slug] || 'bg-gray-200 text-gray-800';
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-        className: `inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold ${(0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$category$2d$colors$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["getCategoryColor"])(slug)}`,
+        className: `inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold ${colorClass}`,
         children: name
     }, void 0, false, {
         fileName: "[project]/src/components/lots/lot-card.tsx",
@@ -426,7 +414,7 @@ const SellerInfo = ({ lot })=>{
 const LotCard = ({ lot, onLotPurchased })=>{
     const { user } = (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$context$2f$auth$2d$context$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useAuth"])();
     const { toast } = (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$hooks$2f$use$2d$toast$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useToast"])();
-    const [isBuying, setIsBuying] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(false);
+    const [isBuying, setIsBuying] = __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"].useState(false);
     const imageUrl = lot.images && lot.images.length > 0 ? lot.images[0] : '/placeholder.png';
     const isDirectSale = lot.type === 'direct';
     // Robust category and subcategory lookup
@@ -558,13 +546,13 @@ const LotCard = ({ lot, onLotPurchased })=>{
                                         lineNumber: 154,
                                         columnNumber: 13
                                     }, this),
-                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(CategoryBadge, {
+                                    subcategory && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(CategoryBadge, {
                                         slug: subcategory?.slug,
                                         name: subcategory?.name
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/lots/lot-card.tsx",
                                         lineNumber: 155,
-                                        columnNumber: 13
+                                        columnNumber: 29
                                     }, this)
                                 ]
                             }, void 0, true, {

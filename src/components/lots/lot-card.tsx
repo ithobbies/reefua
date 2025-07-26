@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import type { Lot } from '@/functions/src/types';
@@ -9,7 +9,7 @@ import { useAuth } from '@/context/auth-context';
 import { useToast } from '@/hooks/use-toast';
 import { useSellerProfile } from '@/hooks/use-seller-profile';
 import { productCategories } from '@/lib/categories-data';
-import { getCategoryColor } from '@/lib/category-colors';
+import { categoryColors } from '@/lib/category-colors';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -20,14 +20,14 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 interface LotCardProps {
   lot: Lot;
-  onLotPurchased?: (lotId: string) => void; 
+  onLotPurchased?: (lotId: string) => void;
 }
 
 const CategoryBadge = ({ slug, name }: { slug?: string; name?: string }) => {
   if (!slug || !name) return null;
-  
+  const colorClass = categoryColors[slug] || 'bg-gray-200 text-gray-800';
   return (
-    <div className={`inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold ${getCategoryColor(slug)}`}>
+    <div className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold ${colorClass}`}>
       {name}
     </div>
   );
@@ -63,7 +63,7 @@ const SellerInfo: React.FC<{ lot: Lot }> = ({ lot }) => {
 const LotCard: React.FC<LotCardProps> = ({ lot, onLotPurchased }) => {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [isBuying, setIsBuying] = useState(false);
+  const [isBuying, setIsBuying] = React.useState(false);
 
   const imageUrl = lot.images && lot.images.length > 0 ? lot.images[0] : '/placeholder.png';
   const isDirectSale = lot.type === 'direct';
@@ -73,7 +73,7 @@ const LotCard: React.FC<LotCardProps> = ({ lot, onLotPurchased }) => {
   const subcategory = category?.subcategories.find(sub => sub.slug === lot.subcategory || sub.name === lot.subcategory);
 
   const handleBuyNow = async (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault(); 
+    e.preventDefault();
     e.stopPropagation();
 
     if (!user) {
@@ -96,19 +96,19 @@ const LotCard: React.FC<LotCardProps> = ({ lot, onLotPurchased }) => {
             },
             body: JSON.stringify({ data: { lotId: lot.id } })
         });
-        
+
         const result = await response.json();
 
         if (!response.ok) {
             throw new Error(result.error || 'Failed to buy the lot.');
         }
-        
+
         toast({ title: "Успіх!", description: "Ви успішно придбали цей лот." });
-        
+
         if (onLotPurchased) {
             onLotPurchased(lot.id);
         }
-        
+
     } catch (error: any) {
         console.error("Error buying now from card:", error);
         toast({ variant: "destructive", title: "Помилка покупки", description: error.message || "Не вдалося придбати лот." });
@@ -116,7 +116,7 @@ const LotCard: React.FC<LotCardProps> = ({ lot, onLotPurchased }) => {
         setIsBuying(false);
     }
   };
-  
+
   const renderPriceInfo = () => {
     if (isDirectSale) {
         return {
@@ -130,7 +130,7 @@ const LotCard: React.FC<LotCardProps> = ({ lot, onLotPurchased }) => {
         value: `${lot.currentBid} грн`,
     };
   };
-  
+
   const {label, value} = renderPriceInfo();
 
   return (
@@ -149,10 +149,10 @@ const LotCard: React.FC<LotCardProps> = ({ lot, onLotPurchased }) => {
         </CardHeader>
         <CardContent className="p-4 flex-grow">
           <CardTitle className="text-lg font.headline mb-2 truncate" title={lot.name}>{lot.name}</CardTitle>
-          
+
           <div className="flex flex-wrap items-center gap-2 mb-2">
             <CategoryBadge slug={category?.slug} name={category?.name} />
-            <CategoryBadge slug={subcategory?.slug} name={subcategory?.name} />
+            {subcategory && <CategoryBadge slug={subcategory?.slug} name={subcategory?.name} />}
           </div>
 
           <SellerInfo lot={lot} />
@@ -166,8 +166,8 @@ const LotCard: React.FC<LotCardProps> = ({ lot, onLotPurchased }) => {
       </Link>
       <CardFooter className="p-4 pt-0">
         {isDirectSale ? (
-             <Button 
-                variant="default" 
+             <Button
+                variant="default"
                 className="w-full"
                 onClick={handleBuyNow}
                 disabled={isBuying || !user || user.uid === lot.sellerUid}
@@ -176,8 +176,8 @@ const LotCard: React.FC<LotCardProps> = ({ lot, onLotPurchased }) => {
                 {isBuying ? 'Покупка...' : `Купити за ${lot.price} грн`}
             </Button>
         ) : lot.buyNowPrice ? (
-          <Button 
-            variant="default" 
+          <Button
+            variant="default"
             className="w-full bg-accent hover:bg-accent/90 text-accent-foreground"
             onClick={handleBuyNow}
             disabled={isBuying || !user || user.uid === lot.sellerUid}
