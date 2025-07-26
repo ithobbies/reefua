@@ -19,12 +19,12 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Loader2, Zap, Wind, ShieldAlert, UserCircle, CalendarDays, Tag, Trophy, AlignLeft, Info, MessageCircle } from 'lucide-react';
 import { RatingStars } from '@/components/ui/rating-stars';
-import type { Lot, Bid as BidType, User } from '@/functions/src/types'; 
+import type { Lot, Bid as BidType, User } from '@/functions/src/types';
 import { useToast } from '@/hooks/use-toast';
 import { getFunctions, httpsCallable as httpsCallableApp } from 'firebase/functions';
 import { difficultyOptions, getLabelByValue } from '@/lib/options';
 import { productCategories } from '@/lib/categories-data';
-import { getCategoryColor } from '@/lib/category-colors';
+import { categoryColors } from '@/lib/category-colors';
 
 const getMinBidStep = (currentPrice: number): number => {
     if (currentPrice < 500) return 20;
@@ -35,9 +35,9 @@ const getMinBidStep = (currentPrice: number): number => {
 
 const CategoryBadge = ({ slug, name }: { slug?: string; name?: string }) => {
   if (!slug || !name) return null;
-  
+  const colorClass = categoryColors[slug] || 'bg-gray-200 text-gray-800';
   return (
-    <div className={`inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold ${getCategoryColor(slug)}`}>
+    <div className={`inline-flex items-center rounded-full border px-3 py-1 text-sm font-semibold ${colorClass}`}>
       {name}
     </div>
   );
@@ -54,7 +54,7 @@ export default function LotDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [bidAmount, setBidAmount] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
+
   const { toast } = useToast();
   const { user, loading: authLoading } = useAuth();
   const { startChatFromLot, isStarting: isChatStarting } = useChat();
@@ -72,7 +72,7 @@ export default function LotDetailPage() {
         const lotData = { ...lotSnap.data(), id: lotSnap.id } as Lot;
         setLot(lotData);
         document.title = `${lotData.name} - ReefUA`;
-        
+
         const sellerRef = doc(db, 'users', lotData.sellerUid);
         getDoc(sellerRef).then(sellerSnap => {
           if (sellerSnap.exists()) {
@@ -102,10 +102,10 @@ export default function LotDetailPage() {
           unsubscribeBids();
         };
     }
-    
+
     return () => unsubscribeLot();
   }, [lotId, lot?.type]);
-  
+
   const handleStartChat = () => {
     if (!lot) return;
     startChatFromLot({
@@ -116,7 +116,7 @@ export default function LotDetailPage() {
       sellerName: lot.sellerUsername,
     });
   };
-  
+
   const handleBidSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) {
@@ -128,7 +128,7 @@ export default function LotDetailPage() {
     const amount = parseInt(bidAmount, 10);
     const minStep = getMinBidStep(lot.currentBid);
     const minimumNextBid = lot.currentBid + minStep;
-    
+
     if (isNaN(amount) || amount < minimumNextBid) {
       toast({ variant: "destructive", title: "Замала ставка", description: `Ваша ставка має бути не менше ${minimumNextBid.toFixed(2)} грн.` });
       return;
@@ -138,7 +138,7 @@ export default function LotDetailPage() {
     try {
         const placeBidFunction = httpsCallable(functions, 'placeBid');
         await placeBidFunction({ lotId, amount });
-        
+
         toast({ title: "Успіх!", description: "Вашу ставку успішно прийнято." });
         setBidAmount('');
     } catch (error: any) {
@@ -170,9 +170,9 @@ export default function LotDetailPage() {
         if (!response.ok) {
             throw new Error(result.error || 'Failed to buy the lot.');
         }
-        
+
         toast({ title: "Успіх!", description: "Ви успішно придбали цей лот." });
-        
+
     } catch (error: any) {
         console.error("Error buying now from card:", error);
         toast({ variant: "destructive", title: "Помилка покупки", description: error.message || "Не вдалося придбати лот." });
@@ -180,11 +180,11 @@ export default function LotDetailPage() {
         setIsSubmitting(false);
     }
   };
-  
+
   if (loading || authLoading) {
     return <div className="container mx-auto py-8 text-center"><Loader2 className="h-16 w-16 animate-spin mx-auto text-primary" /></div>;
   }
-  
+
   if (error) {
     return (
         <div className="text-center py-20">
@@ -198,7 +198,7 @@ export default function LotDetailPage() {
   if (!lot) {
     notFound();
   }
-  
+
   const isAuction = lot.type === 'auction';
   const isDirectSale = lot.type === 'direct';
   const isAuctionActive = isAuction && lot.status === 'active' && new Date(lot.endTime) > new Date();
@@ -206,7 +206,7 @@ export default function LotDetailPage() {
   const minBid = isAuction ? (lot.currentBid > 0 ? lot.currentBid + getMinBidStep(lot.currentBid) : lot.startingBid) : 0;
   const isOwner = user?.uid === lot.sellerUid;
   const canBuyNow = (isDirectSale && lot.price) || (isAuction && lot.buyNowPrice);
-  
+
   const renderPriceDisplay = () => {
       if (isDirectSale) {
         return (
@@ -225,19 +225,19 @@ export default function LotDetailPage() {
   }
 
   return (
-    <div className="container mx-auto py-8 pb-24 md:pb-8"> {/* Added bottom padding for mobile */}
+    <div className="container mx-auto py-8 pb-24 md:pb-8"> { /* Added bottom padding for mobile */ }
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-8">
-          
+
           <PhotoSlider images={lot.images || []} altText={lot.name} />
-          
+
           <Card>
             <CardHeader>
               <div className="flex justify-between items-start">
                   <div>
                     <div className="flex flex-wrap items-center gap-2 mb-2">
                         <CategoryBadge slug={category?.slug} name={category?.name} />
-                        <CategoryBadge slug={subcategory?.slug} name={subcategory?.name} />
+                        {subcategory && <CategoryBadge slug={subcategory?.slug} name={subcategory?.name} />}
                     </div>
                     <CardTitle className="text-3xl font-headline">{lot.name}</CardTitle>
                     <div className="flex items-center gap-2 mt-1">
@@ -252,7 +252,7 @@ export default function LotDetailPage() {
                     </div>
                   </div>
                   {user && !isOwner && (
-                      <Button variant="outline" onClick={handleStartChat} disabled={isChatStarting} className="hidden md:flex"> {/* Hide on mobile */}
+                      <Button variant="outline" onClick={handleStartChat} disabled={isChatStarting} className="hidden md:flex"> { /* Hide on mobile */ }
                           {isChatStarting ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <MessageCircle className="mr-2 h-4 w-4"/>}
                           Повідомлення
                       </Button>
@@ -297,7 +297,7 @@ export default function LotDetailPage() {
                 <CardTitle className="text-2xl font.headline">{isAuction ? "Ставки" : "Продаж"}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              
+
               {renderPriceDisplay()}
 
               {!isDirectSale && <CountdownBadge endTime={new Date(lot.endTime)} />}
@@ -305,18 +305,18 @@ export default function LotDetailPage() {
               {isAuctionActive && (
                  <>
                   <form className="space-y-3" onSubmit={handleBidSubmit}>
-                    <Input 
-                      type="number" 
-                      placeholder={`мін. ${minBid.toFixed(2)} грн`} 
-                      aria-label="Сума ставки" 
-                      className="text-base" 
-                      value={bidAmount} 
-                      onChange={(e) => setBidAmount(e.target.value)} 
-                      disabled={isSubmitting || !user || isOwner} 
+                    <Input
+                      type="number"
+                      placeholder={`мін. ${minBid.toFixed(2)} грн`}
+                      aria-label="Сума ставки"
+                      className="text-base"
+                      value={bidAmount}
+                      onChange={(e) => setBidAmount(e.target.value)}
+                      disabled={isSubmitting || !user || isOwner}
                     />
-                    <Button 
-                      type="submit" 
-                      className="w-full text-lg py-3" 
+                    <Button
+                      type="submit"
+                      className="w-full text-lg py-3"
                       disabled={isSubmitting || authLoading || !user || isOwner}
                     >
                       {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : "Зробити ставку"}
@@ -325,22 +325,22 @@ export default function LotDetailPage() {
                   </form>
                  </>
               )}
-              
+
               {canBuyNow && lot.status === 'active' && (
                 <>
                   {isAuction && <div className="relative my-2"><div className="absolute inset-0 flex items-center"><span className="w-full border-t"></span></div><div className="relative flex justify-center text-xs uppercase"><span className="bg-background px-2 text-muted-foreground">або</span></div></div>}
-                  <Button 
-                    type="button" 
-                    variant={isDirectSale ? 'default' : 'outline'} 
-                    className="w-full text-lg py-3" 
-                    onClick={handleBuyNow} 
+                  <Button
+                    type="button"
+                    variant={isDirectSale ? 'default' : 'outline'}
+                    className="w-full text-lg py-3"
+                    onClick={handleBuyNow}
                     disabled={isSubmitting || !user || isOwner}
                   >
                     {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <><Tag className="mr-2 h-5 w-5" /> {isDirectSale ? `Купити за ${lot.price} грн` : `Купити зараз за ${lot.buyNowPrice} грн`}</>}
                   </Button>
                 </>
               )}
-              
+
               {!isAuctionActive && !isDirectSale && (
                  <div className="text-center py-4">
                   {lot.winnerUid && lot.winnerUsername ? (
@@ -360,7 +360,7 @@ export default function LotDetailPage() {
               )}
             </CardContent>
           </Card>
-          
+
           {isAuction && (
              <Card>
                 <CardHeader><CardTitle className="text-xl font.headline">Історія ставок</CardTitle></CardHeader>
@@ -393,7 +393,7 @@ export default function LotDetailPage() {
 
         </div>
       </div>
-      
+
       {/* Mobile-only Bottom Action Bar */}
       {user && !isOwner && (
         <div className="md:hidden fixed bottom-16 left-0 right-0 bg-background/95 backdrop-blur-sm p-4 border-t z-40">

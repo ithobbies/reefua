@@ -18,7 +18,7 @@ import Link from 'next/link';
 import { useAuth } from '@/context/auth-context';
 import { functions, db, app } from '@/lib/firebase';
 import { httpsCallable } from 'firebase/functions';
-import { doc, updateDoc } from 'firebase/firestore';
+import { doc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { getStorage, ref, uploadBytesResumable, getDownloadURL, FirebaseStorage } from "firebase/storage";
 import { v4 as uuidv4 } from 'uuid';
 import type { Lot } from '@/functions/src/types';
@@ -107,7 +107,6 @@ export function LotForm({ existingLot }: LotFormProps) {
       router.push('/auctions');
     }
     
-    // Pre-fill subcategories if editing an existing lot
     if (existingLot?.category) {
         const currentCategory = productCategories.find(cat => cat.slug === existingLot.category);
         if (currentCategory) {
@@ -119,7 +118,11 @@ export function LotForm({ existingLot }: LotFormProps) {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
-    const parsedValue = type === 'number' && value !== '' ? parseFloat(value) : value;
+    let parsedValue: string | number | undefined = value;
+
+    if (type === 'number') {
+        parsedValue = value === '' ? undefined : parseFloat(value);
+    }
     
     if (name.includes('.')) {
         const [parent, child] = name.split('.');
@@ -133,7 +136,7 @@ export function LotForm({ existingLot }: LotFormProps) {
     if (name === 'category') {
         const selectedCategory = productCategories.find(cat => cat.slug === value);
         setSubcategories(selectedCategory ? selectedCategory.subcategories : []);
-        setFormData(prev => ({ ...prev, category: value as string, subcategory: '' })); // Reset subcategory
+        setFormData(prev => ({ ...prev, category: value as string, subcategory: '' }));
     } else if (name.includes('.')) {
         const [parent, child] = name.split('.');
         setFormData(prev => ({ ...prev, [parent]: { ...(prev as any)[parent], [child]: value }}));
@@ -183,9 +186,10 @@ export function LotForm({ existingLot }: LotFormProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Basic validation
     const isAuction = saleType === 'auction';
     if (!formData.name || !formData.description || !formData.category || !formData.subcategory) {
-      toast({ variant: 'destructive', title: 'Помилка валідації', description: "Будь ласка, заповніть усі обов'язкові поля, включаючи категорію та підкатегорію." });
+      toast({ variant: 'destructive', title: 'Помилка валідації', description: "Будь ласка, заповніть усі обов'язкові поля." });
       return;
     }
      if (isAuction && !formData.startingBid) {
@@ -204,30 +208,61 @@ export function LotForm({ existingLot }: LotFormProps) {
     setIsSubmitting(true);
 
     try {
-        const imageUrl = await uploadImage();
+        const imageUrl = (imageFile || imagePreview) ? await uploadImage() : '';
         
         const { durationDays, ...restOfFormData } = formData;
-        const payload: any = {
+        let payload: any = {
             ...restOfFormData,
-            images: [imageUrl],
-            type: saleType
+            images: imageUrl ? [imageUrl] : existingLot?.images || [],
+            type: saleType,
+            updatedAt: serverTimestamp() // Add updated timestamp
         };
 
-        if (payload.category !== 'corals') {
-            delete payload.parameters;
-        }
-        
-        if (!isEditMode && saleType === 'auction' && durationDays) {
-            const endDate = new Date();
-            endDate.setDate(endDate.getDate() + durationDays);
-            payload.endTime = endDate.toISOString();
-        }
-
         if(isEditMode && existingLot) {
-            await updateDoc(doc(db, 'lots', existingLot.id), payload);
+            // --- CAREFUL DATA CLEANUP FOR UPDATE ---
+            const updatePayload: { [key: string]: any } = {
+                name: payload.name,
+                description: payload.description,
+                category: payload.category,
+                subcategory: payload.subcategory,
+                images: payload.images,
+                updatedAt: payload.updatedAt,
+            };
+            
+            if (payload.category === 'corals') {
+                updatePayload.parameters = payload.parameters;
+            }
+
+            if (saleType === 'auction') {
+                updatePayload.startingBid = payload.startingBid || 0;
+                updatePayload.buyNowPrice = payload.buyNowPrice || null;
+                // We set other type's price to null to clean up the document
+                updatePayload.price = null; 
+            } else { // 'direct'
+                updatePayload.price = payload.price || 0;
+                // Clean up auction-specific fields
+                updatePayload.startingBid = null;
+                updatePayload.buyNowPrice = null;
+                updatePayload.endTime = null;
+            }
+
+            await updateDoc(doc(db, 'lots', existingLot.id), updatePayload);
             toast({ title: 'Лот оновлено!', description: `Лот "${formData.name}" успішно оновлено.` });
             router.push(`/dashboard/lots`);
         } else {
+            // --- LOGIC FOR CREATING A NEW LOT (UNCHANGED) ---
+            if (payload.category !== 'corals') {
+                delete payload.parameters;
+            }
+            if (saleType === 'auction' && durationDays) {
+                const endDate = new Date();
+                endDate.setDate(endDate.getDate() + durationDays);
+                payload.endTime = endDate.toISOString();
+            } else {
+                delete payload.startingBid;
+                delete payload.buyNowPrice;
+            }
+
             const createLotFunc = httpsCallable(functions, 'createLot');
             const result: any = await createLotFunc(payload);
             toast({ title: 'Лот створено!', description: `Лот "${formData.name}" успішно додано.` });
@@ -236,7 +271,8 @@ export function LotForm({ existingLot }: LotFormProps) {
 
     } catch (error: any) {
         console.error(`Failed to ${isEditMode ? 'update' : 'create'} lot:`, error);
-        toast({ variant: "destructive", title: `Помилка ${isEditMode ? 'оновлення' : 'створення'} лоту`, description: "Будь ласка, перевірте дані та спробуйте ще раз." });
+        const errorMessage = error.message || "Будь ласка, перевірте дані та спробуйте ще раз.";
+        toast({ variant: "destructive", title: `Помилка ${isEditMode ? 'оновлення' : 'створення'} лоту`, description: errorMessage });
     } finally {
         setIsSubmitting(false);
     }

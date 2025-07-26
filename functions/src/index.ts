@@ -16,3 +16,4 @@ export * from './reviews';   // Exports leaveReview
 export * from './chat';      // Exports startOrGetChat, sendMessage
 export * from './orders';    // Exports createOrder, onOrderUpdate
 export * from './notifications'; // Exports onOrderCreatedSendEmail
+export * from './dashboard'; // Exports getSellerDashboardData
