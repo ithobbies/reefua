@@ -1281,12 +1281,12 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$re
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$log$2d$out$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__LogOut$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/log-out.js [app-client] (ecmascript) <export default as LogOut>");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$user$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__User$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/user.js [app-client] (ecmascript) <export default as User>");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$layout$2d$dashboard$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__LayoutDashboard$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/layout-dashboard.js [app-client] (ecmascript) <export default as LayoutDashboard>");
-var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$dollar$2d$sign$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__DollarSign$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/dollar-sign.js [app-client] (ecmascript) <export default as DollarSign>");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$loader$2d$circle$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Loader2$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/loader-circle.js [app-client] (ecmascript) <export default as Loader2>");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$house$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Home$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/house.js [app-client] (ecmascript) <export default as Home>");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$square$2d$chart$2d$gantt$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__GanttChartSquare$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/square-chart-gantt.js [app-client] (ecmascript) <export default as GanttChartSquare>");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$square$2d$plus$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__PlusSquare$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/square-plus.js [app-client] (ecmascript) <export default as PlusSquare>");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$log$2d$in$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__LogIn$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/log-in.js [app-client] (ecmascript) <export default as LogIn>");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$gavel$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Gavel$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/gavel.js [app-client] (ecmascript) <export default as Gavel>");
 var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$dropdown$2d$menu$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/components/ui/dropdown-menu.tsx [app-client] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$sheet$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/components/ui/sheet.tsx [app-client] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$hooks$2f$use$2d$mobile$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/hooks/use-mobile.tsx [app-client] (ecmascript)");
@@ -1332,14 +1332,49 @@ const navLinks = [
         href: '/sell',
         label: 'Продати',
         icon: __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$square$2d$plus$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__PlusSquare$3e$__["PlusSquare"]
+    },
+    {
+        href: '/rules',
+        label: 'Правила',
+        icon: __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$gavel$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Gavel$3e$__["Gavel"]
     }
 ];
+// A placeholder component to avoid hydration mismatch
+const NavSkeleton = ()=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+        className: "flex items-center gap-2",
+        children: [
+            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$skeleton$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Skeleton"], {
+                className: "h-10 w-24"
+            }, void 0, false, {
+                fileName: "[project]/src/components/layout/header.tsx",
+                lineNumber: 38,
+                columnNumber: 9
+            }, this),
+            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$skeleton$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Skeleton"], {
+                className: "h-10 w-10 rounded-full"
+            }, void 0, false, {
+                fileName: "[project]/src/components/layout/header.tsx",
+                lineNumber: 39,
+                columnNumber: 9
+            }, this)
+        ]
+    }, void 0, true, {
+        fileName: "[project]/src/components/layout/header.tsx",
+        lineNumber: 37,
+        columnNumber: 5
+    }, this);
+_c = NavSkeleton;
 const Header = ()=>{
     _s();
     const isMobile = (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$hooks$2f$use$2d$mobile$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useIsMobile"])();
     const pathname = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$navigation$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["usePathname"])();
-    // Do not render the header on dashboard pages
-    if (pathname.startsWith('/dashboard')) {
+    const [isMounted, setIsMounted] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(false);
+    (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
+        "Header.useEffect": ()=>{
+            setIsMounted(true);
+        }
+    }["Header.useEffect"], []);
+    if (pathname.startsWith('/dashboard') || pathname.startsWith('/admin')) {
         return null;
     }
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("header", {
@@ -1354,42 +1389,46 @@ const Header = ()=>{
                         className: "h-12 w-12"
                     }, void 0, false, {
                         fileName: "[project]/src/components/layout/header.tsx",
-                        lineNumber: 47,
+                        lineNumber: 60,
                         columnNumber: 11
                     }, this)
                 }, void 0, false, {
                     fileName: "[project]/src/components/layout/header.tsx",
-                    lineNumber: 46,
+                    lineNumber: 59,
                     columnNumber: 9
                 }, this),
-                isMobile ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(MobileNav, {}, void 0, false, {
+                isMounted ? isMobile ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(MobileNav, {}, void 0, false, {
                     fileName: "[project]/src/components/layout/header.tsx",
-                    lineNumber: 49,
-                    columnNumber: 21
+                    lineNumber: 62,
+                    columnNumber: 34
                 }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(DesktopNav, {}, void 0, false, {
                     fileName: "[project]/src/components/layout/header.tsx",
-                    lineNumber: 49,
-                    columnNumber: 37
+                    lineNumber: 62,
+                    columnNumber: 50
+                }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(NavSkeleton, {}, void 0, false, {
+                    fileName: "[project]/src/components/layout/header.tsx",
+                    lineNumber: 62,
+                    columnNumber: 68
                 }, this)
             ]
         }, void 0, true, {
             fileName: "[project]/src/components/layout/header.tsx",
-            lineNumber: 45,
+            lineNumber: 58,
             columnNumber: 7
         }, this)
     }, void 0, false, {
         fileName: "[project]/src/components/layout/header.tsx",
-        lineNumber: 44,
+        lineNumber: 57,
         columnNumber: 5
     }, this);
 };
-_s(Header, "GN0lFZJGw5Kt0BJSJcthDTZa36Q=", false, function() {
+_s(Header, "LD/sKkypci+hAl/bluy6CuvR2zI=", false, function() {
     return [
         __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$hooks$2f$use$2d$mobile$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useIsMobile"],
         __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$navigation$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["usePathname"]
     ];
 });
-_c = Header;
+_c1 = Header;
 // --- Desktop Navigation Component ---
 const DesktopNav = ()=>{
     _s1();
@@ -1397,6 +1436,13 @@ const DesktopNav = ()=>{
     const { toast } = (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$hooks$2f$use$2d$toast$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useToast"])();
     const pathname = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$navigation$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["usePathname"])();
     const router = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$navigation$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useRouter"])();
+    const [searchQuery, setSearchQuery] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])('');
+    const handleSearchSubmit = (e)=>{
+        e.preventDefault();
+        if (searchQuery.trim()) {
+            router.push(`/auctions?q=${encodeURIComponent(searchQuery.trim())}`);
+        }
+    };
     const handleSignOut = async ()=>{
         await (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$firebase$2f$node_modules$2f40$firebase$2f$auth$2f$dist$2f$esm2017$2f$index$2d$8e6e89cb$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__D__as__signOut$3e$__["signOut"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$firebase$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["auth"]);
         toast({
@@ -1418,30 +1464,30 @@ const DesktopNav = ()=>{
                                     alt: firestoreUser?.username || 'User'
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/layout/header.tsx",
-                                    lineNumber: 73,
+                                    lineNumber: 94,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$avatar$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["AvatarFallback"], {
                                     children: firestoreUser?.username?.[0].toUpperCase() || 'U'
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/layout/header.tsx",
-                                    lineNumber: 74,
+                                    lineNumber: 95,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/layout/header.tsx",
-                            lineNumber: 72,
+                            lineNumber: 93,
                             columnNumber: 11
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/src/components/layout/header.tsx",
-                        lineNumber: 71,
+                        lineNumber: 92,
                         columnNumber: 9
                     }, this)
                 }, void 0, false, {
                     fileName: "[project]/src/components/layout/header.tsx",
-                    lineNumber: 70,
+                    lineNumber: 91,
                     columnNumber: 7
                 }, this),
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$dropdown$2d$menu$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["DropdownMenuContent"], {
@@ -1459,7 +1505,7 @@ const DesktopNav = ()=>{
                                         children: firestoreUser?.username
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/layout/header.tsx",
-                                        lineNumber: 81,
+                                        lineNumber: 102,
                                         columnNumber: 13
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -1467,23 +1513,23 @@ const DesktopNav = ()=>{
                                         children: user?.email
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/layout/header.tsx",
-                                        lineNumber: 82,
+                                        lineNumber: 103,
                                         columnNumber: 13
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/layout/header.tsx",
-                                lineNumber: 80,
+                                lineNumber: 101,
                                 columnNumber: 11
                             }, this)
                         }, void 0, false, {
                             fileName: "[project]/src/components/layout/header.tsx",
-                            lineNumber: 79,
+                            lineNumber: 100,
                             columnNumber: 9
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$dropdown$2d$menu$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["DropdownMenuSeparator"], {}, void 0, false, {
                             fileName: "[project]/src/components/layout/header.tsx",
-                            lineNumber: 85,
+                            lineNumber: 106,
                             columnNumber: 9
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$dropdown$2d$menu$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["DropdownMenuItem"], {
@@ -1495,19 +1541,19 @@ const DesktopNav = ()=>{
                                         className: "mr-2 h-4 w-4"
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/layout/header.tsx",
-                                        lineNumber: 87,
+                                        lineNumber: 108,
                                         columnNumber: 37
                                     }, this),
                                     "Панель керування"
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/layout/header.tsx",
-                                lineNumber: 87,
+                                lineNumber: 108,
                                 columnNumber: 13
                             }, this)
                         }, void 0, false, {
                             fileName: "[project]/src/components/layout/header.tsx",
-                            lineNumber: 86,
+                            lineNumber: 107,
                             columnNumber: 9
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$dropdown$2d$menu$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["DropdownMenuItem"], {
@@ -1519,48 +1565,24 @@ const DesktopNav = ()=>{
                                         className: "mr-2 h-4 w-4"
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/layout/header.tsx",
-                                        lineNumber: 90,
+                                        lineNumber: 111,
                                         columnNumber: 35
                                     }, this),
                                     "Профіль"
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/layout/header.tsx",
-                                lineNumber: 90,
+                                lineNumber: 111,
                                 columnNumber: 13
                             }, this)
                         }, void 0, false, {
                             fileName: "[project]/src/components/layout/header.tsx",
-                            lineNumber: 89,
+                            lineNumber: 110,
                             columnNumber: 9
-                        }, this),
-                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$dropdown$2d$menu$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["DropdownMenuItem"], {
-                            asChild: true,
-                            children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$client$2f$app$2d$dir$2f$link$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
-                                href: "/balance",
-                                children: [
-                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$dollar$2d$sign$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__DollarSign$3e$__["DollarSign"], {
-                                        className: "mr-2 h-4 w-4"
-                                    }, void 0, false, {
-                                        fileName: "[project]/src/components/layout/header.tsx",
-                                        lineNumber: 93,
-                                        columnNumber: 35
-                                    }, this),
-                                    "Баланс"
-                                ]
-                            }, void 0, true, {
-                                fileName: "[project]/src/components/layout/header.tsx",
-                                lineNumber: 93,
-                                columnNumber: 13
-                            }, this)
-                        }, void 0, false, {
-                            fileName: "[project]/src/components/layout/header.tsx",
-                            lineNumber: 92,
-                            columnNumber: 10
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$dropdown$2d$menu$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["DropdownMenuSeparator"], {}, void 0, false, {
                             fileName: "[project]/src/components/layout/header.tsx",
-                            lineNumber: 95,
+                            lineNumber: 113,
                             columnNumber: 9
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$dropdown$2d$menu$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["DropdownMenuItem"], {
@@ -1571,26 +1593,26 @@ const DesktopNav = ()=>{
                                     className: "mr-2 h-4 w-4"
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/layout/header.tsx",
-                                    lineNumber: 97,
+                                    lineNumber: 115,
                                     columnNumber: 11
                                 }, this),
                                 "Вийти"
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/layout/header.tsx",
-                            lineNumber: 96,
+                            lineNumber: 114,
                             columnNumber: 9
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/src/components/layout/header.tsx",
-                    lineNumber: 78,
+                    lineNumber: 99,
                     columnNumber: 7
                 }, this)
             ]
         }, void 0, true, {
             fileName: "[project]/src/components/layout/header.tsx",
-            lineNumber: 69,
+            lineNumber: 90,
             columnNumber: 6
         }, this);
     const AuthContent = ()=>{
@@ -1598,15 +1620,14 @@ const DesktopNav = ()=>{
             className: "h-10 w-24 rounded-md"
         }, void 0, false, {
             fileName: "[project]/src/components/layout/header.tsx",
-            lineNumber: 104,
+            lineNumber: 122,
             columnNumber: 25
         }, this);
         if (user) return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(UserMenu, {}, void 0, false, {
             fileName: "[project]/src/components/layout/header.tsx",
-            lineNumber: 105,
+            lineNumber: 123,
             columnNumber: 22
         }, this);
-        // This now correctly points to the login page
         return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Button"], {
             asChild: true,
             children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$client$2f$app$2d$dir$2f$link$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
@@ -1616,25 +1637,26 @@ const DesktopNav = ()=>{
                         className: "mr-2 h-5 w-5"
                     }, void 0, false, {
                         fileName: "[project]/src/components/layout/header.tsx",
-                        lineNumber: 109,
+                        lineNumber: 126,
                         columnNumber: 33
                     }, this),
                     " Увійти"
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/components/layout/header.tsx",
-                lineNumber: 109,
+                lineNumber: 126,
                 columnNumber: 13
             }, this)
         }, void 0, false, {
             fileName: "[project]/src/components/layout/header.tsx",
-            lineNumber: 108,
+            lineNumber: 125,
             columnNumber: 9
         }, this);
     };
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Fragment"], {
         children: [
-            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("form", {
+                onSubmit: handleSearchSubmit,
                 className: "flex-1 max-w-md ml-8 hidden md:block",
                 children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                     className: "relative",
@@ -1643,27 +1665,29 @@ const DesktopNav = ()=>{
                             className: "absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground"
                         }, void 0, false, {
                             fileName: "[project]/src/components/layout/header.tsx",
-                            lineNumber: 118,
+                            lineNumber: 135,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$input$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Input"], {
                             type: "search",
                             placeholder: "Пошук лотів, категорій...",
-                            className: "pl-10 bg-card"
+                            className: "pl-10 bg-card",
+                            value: searchQuery,
+                            onChange: (e)=>setSearchQuery(e.target.value)
                         }, void 0, false, {
                             fileName: "[project]/src/components/layout/header.tsx",
-                            lineNumber: 119,
+                            lineNumber: 136,
                             columnNumber: 11
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/src/components/layout/header.tsx",
-                    lineNumber: 117,
+                    lineNumber: 134,
                     columnNumber: 9
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/src/components/layout/header.tsx",
-                lineNumber: 116,
+                lineNumber: 133,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("nav", {
@@ -1677,35 +1701,35 @@ const DesktopNav = ()=>{
                             children: link.label
                         }, void 0, false, {
                             fileName: "[project]/src/components/layout/header.tsx",
-                            lineNumber: 125,
+                            lineNumber: 148,
                             columnNumber: 13
                         }, this)
                     }, link.href, false, {
                         fileName: "[project]/src/components/layout/header.tsx",
-                        lineNumber: 124,
+                        lineNumber: 147,
                         columnNumber: 11
                     }, this))
             }, void 0, false, {
                 fileName: "[project]/src/components/layout/header.tsx",
-                lineNumber: 122,
+                lineNumber: 145,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                 className: "hidden md:flex items-center gap-2",
                 children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(AuthContent, {}, void 0, false, {
                     fileName: "[project]/src/components/layout/header.tsx",
-                    lineNumber: 130,
+                    lineNumber: 153,
                     columnNumber: 9
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/src/components/layout/header.tsx",
-                lineNumber: 129,
+                lineNumber: 152,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true);
 };
-_s1(DesktopNav, "Gwg1i4BdAUH+iJSQ7CG2YHNzfDM=", false, function() {
+_s1(DesktopNav, "NzA14N5jgt6ec5mrIeOqQcZ1A14=", false, function() {
     return [
         __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$context$2f$auth$2d$context$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useAuth"],
         __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$hooks$2f$use$2d$toast$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useToast"],
@@ -1713,7 +1737,7 @@ _s1(DesktopNav, "Gwg1i4BdAUH+iJSQ7CG2YHNzfDM=", false, function() {
         __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$navigation$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useRouter"]
     ];
 });
-_c1 = DesktopNav;
+_c2 = DesktopNav;
 // --- Mobile Navigation Component ---
 const MobileNav = ()=>{
     _s2();
@@ -1743,7 +1767,7 @@ const MobileNav = ()=>{
                         " ",
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$menu$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Menu$3e$__["Menu"], {}, void 0, false, {
                             fileName: "[project]/src/components/layout/header.tsx",
-                            lineNumber: 155,
+                            lineNumber: 178,
                             columnNumber: 50
                         }, this),
                         " ",
@@ -1752,18 +1776,18 @@ const MobileNav = ()=>{
                             children: "Відкрити меню"
                         }, void 0, false, {
                             fileName: "[project]/src/components/layout/header.tsx",
-                            lineNumber: 155,
+                            lineNumber: 178,
                             columnNumber: 59
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/src/components/layout/header.tsx",
-                    lineNumber: 155,
+                    lineNumber: 178,
                     columnNumber: 13
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/src/components/layout/header.tsx",
-                lineNumber: 154,
+                lineNumber: 177,
                 columnNumber: 9
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$sheet$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["SheetContent"], {
@@ -1782,7 +1806,7 @@ const MobileNav = ()=>{
                                         className: "h-10 w-10"
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/layout/header.tsx",
-                                        lineNumber: 161,
+                                        lineNumber: 184,
                                         columnNumber: 25
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -1790,23 +1814,23 @@ const MobileNav = ()=>{
                                         children: "ReefUA"
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/layout/header.tsx",
-                                        lineNumber: 162,
+                                        lineNumber: 185,
                                         columnNumber: 25
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/layout/header.tsx",
-                                lineNumber: 160,
+                                lineNumber: 183,
                                 columnNumber: 21
                             }, this)
                         }, void 0, false, {
                             fileName: "[project]/src/components/layout/header.tsx",
-                            lineNumber: 159,
+                            lineNumber: 182,
                             columnNumber: 17
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/src/components/layout/header.tsx",
-                        lineNumber: 158,
+                        lineNumber: 181,
                         columnNumber: 13
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("nav", {
@@ -1822,20 +1846,20 @@ const MobileNav = ()=>{
                                         className: "mr-3 h-5 w-5"
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/layout/header.tsx",
-                                        lineNumber: 177,
+                                        lineNumber: 200,
                                         columnNumber: 21
                                     }, this),
                                     link.label
                                 ]
                             }, link.href, true, {
                                 fileName: "[project]/src/components/layout/header.tsx",
-                                lineNumber: 171,
+                                lineNumber: 194,
                                 columnNumber: 21
                             }, this);
                         })
                     }, void 0, false, {
                         fileName: "[project]/src/components/layout/header.tsx",
-                        lineNumber: 167,
+                        lineNumber: 190,
                         columnNumber: 13
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1846,12 +1870,12 @@ const MobileNav = ()=>{
                                 className: "h-6 w-6 animate-spin"
                             }, void 0, false, {
                                 fileName: "[project]/src/components/layout/header.tsx",
-                                lineNumber: 186,
+                                lineNumber: 209,
                                 columnNumber: 71
                             }, this)
                         }, void 0, false, {
                             fileName: "[project]/src/components/layout/header.tsx",
-                            lineNumber: 186,
+                            lineNumber: 209,
                             columnNumber: 17
                         }, this) : user && firestoreUser ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                             className: "flex flex-col gap-2",
@@ -1869,20 +1893,20 @@ const MobileNav = ()=>{
                                                     alt: firestoreUser.username
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/layout/header.tsx",
-                                                    lineNumber: 191,
+                                                    lineNumber: 214,
                                                     columnNumber: 29
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$avatar$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["AvatarFallback"], {
                                                     children: firestoreUser.username?.[0].toUpperCase() || 'U'
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/layout/header.tsx",
-                                                    lineNumber: 192,
+                                                    lineNumber: 215,
                                                     columnNumber: 29
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/components/layout/header.tsx",
-                                            lineNumber: 190,
+                                            lineNumber: 213,
                                             columnNumber: 25
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1893,7 +1917,7 @@ const MobileNav = ()=>{
                                                     children: firestoreUser.username
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/layout/header.tsx",
-                                                    lineNumber: 195,
+                                                    lineNumber: 218,
                                                     columnNumber: 29
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -1901,19 +1925,19 @@ const MobileNav = ()=>{
                                                     children: "Перейти до профілю"
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/layout/header.tsx",
-                                                    lineNumber: 196,
+                                                    lineNumber: 219,
                                                     columnNumber: 29
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/components/layout/header.tsx",
-                                            lineNumber: 194,
+                                            lineNumber: 217,
                                             columnNumber: 25
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/layout/header.tsx",
-                                    lineNumber: 189,
+                                    lineNumber: 212,
                                     columnNumber: 21
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$client$2f$app$2d$dir$2f$link$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
@@ -1925,14 +1949,14 @@ const MobileNav = ()=>{
                                             className: "mr-3 h-5 w-5"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/layout/header.tsx",
-                                            lineNumber: 200,
+                                            lineNumber: 223,
                                             columnNumber: 25
                                         }, this),
                                         " Панель керування"
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/layout/header.tsx",
-                                    lineNumber: 199,
+                                    lineNumber: 222,
                                     columnNumber: 21
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Button"], {
@@ -1944,23 +1968,22 @@ const MobileNav = ()=>{
                                             className: "mr-3 h-5 w-5"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/layout/header.tsx",
-                                            lineNumber: 203,
+                                            lineNumber: 226,
                                             columnNumber: 25
                                         }, this),
                                         " Вийти"
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/layout/header.tsx",
-                                    lineNumber: 202,
+                                    lineNumber: 225,
                                     columnNumber: 21
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/layout/header.tsx",
-                            lineNumber: 188,
+                            lineNumber: 211,
                             columnNumber: 17
-                        }, this) : // This now correctly points to the login page
-                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Button"], {
+                        }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Button"], {
                             asChild: true,
                             className: "w-full",
                             onClick: ()=>setIsOpen(false),
@@ -1971,36 +1994,36 @@ const MobileNav = ()=>{
                                         className: "mr-2 h-5 w-5"
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/layout/header.tsx",
-                                        lineNumber: 210,
+                                        lineNumber: 232,
                                         columnNumber: 25
                                     }, this),
                                     " Увійти / Зареєструватися"
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/layout/header.tsx",
-                                lineNumber: 209,
+                                lineNumber: 231,
                                 columnNumber: 21
                             }, this)
                         }, void 0, false, {
                             fileName: "[project]/src/components/layout/header.tsx",
-                            lineNumber: 208,
+                            lineNumber: 230,
                             columnNumber: 17
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/src/components/layout/header.tsx",
-                        lineNumber: 184,
+                        lineNumber: 207,
                         columnNumber: 13
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/components/layout/header.tsx",
-                lineNumber: 157,
+                lineNumber: 180,
                 columnNumber: 9
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/src/components/layout/header.tsx",
-        lineNumber: 153,
+        lineNumber: 176,
         columnNumber: 9
     }, this);
 };
@@ -2012,12 +2035,13 @@ _s2(MobileNav, "xFIvv/UNMhcKqamNd9Qr8Jn6Zjw=", false, function() {
         __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$navigation$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useRouter"]
     ];
 });
-_c2 = MobileNav;
+_c3 = MobileNav;
 const __TURBOPACK__default__export__ = Header;
-var _c, _c1, _c2;
-__turbopack_context__.k.register(_c, "Header");
-__turbopack_context__.k.register(_c1, "DesktopNav");
-__turbopack_context__.k.register(_c2, "MobileNav");
+var _c, _c1, _c2, _c3;
+__turbopack_context__.k.register(_c, "NavSkeleton");
+__turbopack_context__.k.register(_c1, "Header");
+__turbopack_context__.k.register(_c2, "DesktopNav");
+__turbopack_context__.k.register(_c3, "MobileNav");
 if (typeof globalThis.$RefreshHelpers$ === 'object' && globalThis.$RefreshHelpers !== null) {
     __turbopack_context__.k.registerExports(module, globalThis.$RefreshHelpers$);
 }

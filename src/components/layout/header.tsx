@@ -6,7 +6,7 @@ import SiteLogoIcon from '@/components/icons/site-logo-icon';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Search, Menu, LogOut, User as UserIcon, LayoutDashboard, DollarSign, Loader2, Home, GanttChartSquare, PlusSquare, LogIn } from 'lucide-react';
+import { Search, Menu, LogOut, User as UserIcon, LayoutDashboard, DollarSign, Loader2, Home, GanttChartSquare, PlusSquare, LogIn, Gavel } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,7 +17,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { useIsMobile } from '@/hooks/use-mobile';
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/context/auth-context';
 import { auth } from '@/lib/firebase';
 import { signOut } from 'firebase/auth';
@@ -29,14 +29,27 @@ const navLinks = [
   { href: '/', label: 'Головна', icon: Home },
   { href: '/auctions', label: 'Аукціони', icon: GanttChartSquare },
   { href: '/sell', label: 'Продати', icon: PlusSquare },
+  { href: '/rules', label: 'Правила', icon: Gavel },
 ];
+
+// A placeholder component to avoid hydration mismatch
+const NavSkeleton = () => (
+    <div className="flex items-center gap-2">
+        <Skeleton className="h-10 w-24" />
+        <Skeleton className="h-10 w-10 rounded-full" />
+    </div>
+);
 
 const Header = () => {
   const isMobile = useIsMobile();
   const pathname = usePathname();
+  const [isMounted, setIsMounted] = useState(false);
 
-  // Do not render the header on dashboard pages
-  if (pathname.startsWith('/dashboard')) {
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  if (pathname.startsWith('/dashboard') || pathname.startsWith('/admin')) {
     return null;
   }
   
@@ -46,7 +59,7 @@ const Header = () => {
         <Link href="/" className="flex items-center text-primary hover:opacity-80 transition-opacity">
           <SiteLogoIcon className="h-12 w-12" />
         </Link>
-        {isMobile ? <MobileNav /> : <DesktopNav />}
+        {isMounted ? (isMobile ? <MobileNav /> : <DesktopNav />) : <NavSkeleton />}
       </div>
     </header>
   );
@@ -58,6 +71,14 @@ const DesktopNav = () => {
   const { toast } = useToast();
   const pathname = usePathname();
   const router = useRouter();
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const handleSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      router.push(`/auctions?q=${encodeURIComponent(searchQuery.trim())}`);
+    }
+  };
 
   const handleSignOut = async () => {
     await signOut(auth);
@@ -89,9 +110,6 @@ const DesktopNav = () => {
         <DropdownMenuItem asChild>
             <Link href="/profile"><UserIcon className="mr-2 h-4 w-4" />Профіль</Link>
         </DropdownMenuItem>
-         <DropdownMenuItem asChild>
-            <Link href="/balance"><DollarSign className="mr-2 h-4 w-4" />Баланс</Link>
-        </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleSignOut} className="text-destructive focus:text-destructive">
           <LogOut className="mr-2 h-4 w-4" />Вийти
@@ -103,7 +121,6 @@ const DesktopNav = () => {
   const AuthContent = () => {
     if (loading) return <Skeleton className="h-10 w-24 rounded-md" />;
     if (user) return <UserMenu />;
-    // This now correctly points to the login page
     return (
         <Button asChild>
             <Link href="/login"><LogIn className="mr-2 h-5 w-5" /> Увійти</Link>
@@ -113,12 +130,18 @@ const DesktopNav = () => {
 
   return (
     <>
-      <div className="flex-1 max-w-md ml-8 hidden md:block">
+      <form onSubmit={handleSearchSubmit} className="flex-1 max-w-md ml-8 hidden md:block">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-          <Input type="search" placeholder="Пошук лотів, категорій..." className="pl-10 bg-card" />
+          <Input 
+            type="search" 
+            placeholder="Пошук лотів, категорій..." 
+            className="pl-10 bg-card"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
         </div>
-      </div>
+      </form>
       <nav className="hidden md:flex items-center gap-1">
         {navLinks.map((link) => (
           <Button key={link.href} variant="ghost" asChild className={`text-foreground hover:text-primary ${pathname === link.href ? 'font-bold text-primary' : ''}`}>
@@ -204,7 +227,6 @@ const MobileNav = () => {
                     </Button>
                 </div>
             ) : (
-                // This now correctly points to the login page
                 <Button asChild className="w-full" onClick={() => setIsOpen(false)}>
                     <Link href="/login">
                         <LogIn className="mr-2 h-5 w-5" /> Увійти / Зареєструватися

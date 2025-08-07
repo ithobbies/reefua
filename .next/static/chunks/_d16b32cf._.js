@@ -112,18 +112,26 @@ if (typeof globalThis.$RefreshHelpers$ === 'object' && globalThis.$RefreshHelper
 
 var { g: global, __dirname, k: __turbopack_refresh__, m: module } = __turbopack_context__;
 {
+// A vibrant, reef-themed color palette for category and subcategory badges.
+// Each color is chosen for good contrast and visual distinction.
+// The hover:bg-* class is added to prevent the default hover effect from the Badge component.
 __turbopack_context__.s({
     "categoryColors": (()=>categoryColors)
 });
 const categoryColors = {
-    livestock: 'bg-blue-200 text-blue-800',
-    fish: 'bg-blue-300 text-blue-900',
-    invertebrates: 'bg-blue-400 text-blue-900',
-    corals: 'bg-purple-200 text-purple-800',
-    soft: 'bg-purple-300 text-purple-900',
-    lps: 'bg-purple-400 text-purple-900',
-    sps: 'bg-purple-500 text-purple-900',
-    anemones: 'bg-purple-600 text-white'
+    // Main Categories
+    livestock: 'bg-green-200 text-green-800 hover:bg-green-200',
+    corals: 'bg-rose-200 text-rose-800 hover:bg-rose-200',
+    equipment: 'bg-amber-200 text-amber-800 hover:bg-amber-200',
+    chemistry: 'bg-sky-200 text-sky-800 hover:bg-sky-200',
+    // Subcategories for Livestock
+    fish: 'bg-teal-200 text-teal-800 hover:bg-teal-200',
+    invertebrates: 'bg-cyan-200 text-cyan-800 hover:bg-cyan-200',
+    // Subcategories for Corals
+    soft: 'bg-fuchsia-200 text-fuchsia-800 hover:bg-fuchsia-200',
+    lps: 'bg-orange-200 text-orange-800 hover:bg-orange-200',
+    sps: 'bg-violet-200 text-violet-800 hover:bg-violet-200',
+    anemones: 'bg-red-200 text-red-800 hover:bg-red-200'
 };
 if (typeof globalThis.$RefreshHelpers$ === 'object' && globalThis.$RefreshHelpers !== null) {
     __turbopack_context__.k.registerExports(module, globalThis.$RefreshHelpers$);
@@ -344,6 +352,7 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$hooks$2f$use$2d$selle
 var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$categories$2d$data$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/lib/categories-data.ts [app-client] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$category$2d$colors$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/lib/category-colors.ts [app-client] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/components/ui/button.tsx [app-client] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$badge$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/components/ui/badge.tsx [app-client] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/components/ui/card.tsx [app-client] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$tag$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Tag$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/tag.js [app-client] (ecmascript) <export default as Tag>");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$loader$2d$circle$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Loader2$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/loader-circle.js [app-client] (ecmascript) <export default as Loader2>");
@@ -367,15 +376,18 @@ var _s = __turbopack_context__.k.signature(), _s1 = __turbopack_context__.k.sign
 ;
 ;
 ;
+;
 const CategoryBadge = ({ slug, name })=>{
     if (!slug || !name) return null;
-    const colorClass = __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$category$2d$colors$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["categoryColors"][slug] || 'bg-gray-200 text-gray-800';
-    return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-        className: `inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold ${colorClass}`,
+    const colorClass = __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$category$2d$colors$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["categoryColors"][slug] || 'bg-secondary text-secondary-foreground';
+    // By removing the variant prop, we prevent default variant styles from overriding our custom colors.
+    // We add 'border-transparent' to be consistent with other badge variants that hide the default border.
+    return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$badge$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Badge"], {
+        className: `border-transparent ${colorClass}`,
         children: name
     }, void 0, false, {
         fileName: "[project]/src/components/lots/lot-card.tsx",
-        lineNumber: 30,
+        lineNumber: 34,
         columnNumber: 5
     }, this);
 };
@@ -389,7 +401,7 @@ const SellerInfo = ({ lot })=>{
             className: "h-4 w-3/4 mt-2"
         }, void 0, false, {
             fileName: "[project]/src/components/lots/lot-card.tsx",
-            lineNumber: 41,
+            lineNumber: 45,
             columnNumber: 16
         }, this);
     }
@@ -403,7 +415,7 @@ const SellerInfo = ({ lot })=>{
                 children: "Продавець:"
             }, void 0, false, {
                 fileName: "[project]/src/components/lots/lot-card.tsx",
-                lineNumber: 50,
+                lineNumber: 54,
                 columnNumber: 13
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -411,7 +423,7 @@ const SellerInfo = ({ lot })=>{
                 children: lot.sellerUsername
             }, void 0, false, {
                 fileName: "[project]/src/components/lots/lot-card.tsx",
-                lineNumber: 51,
+                lineNumber: 55,
                 columnNumber: 13
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -422,7 +434,7 @@ const SellerInfo = ({ lot })=>{
                         children: sellerProfile.sellerRating?.toFixed(1)
                     }, void 0, false, {
                         fileName: "[project]/src/components/lots/lot-card.tsx",
-                        lineNumber: 55,
+                        lineNumber: 59,
                         columnNumber: 17
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$rating$2d$stars$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["RatingStars"], {
@@ -430,7 +442,7 @@ const SellerInfo = ({ lot })=>{
                         starSize: 12
                     }, void 0, false, {
                         fileName: "[project]/src/components/lots/lot-card.tsx",
-                        lineNumber: 56,
+                        lineNumber: 60,
                         columnNumber: 17
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -441,19 +453,19 @@ const SellerInfo = ({ lot })=>{
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/lots/lot-card.tsx",
-                        lineNumber: 57,
+                        lineNumber: 61,
                         columnNumber: 17
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/components/lots/lot-card.tsx",
-                lineNumber: 54,
+                lineNumber: 58,
                 columnNumber: 13
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/src/components/lots/lot-card.tsx",
-        lineNumber: 49,
+        lineNumber: 53,
         columnNumber: 9
     }, this);
 };
@@ -563,17 +575,17 @@ const LotCard = ({ lot, onLotPurchased })=>{
                                 className: "object-contain"
                             }, void 0, false, {
                                 fileName: "[project]/src/components/lots/lot-card.tsx",
-                                lineNumber: 141,
+                                lineNumber: 145,
                                 columnNumber: 13
                             }, this)
                         }, void 0, false, {
                             fileName: "[project]/src/components/lots/lot-card.tsx",
-                            lineNumber: 140,
+                            lineNumber: 144,
                             columnNumber: 11
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/src/components/lots/lot-card.tsx",
-                        lineNumber: 139,
+                        lineNumber: 143,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["CardContent"], {
@@ -585,7 +597,7 @@ const LotCard = ({ lot, onLotPurchased })=>{
                                 children: lot.name
                             }, void 0, false, {
                                 fileName: "[project]/src/components/lots/lot-card.tsx",
-                                lineNumber: 151,
+                                lineNumber: 155,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -596,7 +608,7 @@ const LotCard = ({ lot, onLotPurchased })=>{
                                         name: category?.name
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/lots/lot-card.tsx",
-                                        lineNumber: 154,
+                                        lineNumber: 158,
                                         columnNumber: 13
                                     }, this),
                                     subcategory && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(CategoryBadge, {
@@ -604,20 +616,20 @@ const LotCard = ({ lot, onLotPurchased })=>{
                                         name: subcategory?.name
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/lots/lot-card.tsx",
-                                        lineNumber: 155,
+                                        lineNumber: 159,
                                         columnNumber: 29
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/lots/lot-card.tsx",
-                                lineNumber: 153,
+                                lineNumber: 157,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(SellerInfo, {
                                 lot: lot
                             }, void 0, false, {
                                 fileName: "[project]/src/components/lots/lot-card.tsx",
-                                lineNumber: 158,
+                                lineNumber: 162,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -628,7 +640,7 @@ const LotCard = ({ lot, onLotPurchased })=>{
                                         children: label
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/lots/lot-card.tsx",
-                                        lineNumber: 161,
+                                        lineNumber: 165,
                                         columnNumber: 13
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -636,32 +648,32 @@ const LotCard = ({ lot, onLotPurchased })=>{
                                         children: value
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/lots/lot-card.tsx",
-                                        lineNumber: 162,
+                                        lineNumber: 166,
                                         columnNumber: 13
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/lots/lot-card.tsx",
-                                lineNumber: 160,
+                                lineNumber: 164,
                                 columnNumber: 11
                             }, this),
                             !isDirectSale && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$countdown$2d$badge$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
                                 endTime: new Date(lot.endTime)
                             }, void 0, false, {
                                 fileName: "[project]/src/components/lots/lot-card.tsx",
-                                lineNumber: 164,
+                                lineNumber: 168,
                                 columnNumber: 29
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/lots/lot-card.tsx",
-                        lineNumber: 150,
+                        lineNumber: 154,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/components/lots/lot-card.tsx",
-                lineNumber: 138,
+                lineNumber: 142,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["CardFooter"], {
@@ -676,20 +688,20 @@ const LotCard = ({ lot, onLotPurchased })=>{
                             className: "mr-2 h-4 w-4 animate-spin"
                         }, void 0, false, {
                             fileName: "[project]/src/components/lots/lot-card.tsx",
-                            lineNumber: 175,
+                            lineNumber: 179,
                             columnNumber: 29
                         }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$tag$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Tag$3e$__["Tag"], {
                             className: "mr-2 h-4 w-4"
                         }, void 0, false, {
                             fileName: "[project]/src/components/lots/lot-card.tsx",
-                            lineNumber: 175,
+                            lineNumber: 179,
                             columnNumber: 81
                         }, this),
                         isBuying ? 'Покупка...' : `Купити за ${lot.price} грн`
                     ]
                 }, void 0, true, {
                     fileName: "[project]/src/components/lots/lot-card.tsx",
-                    lineNumber: 169,
+                    lineNumber: 173,
                     columnNumber: 14
                 }, this) : lot.buyNowPrice ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Button"], {
                     variant: "default",
@@ -701,20 +713,20 @@ const LotCard = ({ lot, onLotPurchased })=>{
                             className: "mr-2 h-4 w-4 animate-spin"
                         }, void 0, false, {
                             fileName: "[project]/src/components/lots/lot-card.tsx",
-                            lineNumber: 185,
+                            lineNumber: 189,
                             columnNumber: 25
                         }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$tag$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Tag$3e$__["Tag"], {
                             className: "mr-2 h-4 w-4"
                         }, void 0, false, {
                             fileName: "[project]/src/components/lots/lot-card.tsx",
-                            lineNumber: 185,
+                            lineNumber: 189,
                             columnNumber: 77
                         }, this),
                         isBuying ? 'Покупка...' : `Купити зараз за ${lot.buyNowPrice} грн`
                     ]
                 }, void 0, true, {
                     fileName: "[project]/src/components/lots/lot-card.tsx",
-                    lineNumber: 179,
+                    lineNumber: 183,
                     columnNumber: 11
                 }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Button"], {
                     variant: "outline",
@@ -725,23 +737,23 @@ const LotCard = ({ lot, onLotPurchased })=>{
                         children: "Зробити ставку"
                     }, void 0, false, {
                         fileName: "[project]/src/components/lots/lot-card.tsx",
-                        lineNumber: 190,
+                        lineNumber: 194,
                         columnNumber: 13
                     }, this)
                 }, void 0, false, {
                     fileName: "[project]/src/components/lots/lot-card.tsx",
-                    lineNumber: 189,
+                    lineNumber: 193,
                     columnNumber: 12
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/src/components/lots/lot-card.tsx",
-                lineNumber: 167,
+                lineNumber: 171,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/src/components/lots/lot-card.tsx",
-        lineNumber: 137,
+        lineNumber: 141,
         columnNumber: 5
     }, this);
 };

@@ -25,7 +25,7 @@ interface ActivityItem {
   type: 'bid' | 'sale';
   item: string;
   value: string;
-  user: string; // We'll use a generic name for now
+  user: string;
   timestamp: Date;
 }
 
@@ -49,7 +49,7 @@ export const getSellerDashboardData = functions.https.onCall(async (data, contex
   const sellerUid = context.auth.uid;
 
   try {
-    // --- Stats and Chart Data (existing logic) ---
+    // --- Stats and Chart Data ---
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
     const twentyFourHoursAgo = new Date();
@@ -57,6 +57,7 @@ export const getSellerDashboardData = functions.https.onCall(async (data, contex
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
+    // Run all stat queries in parallel
     const [ordersSnap, activeListingsSnap, newOrdersSnap, newBidsSnap, salesSnap] = await Promise.all([
       db.collection("orders").where("sellerId", "==", sellerUid).where("status", "==", "completed").where("createdAt", ">=", admin.firestore.Timestamp.fromDate(thirtyDaysAgo)).get(),
       db.collection("lots").where("sellerId", "==", sellerUid).where("status", "in", ["active", "published"]).get(),
@@ -65,11 +66,13 @@ export const getSellerDashboardData = functions.https.onCall(async (data, contex
       db.collection("orders").where("sellerId", "==", sellerUid).where("status", "==", "completed").where("createdAt", ">=", admin.firestore.Timestamp.fromDate(sevenDaysAgo)).get()
     ]);
 
+    // Process stats
     const totalRevenue = ordersSnap.docs.reduce((acc, doc) => acc + doc.data().totalPrice, 0);
     const activeListings = activeListingsSnap.size;
     const newFixedPriceOrders = newOrdersSnap.size;
     const newAuctionBids = newBidsSnap.size;
     
+    // Process chart data
     const salesByDay = new Map<string, number>();
     for (let i = 0; i < 7; i++) {
         const d = new Date();
@@ -84,103 +87,65 @@ export const getSellerDashboardData = functions.https.onCall(async (data, contex
     const salesChartData = Array.from(salesByDay.entries()).map(([date, revenue]) => ({ date, revenue })).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
     // --- Fetch Data for Widgets ---
-    
-    // Active Auctions
-    const activeAuctionsSnap = await db.collection("lots")
-      .where("sellerId", "==", sellerUid)
-      .where("status", "==", "active")
-      .where("type", "==", "auction")
-      .orderBy("endDate", "asc")
-      .limit(5)
-      .get();
+    const [activeAuctionsSnap, fixedPriceSnap, recentBidsSnap, recentOrdersSnap] = await Promise.all([
+        db.collection("lots").where("sellerId", "==", sellerUid).where("status", "==", "active").where("type", "==", "auction").orderBy("endTime", "asc").limit(5).get(),
+        db.collection("lots").where("sellerId", "==", sellerUid).where("status", "in", ["active", "published"]).where("type", "==", "direct").orderBy("createdAt", "desc").limit(5).get(),
+        db.collectionGroup("bids").where("lotSellerId", "==", sellerUid).orderBy("createdAt", "desc").limit(5).get(),
+        db.collection("orders").where("sellerId", "==", sellerUid).orderBy("createdAt", "desc").limit(5).get()
+    ]);
     
     const activeAuctions = activeAuctionsSnap.docs.map(doc => {
         const lot = doc.data() as Lot;
-        return {
-            id: doc.id,
-            name: lot.title,
-            price: lot.currentPrice?.toLocaleString('uk-UA') + ' ₴' || lot.startPrice.toLocaleString('uk-UA') + ' ₴',
-            bids: lot.bidsCount || 0,
-            imageUrl: lot.imageUrls?.[0] || '',
-            endDate: (lot.endDate as admin.firestore.Timestamp).toDate()
+        return { 
+            id: doc.id, 
+            name: lot.name, 
+            price: `${lot.currentBid || lot.startingBid} ₴`, 
+            bids: lot.bidCount || 0, 
+            imageUrl: lot.images?.[0], 
+            endDate: new Date(lot.endTime) 
         };
     });
 
-    // Fixed Price Items
-    const fixedPriceSnap = await db.collection("lots")
-      .where("sellerId", "==", sellerUid)
-      .where("status", "in", ["active", "published"])
-      .where("type", "==", "fixed_price")
-      .orderBy("createdAt", "desc")
-      .limit(5)
-      .get();
-      
     const fixedPriceItems = fixedPriceSnap.docs.map(doc => {
         const lot = doc.data() as Lot;
-        return {
-            id: doc.id,
-            name: lot.title,
-            price: lot.startPrice.toLocaleString('uk-UA') + ' ₴',
-            stock: lot.stock || 0,
-            imageUrl: lot.imageUrls?.[0] || ''
+        return { 
+            id: doc.id, 
+            name: lot.name, 
+            price: `${lot.price} ₴`, 
+            imageUrl: lot.images?.[0] 
         };
     });
-
-    // Recent Activity (Sales and Bids)
-    const recentBidsSnap = await db.collectionGroup("bids")
-        .where("lotSellerId", "==", sellerUid)
-        .orderBy("createdAt", "desc")
-        .limit(5)
-        .get();
-    
-    const recentOrdersSnap = await db.collection("orders")
-        .where("sellerId", "==", sellerUid)
-        .orderBy("createdAt", "desc")
-        .limit(5)
-        .get();
 
     let recentActivity: ActivityItem[] = [];
     recentBidsSnap.forEach(doc => {
         const bid = doc.data();
-        recentActivity.push({
-            id: doc.id,
-            type: 'bid',
-            item: bid.lotTitle || 'Невідомий лот',
-            value: bid.amount.toLocaleString('uk-UA') + ' ₴',
-            user: bid.userName || 'Анонім',
-            timestamp: (bid.createdAt as admin.firestore.Timestamp).toDate()
-        });
+        recentActivity.push({ id: doc.id, type: 'bid', item: bid.lotTitle, value: `${bid.amount} ₴`, user: bid.username, timestamp: (bid.createdAt as admin.firestore.Timestamp).toDate() });
     });
-
     recentOrdersSnap.forEach(doc => {
         const order = doc.data();
-        recentActivity.push({
-            id: doc.id,
-            type: 'sale',
-            item: order.lotTitle || 'Невідомий товар',
-            value: order.totalPrice.toLocaleString('uk-UA') + ' ₴',
-            user: order.buyerName || 'Анонім',
-            timestamp: (order.createdAt as admin.firestore.Timestamp).toDate()
-        });
+        recentActivity.push({ id: doc.id, type: 'sale', item: order.lotTitle, value: `${order.totalPrice} ₴`, user: order.buyerName, timestamp: (order.createdAt as admin.firestore.Timestamp).toDate() });
     });
     
-    // Sort combined activities by date and take the latest 5
-    recentActivity.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
-    recentActivity = recentActivity.slice(0, 5);
+    recentActivity = recentActivity.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime()).slice(0, 5);
     
-    // --- Construct final object ---
+    // --- Construct final object ensuring all keys are present ---
     const dashboardData: SellerDashboardData = {
-        stats: { totalRevenue, activeListings, newFixedPriceOrders, newAuctionBids },
-        salesChartData,
-        activeAuctions,
-        fixedPriceItems,
-        recentActivity,
+        stats: { 
+            totalRevenue: totalRevenue || 0,
+            activeListings: activeListings || 0,
+            newFixedPriceOrders: newFixedPriceOrders || 0,
+            newAuctionBids: newAuctionBids || 0 
+        },
+        salesChartData: salesChartData || [],
+        activeAuctions: activeAuctions || [],
+        fixedPriceItems: fixedPriceItems || [],
+        recentActivity: recentActivity || [],
     };
 
     return dashboardData;
 
   } catch (error) {
-    console.error("Error in getSellerDashboardData for user:", sellerUid, error);
+    console.error("CRITICAL Error in getSellerDashboardData for user:", sellerUid, error);
     throw new HttpsError("internal", "Could not fetch dashboard data.", error);
   }
 });

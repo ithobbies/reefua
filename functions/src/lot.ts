@@ -4,6 +4,7 @@ import type { Lot, User } from "./types";
 
 const db = admin.firestore();
 
+// Minor comment to force re-deployment
 export const createLot = functions.region('us-central1').https.onCall(async (data, context) => {
     if (!context.auth) {
         throw new functions.https.HttpsError("unauthenticated", "You must be logged in to create a lot.");
@@ -17,10 +18,8 @@ export const createLot = functions.region('us-central1').https.onCall(async (dat
     }
     const sellerUsername = (userDoc.data() as User)?.username || 'Unknown Seller';
 
-    // FIX: Added 'subcategory' to the destructuring
     const { name, description, category, subcategory, startingBid, buyNowPrice, endTime, images, parameters, type, price } = data;
 
-    // FIX: Added 'subcategory' to the validation
     if (!name || !description || !category || !subcategory || !images || !Array.isArray(images) || images.length === 0 || !type) {
         throw new functions.https.HttpsError("invalid-argument", "Required lot information is missing or invalid, including subcategory.");
     }
@@ -46,7 +45,7 @@ export const createLot = functions.region('us-central1').https.onCall(async (dat
             sellerUid,
             sellerUsername,
             category,
-            subcategory, // FIX: Added 'subcategory' to the new lot object
+            subcategory,
             status: 'active',
             createdAt: nowISO,
             endTime: thirtyDaysFromNow.toISOString(),
@@ -75,7 +74,7 @@ export const createLot = functions.region('us-central1').https.onCall(async (dat
             sellerUid,
             sellerUsername,
             category,
-            subcategory, // FIX: Added 'subcategory' to the new lot object
+            subcategory,
             status: 'active',
             createdAt: nowISO,
             parameters: parameters || {},
@@ -208,4 +207,44 @@ export const expireDirectSales = functions.pubsub.schedule('every 24 hours').onR
     await batch.commit();
     console.log(`Expired ${snapshot.size} direct sales lots.`);
     return null;
+});
+
+/**
+ * Searches active lots based on a query string.
+ * This function performs a case-insensitive search on lot name, description, and category.
+ */
+export const searchLots = functions.region('us-central1').https.onCall(async (data, context) => {
+    const { query } = data;
+
+    if (typeof query !== 'string' || query.trim().length === 0) {
+        throw new functions.https.HttpsError('invalid-argument', 'A non-empty search query string is required.');
+    }
+
+    const lowerCaseQuery = query.toLowerCase();
+
+    try {
+        const lotsSnapshot = await db.collection('lots').where('status', '==', 'active').get();
+        
+        if (lotsSnapshot.empty) {
+            return [];
+        }
+
+        const allLots = lotsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Lot[];
+
+        // Filter in memory with defensive checks for undefined fields
+        const filteredLots = allLots.filter(lot => {
+            const nameMatch = lot.name?.toLowerCase().includes(lowerCaseQuery) || false;
+            const descriptionMatch = lot.description?.toLowerCase().includes(lowerCaseQuery) || false;
+            const categoryMatch = lot.category?.toLowerCase().includes(lowerCaseQuery) || false;
+            const subcategoryMatch = lot.subcategory?.toLowerCase().includes(lowerCaseQuery) || false;
+
+            return nameMatch || descriptionMatch || categoryMatch || subcategoryMatch;
+        });
+
+        return filteredLots;
+
+    } catch (error) {
+        console.error("Error searching lots:", error);
+        throw new functions.https.HttpsError('internal', 'An error occurred while searching for lots.');
+    }
 });

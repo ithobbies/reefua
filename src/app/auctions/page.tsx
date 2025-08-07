@@ -1,83 +1,83 @@
 
 'use client';
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import LotCard from '@/components/lots/lot-card';
-import { db } from '@/lib/firebase';
+import { db, functions } from '@/lib/firebase';
+import { httpsCallable } from 'firebase/functions';
 import { collection, getDocs, query, where, orderBy, QueryConstraint, doc, getDoc } from 'firebase/firestore';
 import { type Lot, type SellerProfile } from '@/functions/src/types';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
-import { Search } from 'lucide-react';
+import { Search, Loader2 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 type SaleTypeFilter = 'all' | 'auction' | 'direct';
 
-export default function AuctionsPage() {
+function AuctionsPageContent() {
+  const { toast } = useToast();
+  const searchParams = useSearchParams();
+  const searchQuery = searchParams.get('q');
+
   const [lots, setLots] = useState<Lot[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [saleTypeFilter, setSaleTypeFilter] = useState<SaleTypeFilter>('all');
-  const [searchTerm, setSearchTerm] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(true);
+  const [pageTitle, setPageTitle] = useState<string>('Всі активні лоти');
 
   useEffect(() => {
-    document.title = 'Всі лоти - ReefUA';
-
-    const fetchLotsAndSellers = async () => {
+    document.title = searchQuery ? `Результати пошуку: ${searchQuery}` : 'Всі лоти - ReefUA';
+    
+    const fetchLots = async () => {
       setLoading(true);
       try {
-        const lotsCollection = collection(db, 'lots');
-        const queryConstraints: QueryConstraint[] = [where('status', '==', 'active')];
+        let lotsList: Lot[] = [];
 
-        if (saleTypeFilter !== 'all') {
-          queryConstraints.push(where('type', '==', saleTypeFilter));
+        if (searchQuery) {
+          setPageTitle(`Результати пошуку для: "${searchQuery}"`);
+          const searchLotsFunc = httpsCallable(functions, 'searchLots');
+          const result: any = await searchLotsFunc({ query: searchQuery });
+          lotsList = result.data as Lot[];
+        } else {
+          setPageTitle('Всі активні лоти');
+          const lotsCollection = collection(db, 'lots');
+          const q = query(lotsCollection, where('status', '==', 'active'), orderBy('createdAt', 'desc'));
+          const lotSnapshot = await getDocs(q);
+          lotsList = lotSnapshot.docs.map(doc => ({ ...doc.data(), id: doc.id })) as Lot[];
         }
-
-        const q = query(lotsCollection, ...queryConstraints, orderBy('endTime', 'asc'));
-        const lotSnapshot = await getDocs(q);
-        const lotsList = lotSnapshot.docs.map(doc => ({ ...doc.data(), id: doc.id })) as Lot[];
-
-        const sellerUids = [...new Set(lotsList.map(lot => lot.sellerUid))];
-        const sellerProfiles: Record<string, SellerProfile> = {};
-
-        for (const uid of sellerUids) {
-          const userDoc = await getDoc(doc(db, 'users', uid));
-          if (userDoc.exists()) {
-            const userData = userDoc.data();
-            sellerProfiles[uid] = {
-              name: userData.username,
-              rating: userData.sellerRating || 0,
-              reviewsCount: userData.sellerReviewCount || 0,
-              avatar: userData.photoURL || undefined,
-            };
-          }
-        }
-        console.log('Seller Profiles:', sellerProfiles);
-
-        const lotsWithSellers = lotsList.map(lot => ({
-          ...lot,
-          sellerProfile: sellerProfiles[lot.sellerUid],
-        }));
         
-        console.log('Lots with Sellers:', lotsWithSellers);
-
-        setLots(lotsWithSellers);
-
-        const categoriesCollection = collection(db, 'categories');
-        const categorySnapshot = await getDocs(categoriesCollection);
-        const categoriesList = categorySnapshot.docs.map(doc => doc.data().name);
-        setCategories(categoriesList);
+        setLots(lotsList);
 
       } catch (error) {
-        console.error("Error fetching data: ", error);
+        console.error("Error fetching lots: ", error);
+        toast({
+            variant: 'destructive',
+            title: 'Помилка завантаження',
+            description: 'Не вдалося завантажити лоти. Спробуйте оновити сторінку.'
+        })
       } finally {
         setLoading(false);
       }
     };
+    
+    // This part can run independently as it's for filtering UI
+    const fetchCategories = async () => {
+        try {
+            const categoriesCollection = collection(db, 'categories');
+            const categorySnapshot = await getDocs(categoriesCollection);
+            const categoriesList = categorySnapshot.docs.map(doc => doc.data().name);
+            setCategories(categoriesList);
+        } catch (error) {
+            console.error("Error fetching categories: ", error);
+        }
+    };
 
-    fetchLotsAndSellers();
-  }, [saleTypeFilter]);
+    fetchLots();
+    fetchCategories();
+  }, [searchQuery, toast]);
   
   const handleLotPurchased = (lotId: string) => {
     setLots(prevLots => prevLots.filter(lot => lot.id !== lotId));
@@ -86,29 +86,36 @@ export default function AuctionsPage() {
   const filteredLots = useMemo(() => {
     return lots.filter(lot => {
       const matchesCategory = selectedCategory === 'all' || lot.category === selectedCategory;
-      const matchesSearch = searchTerm === '' || lot.name.toLowerCase().includes(searchTerm.toLowerCase()) || (lot.description && lot.description.toLowerCase().includes(searchTerm.toLowerCase()));
-      return matchesCategory && matchesSearch;
+      const matchesSaleType = saleTypeFilter === 'all' || lot.type === saleTypeFilter;
+      return matchesCategory && matchesSaleType;
     });
-  }, [lots, selectedCategory, searchTerm]);
+  }, [lots, selectedCategory, saleTypeFilter]);
   
   const renderLots = (lotsToRender: Lot[]) => (
      loading ? (
-        <div className="text-center py-10">Завантаження лотів...</div>
+        <div className="text-center py-20 flex flex-col items-center gap-4">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <p>Завантаження лотів...</p>
+        </div>
       ) : lotsToRender.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-6 space-y-6">
           {lotsToRender.map((lot) => (
             <LotCard key={lot.id} lot={lot} onLotPurchased={handleLotPurchased} />
           ))}
         </div>
       ) : (
-        <p className="text-center text-muted-foreground py-10">
-          Активних лотів не знайдено. Зазирніть пізніше!
+        <p className="text-center text-muted-foreground py-20">
+          {searchQuery ? `Лотів за запитом "${searchQuery}" не знайдено.` : 'Активних лотів не знайдено. Зазирніть пізніше!'}
         </p>
       )
   );
 
   return (
     <div>
+        <div className="mb-8">
+            <h1 className="text-3xl font-headline font-bold mb-2">{pageTitle}</h1>
+            <p className="text-muted-foreground">Знайдіть найкращі пропозиції від перевірених продавців нашої спільноти.</p>
+        </div>
         <Tabs defaultValue="all" onValueChange={(value) => setSaleTypeFilter(value as SaleTypeFilter)}>
           <div className="mb-8 space-y-4 md:space-y-0 md:flex md:justify-between md:items-center">
              <TabsList>
@@ -117,16 +124,6 @@ export default function AuctionsPage() {
                 <TabsTrigger value="direct">Продаж</TabsTrigger>
             </TabsList>
             <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
-              <div className="relative w-full sm:w-auto sm:flex-grow md:min-w-[200px]">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  type="search"
-                  placeholder="Пошук за назвою чи описом..."
-                  className="pl-9 w-full"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </div>
               <Select onValueChange={setSelectedCategory} defaultValue="all">
                 <SelectTrigger className="w-full sm:w-auto md:min-w-[200px]">
                   <SelectValue placeholder="Фільтрувати за категорією" />
@@ -145,12 +142,22 @@ export default function AuctionsPage() {
             {renderLots(filteredLots)}
           </TabsContent>
           <TabsContent value="auction">
-            {renderLots(filteredLots.filter(lot => lot.type === 'auction'))}
+            {renderLots(filteredLots)}
           </TabsContent>
           <TabsContent value="direct">
-            {renderLots(filteredLots.filter(lot => lot.type === 'direct'))}
+            {renderLots(filteredLots)}
           </TabsContent>
         </Tabs>
     </div>
   );
+}
+
+
+// Use Suspense to handle the initial render of searchParams
+export default function AuctionsPage() {
+    return (
+        <Suspense fallback={<div>Завантаження...</div>}>
+            <AuctionsPageContent />
+        </Suspense>
+    )
 }

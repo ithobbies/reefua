@@ -12,6 +12,7 @@ import { productCategories } from '@/lib/categories-data';
 import { categoryColors } from '@/lib/category-colors';
 
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tag, Loader2 } from 'lucide-react';
 import CountdownBadge from '@/components/ui/countdown-badge';
@@ -25,11 +26,14 @@ interface LotCardProps {
 
 const CategoryBadge = ({ slug, name }: { slug?: string; name?: string }) => {
   if (!slug || !name) return null;
-  const colorClass = categoryColors[slug] || 'bg-gray-200 text-gray-800';
+  const colorClass = categoryColors[slug] || 'bg-secondary text-secondary-foreground';
+  
+  // By removing the variant prop, we prevent default variant styles from overriding our custom colors.
+  // We add 'border-transparent' to be consistent with other badge variants that hide the default border.
   return (
-    <div className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold ${colorClass}`}>
+    <Badge className={`border-transparent ${colorClass}`}>
       {name}
-    </div>
+    </Badge>
   );
 };
 

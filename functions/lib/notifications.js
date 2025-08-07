@@ -1,61 +1,209 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.onOrderCreatedSendEmail = void 0;
+exports.onOrderCreatedSendEmail = exports.onNewLotSendTelegramNotification = exports.onNewBidNotifyOutbidUser = exports.onLotSold = exports.onNewChatMessage = void 0;
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
-// To send emails, you would typically use a service like SendGrid, Mailgun, etc.
-// For this example, we'll log to the console, but the structure is here.
-// import * as sendgrid from '@sendgrid/mail';
-// sendgrid.setApiKey(functions.config().sendgrid.key);
+const axios_1 = require("axios");
+const params_1 = require("firebase-functions/params");
+const telegramBotToken = (0, params_1.defineString)('TELEGRAM_BOT_TOKEN');
+const telegramChatId = (0, params_1.defineString)('TELEGRAM_CHAT_ID');
 const db = admin.firestore();
-exports.onOrderCreatedSendEmail = functions.region('us-central1').firestore
-    .document('orders/{orderId}')
-    .onCreate(async (snap, context) => {
-    const order = snap.data();
+// --- Reusable Telegram Functions ---
+async function sendTelegramMessage(userId, text) {
+    var _a;
+    const token = telegramBotToken.value();
+    if (!token) {
+        console.error('TG token not configured.');
+        return;
+    }
+    const url = `https://api.telegram.org/bot${token}/sendMessage`;
     try {
-        // Get seller's and buyer's user data to find their emails
-        const sellerDoc = await db.collection('users').doc(order.sellerUid).get();
-        const buyerDoc = await db.collection('users').doc(order.buyerUid).get();
-        if (!sellerDoc.exists || !buyerDoc.exists) {
-            console.error(`Could not find user data for seller ${order.sellerUid} or buyer ${order.buyerUid}`);
-            return;
-        }
-        const seller = sellerDoc.data();
-        const buyer = buyerDoc.data();
-        // --- Email to Seller ---
-        const sellerEmail = {
-            to: seller.email,
-            from: 'no-reply@reefua.com', // Use a verified sender email
-            subject: `🎉 Нове замовлення #${order.id.substring(0, 6)} на ReefUA!`,
-            html: `
-                    <h1>Вітаємо, ${seller.username}!</h1>
-                    <p>Ви отримали нове замовлення від покупця ${buyer.username}.</p>
-                    <p><strong>Сума замовлення:</strong> ${order.totalAmount.toFixed(2)} грн</p>
-                    <p>Будь ласка, увійдіть у свою <a href="https://your-app-url/dashboard/sales/${order.id}">панель керування</a>, щоб переглянути деталі та обробити замовлення.</p>
-                    <p>Дякуємо за продаж на ReefUA!</p>
-                `,
-        };
-        // --- Email to Buyer ---
-        const buyerEmail = {
-            to: buyer.email,
-            from: 'no-reply@reefua.com',
-            subject: `✅ Ваше замовлення #${order.id.substring(0, 6)} на ReefUA підтверджено!`,
-            html: `
-                    <h1>Дякуємо за покупку, ${buyer.username}!</h1>
-                    <p>Ваше замовлення, що містить лоти від продавця ${seller.username}, було успішно оформлено.</p>
-                    <p><strong>Сума замовлення:</strong> ${order.totalAmount.toFixed(2)} грн</p>
-                    <p>Продавець отримав сповіщення і незабаром обробить ваше замовлення. Ви можете переглянути його статус у <a href="https://your-app-url/profile">вашому профілі</a>.</p>
-                `,
-        };
-        // In a real app, you would uncomment the following lines after setting up an email service
-        // await sendgrid.send(sellerEmail);
-        // await sendgrid.send(buyerEmail);
-        // Using console.log to satisfy the linter until a real email service is used.
-        console.log(`(Email-simulation) Prepared notification for seller:`, JSON.stringify(sellerEmail));
-        console.log(`(Email-simulation) Prepared notification for buyer:`, JSON.stringify(buyerEmail));
+        await axios_1.default.post(url, { chat_id: userId, text, parse_mode: 'Markdown' });
     }
     catch (error) {
-        console.error(`Failed to send notification emails for order ${order.id}`, error);
+        console.error(`Failed to send message to user ${userId}:`, ((_a = error.response) === null || _a === void 0 ? void 0 : _a.data) || error.message);
+    }
+}
+async function sendTelegramPhoto(chatId, photoUrl, caption) {
+    var _a;
+    const token = telegramBotToken.value();
+    if (!token) {
+        console.error('TG token not configured.');
+        return;
+    }
+    const url = `https://api.telegram.org/bot${token}/sendPhoto`;
+    try {
+        await axios_1.default.post(url, { chat_id: chatId, photo: photoUrl, caption, parse_mode: 'Markdown' });
+        console.log('Successfully sent Telegram photo to', chatId);
+    }
+    catch (error) {
+        console.error('Failed to send Telegram photo:', ((_a = error.response) === null || _a === void 0 ? void 0 : _a.data) || error.message);
+    }
+}
+// --- Firestore Triggers for Notifications ---
+/**
+ * Triggered when a new chat message is sent.
+ * Notifies the recipient via Telegram.
+ */
+exports.onNewChatMessage = functions.region('us-central1').firestore
+    .document('chats/{chatId}/messages/{messageId}')
+    .onCreate(async (snap, context) => {
+    var _a;
+    const message = snap.data();
+    const { chatId } = context.params;
+    const chatDocRef = db.collection('chats').doc(chatId);
+    const chatDoc = await chatDocRef.get();
+    if (!chatDoc.exists) {
+        console.log(`Chat document ${chatId} not found.`);
+        return;
+    }
+    const chat = chatDoc.data();
+    const senderUid = message.senderUid;
+    const recipientUid = chat.participantUids.find(uid => uid !== senderUid);
+    if (!recipientUid) {
+        console.log("Could not determine the recipient.");
+        return;
+    }
+    const userDoc = await db.collection('users').doc(recipientUid).get();
+    if (!userDoc.exists) {
+        console.log(`Recipient user ${recipientUid} not found.`);
+        return;
+    }
+    const recipient = userDoc.data();
+    const telegramId = recipient.telegramUserId;
+    if (telegramId) {
+        const senderUsername = ((_a = chat.participantInfo[senderUid]) === null || _a === void 0 ? void 0 : _a.username) || 'Користувач';
+        const siteUrl = 'https://reefua.store';
+        const chatUrl = `${siteUrl}/dashboard/messages`;
+        const notificationMessage = `
+📬 *Нове повідомлення від ${senderUsername}*
+
+Щодо лоту: *"${chat.lotName}"*
+
+[Відповісти на сайті](${chatUrl})
+            `;
+        await sendTelegramMessage(telegramId, notificationMessage);
     }
 });
+/**
+ * Triggered when a lot's status changes.
+ * Sends notifications to the winner and seller when a lot is sold.
+ */
+exports.onLotSold = functions.region('us-central1').firestore
+    .document('lots/{lotId}')
+    .onUpdate(async (change, context) => {
+    var _a;
+    const lotBefore = change.before.data();
+    const lotAfter = change.after.data();
+    const lotId = context.params.lotId;
+    if (lotBefore.status !== 'sold' && lotAfter.status === 'sold') {
+        const winnerId = lotAfter.winnerUid;
+        const sellerId = lotAfter.sellerUid;
+        const siteUrl = 'https://reefua.store';
+        if (!winnerId) {
+            console.log(`Lot ${lotId} was marked as sold without a winnerUid.`);
+            return;
+        }
+        const [winnerDoc, sellerDoc] = await Promise.all([
+            db.collection('users').doc(winnerId).get(),
+            db.collection('users').doc(sellerId).get()
+        ]);
+        if (winnerDoc.exists) {
+            const winner = winnerDoc.data();
+            if (winner.telegramUserId) {
+                const message = `
+🎉 *Вітаємо! Ви виграли лот!*
+
+Ви успішно виграли аукціон на лот *"${lotAfter.name}"* за ціною *${lotAfter.finalPrice || lotAfter.currentBid} грн*.
+
+Будь ласка, перейдіть до [ваших покупок](${siteUrl}/profile), щоб оформити замовлення.
+                    `;
+                await sendTelegramMessage(winner.telegramUserId, message);
+            }
+        }
+        if (sellerDoc.exists) {
+            const seller = sellerDoc.data();
+            if (seller.telegramUserId) {
+                const winnerUsername = ((_a = winnerDoc.data()) === null || _a === void 0 ? void 0 : _a.username) || 'переможець';
+                const message = `
+✅ *Ваш лот продано!*
+
+Ваш лот *"${lotAfter.name}"* було успішно продано користувачу *${winnerUsername}* за ціною *${lotAfter.finalPrice || lotAfter.currentBid} грн*.
+
+Очікуйте на оформлення замовлення покупцем. [Переглянути продаж](${siteUrl}/dashboard/sales)
+                    `;
+                await sendTelegramMessage(seller.telegramUserId, message);
+            }
+        }
+    }
+});
+/**
+ * Triggered when a new bid is placed on a lot.
+ * Notifies the previously outbid user.
+ */
+exports.onNewBidNotifyOutbidUser = functions.region('us-central1').firestore
+    .document('lots/{lotId}/bids/{bidId}')
+    .onCreate(async (snap, context) => {
+    const { lotId } = context.params;
+    const bidsRef = db.collection('lots').doc(lotId).collection('bids');
+    const bidsSnap = await bidsRef.orderBy('amount', 'desc').get();
+    if (bidsSnap.docs.length < 2) {
+        return;
+    }
+    const highestBidder = bidsSnap.docs[0].data();
+    const outbidUserBid = bidsSnap.docs[1].data();
+    if (highestBidder.userUid === outbidUserBid.userUid) {
+        return;
+    }
+    const userDoc = await db.collection('users').doc(outbidUserBid.userUid).get();
+    if (!userDoc.exists) {
+        return;
+    }
+    const outbidUser = userDoc.data();
+    const telegramId = outbidUser.telegramUserId;
+    if (telegramId) {
+        const lotDoc = await db.collection('lots').doc(lotId).get();
+        const lot = lotDoc.data();
+        const lotUrl = `https://reefua.store/lot/${lotId}`;
+        const message = `
+🔴 *Вашу ставку перебито!*
+
+Вашу ставку на лот *"${lot.name}"* було перебито.
+Нова ставка: *${highestBidder.amount} грн*.
+
+[Зробити нову ставку](${lotUrl})
+            `;
+        await sendTelegramMessage(telegramId, message);
+    }
+});
+/**
+ * Triggered when a new lot is created.
+ */
+exports.onNewLotSendTelegramNotification = functions.region('us-central1').firestore
+    .document('lots/{lotId}')
+    .onCreate(async (snap, context) => {
+    const lot = snap.data();
+    const lotId = context.params.lotId;
+    if (lot.status !== 'active' || !lot.images || lot.images.length === 0) {
+        return;
+    }
+    const lotUrl = `https://reefua.store/lot/${lotId}`;
+    const imageUrl = lot.images[0];
+    let priceInfo = lot.type === 'auction'
+        ? `*Стартова ціна:* ${lot.startingBid} грн` + (lot.buyNowPrice ? `\n*Купити зараз:* ${lot.buyNowPrice} грн` : '')
+        : `*Ціна:* ${lot.price} грн`;
+    const caption = `
+🆕 *Новий лот на ReefUA!*
+
+*Назва:* ${lot.name}
+*Продавець:* ${lot.sellerUsername}
+${priceInfo}
+
+[Переглянути лот](${lotUrl})
+        `;
+    await sendTelegramPhoto(telegramChatId.value(), imageUrl, caption);
+});
+exports.onOrderCreatedSendEmail = functions.region('us-central1').firestore
+    .document('orders/{orderId}')
+    .onCreate(async (snap, context) => { });
 //# sourceMappingURL=notifications.js.map

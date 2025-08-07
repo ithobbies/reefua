@@ -1949,8 +1949,10 @@ function DashboardPage() {
     const { toast } = (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$hooks$2f$use$2d$toast$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useToast"])();
     const [data, setData] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(null);
     const [loading, setLoading] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(true);
+    console.log('Rendering DashboardPage. User:', user, 'Data state:', data);
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
         "DashboardPage.useEffect": ()=>{
+            console.log('useEffect triggered. User:', user);
             if (!user) {
                 setLoading(false);
                 return;
@@ -1958,10 +1960,12 @@ function DashboardPage() {
             const fetchDashboardData = {
                 "DashboardPage.useEffect.fetchDashboardData": async ()=>{
                     setLoading(true);
+                    console.log('Fetching dashboard data for user:', user.uid);
                     const functions = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$functions$2f$dist$2f$esm$2f$index$2e$esm2017$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["getFunctions"])();
                     const getSellerDashboardData = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$functions$2f$dist$2f$esm$2f$index$2e$esm2017$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["httpsCallable"])(functions, 'getSellerDashboardData');
                     try {
                         const result = await getSellerDashboardData();
+                        console.log('Data received from Firebase:', result.data);
                         // Defensive check to ensure arrays exist before mapping
                         const processedData = {
                             ...result.data,
@@ -1979,6 +1983,7 @@ function DashboardPage() {
                                     })
                             }["DashboardPage.useEffect.fetchDashboardData"])
                         };
+                        console.log('Setting processed data:', processedData);
                         setData(processedData);
                     } catch (error) {
                         console.error("Error fetching dashboard data:", error);
@@ -1989,6 +1994,7 @@ function DashboardPage() {
                         });
                     } finally{
                         setLoading(false);
+                        console.log('Finished fetching data.');
                     }
                 }
             }["DashboardPage.useEffect.fetchDashboardData"];
@@ -2001,7 +2007,7 @@ function DashboardPage() {
     if (loading) {
         return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$dashboard$2f$dashboard$2d$skeleton$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["DashboardSkeleton"], {}, void 0, false, {
             fileName: "[project]/src/app/dashboard/page.tsx",
-            lineNumber: 91,
+            lineNumber: 99,
             columnNumber: 12
         }, this);
     }
@@ -2010,16 +2016,17 @@ function DashboardPage() {
             children: "Будь ласка, увійдіть до системи, щоб побачити вашу панель."
         }, void 0, false, {
             fileName: "[project]/src/app/dashboard/page.tsx",
-            lineNumber: 95,
+            lineNumber: 103,
             columnNumber: 12
         }, this);
     }
     if (!data) {
+        console.log('No data available to render, showing error message.');
         return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
             children: "Не вдалося завантажити дані. Спробуйте оновити сторінку."
         }, void 0, false, {
             fileName: "[project]/src/app/dashboard/page.tsx",
-            lineNumber: 99,
+            lineNumber: 108,
             columnNumber: 12
         }, this);
     }
@@ -2034,25 +2041,25 @@ function DashboardPage() {
                         children: "Панель продавця"
                     }, void 0, false, {
                         fileName: "[project]/src/app/dashboard/page.tsx",
-                        lineNumber: 105,
+                        lineNumber: 114,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$dashboard$2f$quick$2d$actions$2d$widget$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["QuickActionsWidget"], {}, void 0, false, {
                         fileName: "[project]/src/app/dashboard/page.tsx",
-                        lineNumber: 106,
+                        lineNumber: 115,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/app/dashboard/page.tsx",
-                lineNumber: 104,
+                lineNumber: 113,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$dashboard$2f$stats$2d$widget$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["StatsWidget"], {
                 stats: data.stats
             }, void 0, false, {
                 fileName: "[project]/src/app/dashboard/page.tsx",
-                lineNumber: 109,
+                lineNumber: 118,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2062,20 +2069,20 @@ function DashboardPage() {
                         data: data.salesChartData
                     }, void 0, false, {
                         fileName: "[project]/src/app/dashboard/page.tsx",
-                        lineNumber: 112,
+                        lineNumber: 121,
                         columnNumber: 11
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$dashboard$2f$activity$2d$feed$2d$widget$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["ActivityFeedWidget"], {
                         activities: data.recentActivity
                     }, void 0, false, {
                         fileName: "[project]/src/app/dashboard/page.tsx",
-                        lineNumber: 113,
+                        lineNumber: 122,
                         columnNumber: 11
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/app/dashboard/page.tsx",
-                lineNumber: 111,
+                lineNumber: 120,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$dashboard$2f$active$2d$listings$2d$widget$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["ActiveListingsWidget"], {
@@ -2083,13 +2090,13 @@ function DashboardPage() {
                 fixedPriceItems: data.fixedPriceItems
             }, void 0, false, {
                 fileName: "[project]/src/app/dashboard/page.tsx",
-                lineNumber: 116,
+                lineNumber: 125,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/src/app/dashboard/page.tsx",
-        lineNumber: 103,
+        lineNumber: 112,
         columnNumber: 5
     }, this);
 }

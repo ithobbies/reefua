@@ -16,18 +16,18 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const admin = require("firebase-admin");
 // Initialize Firebase Admin SDK.
-// This is done once here. Other files should not re-initialize without checking admin.apps.length.
 if (admin.apps.length === 0) {
     admin.initializeApp();
 }
 // Export all functions from their respective files
-__exportStar(require("./lot"), exports); // Exports createLot, buyNow
-__exportStar(require("./user"), exports); // Exports createUserDocument, updateUserProfile
-__exportStar(require("./auction"), exports); // Exports endAuctions
-__exportStar(require("./bids"), exports); // Exports placeBid, getMyBids
-__exportStar(require("./reviews"), exports); // Exports leaveReview
-__exportStar(require("./chat"), exports); // Exports startOrGetChat, sendMessage
-__exportStar(require("./orders"), exports); // Exports createOrder, onOrderUpdate
-__exportStar(require("./notifications"), exports); // Exports onOrderCreatedSendEmail
-__exportStar(require("./dashboard"), exports); // Exports getSellerDashboardData
+__exportStar(require("./lot"), exports);
+__exportStar(require("./user"), exports);
+__exportStar(require("./auction"), exports);
+__exportStar(require("./bids"), exports);
+__exportStar(require("./reviews"), exports);
+__exportStar(require("./chat"), exports);
+__exportStar(require("./orders"), exports);
+__exportStar(require("./notifications"), exports);
+__exportStar(require("./dashboard"), exports);
+__exportStar(require("./telegram"), exports);
 //# sourceMappingURL=index.js.map
