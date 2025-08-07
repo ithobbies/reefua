@@ -37,7 +37,7 @@ const DashboardLayoutContent = ({ children }: { children: React.ReactNode }) => 
   };
 
   const menuItems = [
-    { href: '/dashboard', label: 'Оглядова панель', icon: <LayoutDashboard /> },
+    // { href: '/dashboard', label: 'Оглядова панель', icon: <LayoutDashboard /> }, // Removed as requested
     { href: '/dashboard/lots', label: 'Мої лоти', icon: <ListChecks /> },
     { href: '/dashboard/sales', label: 'Мої продажі', icon: <ShoppingCart /> },
     { href: '/dashboard/messages', label: 'Повідомлення', icon: <MessageSquare /> },

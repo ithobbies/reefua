@@ -1,9 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.expireDirectSales = exports.buyNow = exports.createLot = void 0;
+exports.searchLots = exports.expireDirectSales = exports.buyNow = exports.createLot = void 0;
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
 const db = admin.firestore();
+// Minor comment to force re-deployment
 exports.createLot = functions.region('us-central1').https.onCall(async (data, context) => {
     var _a;
     if (!context.auth) {
@@ -15,9 +16,7 @@ exports.createLot = functions.region('us-central1').https.onCall(async (data, co
         throw new functions.https.HttpsError("not-found", "Seller profile does not exist.");
     }
     const sellerUsername = ((_a = userDoc.data()) === null || _a === void 0 ? void 0 : _a.username) || 'Unknown Seller';
-    // FIX: Added 'subcategory' to the destructuring
     const { name, description, category, subcategory, startingBid, buyNowPrice, endTime, images, parameters, type, price } = data;
-    // FIX: Added 'subcategory' to the validation
     if (!name || !description || !category || !subcategory || !images || !Array.isArray(images) || images.length === 0 || !type) {
         throw new functions.https.HttpsError("invalid-argument", "Required lot information is missing or invalid, including subcategory.");
     }
@@ -39,7 +38,7 @@ exports.createLot = functions.region('us-central1').https.onCall(async (data, co
             sellerUid,
             sellerUsername,
             category,
-            subcategory, // FIX: Added 'subcategory' to the new lot object
+            subcategory,
             status: 'active',
             createdAt: nowISO,
             endTime: thirtyDaysFromNow.toISOString(),
@@ -69,7 +68,7 @@ exports.createLot = functions.region('us-central1').https.onCall(async (data, co
             sellerUid,
             sellerUsername,
             category,
-            subcategory, // FIX: Added 'subcategory' to the new lot object
+            subcategory,
             status: 'active',
             createdAt: nowISO,
             parameters: parameters || {},
@@ -183,5 +182,37 @@ exports.expireDirectSales = functions.pubsub.schedule('every 24 hours').onRun(as
     await batch.commit();
     console.log(`Expired ${snapshot.size} direct sales lots.`);
     return null;
+});
+/**
+ * Searches active lots based on a query string.
+ * This function performs a case-insensitive search on lot name, description, and category.
+ */
+exports.searchLots = functions.region('us-central1').https.onCall(async (data, context) => {
+    const { query } = data;
+    if (typeof query !== 'string' || query.trim().length === 0) {
+        throw new functions.https.HttpsError('invalid-argument', 'A non-empty search query string is required.');
+    }
+    const lowerCaseQuery = query.toLowerCase();
+    try {
+        const lotsSnapshot = await db.collection('lots').where('status', '==', 'active').get();
+        if (lotsSnapshot.empty) {
+            return [];
+        }
+        const allLots = lotsSnapshot.docs.map(doc => (Object.assign({ id: doc.id }, doc.data())));
+        // Filter in memory with defensive checks for undefined fields
+        const filteredLots = allLots.filter(lot => {
+            var _a, _b, _c, _d;
+            const nameMatch = ((_a = lot.name) === null || _a === void 0 ? void 0 : _a.toLowerCase().includes(lowerCaseQuery)) || false;
+            const descriptionMatch = ((_b = lot.description) === null || _b === void 0 ? void 0 : _b.toLowerCase().includes(lowerCaseQuery)) || false;
+            const categoryMatch = ((_c = lot.category) === null || _c === void 0 ? void 0 : _c.toLowerCase().includes(lowerCaseQuery)) || false;
+            const subcategoryMatch = ((_d = lot.subcategory) === null || _d === void 0 ? void 0 : _d.toLowerCase().includes(lowerCaseQuery)) || false;
+            return nameMatch || descriptionMatch || categoryMatch || subcategoryMatch;
+        });
+        return filteredLots;
+    }
+    catch (error) {
+        console.error("Error searching lots:", error);
+        throw new functions.https.HttpsError('internal', 'An error occurred while searching for lots.');
+    }
 });
 //# sourceMappingURL=lot.js.map

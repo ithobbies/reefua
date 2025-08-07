@@ -18,6 +18,7 @@ export interface User {
   balance?: number;
   sellerRating?: number;
   sellerReviewCount?: number;
+  telegramUserId?: number; // <-- ADDED THIS LINE
 }
 
 export interface LotParameters {

@@ -4,17 +4,15 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge'; // <-- The missing import
-import { Edit3, Bell, Gavel, Trophy, History, LayoutDashboardIcon, Loader2, MessageSquarePlus, Eye, CreditCard } from 'lucide-react';
+import { Badge } from '@/components/ui/badge'; 
+import { Edit3, Bell, Gavel, Trophy, History, LayoutDashboardIcon, Loader2, MessageSquarePlus, Eye, CreditCard, Bot, CheckCircle } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import React, { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '@/context/auth-context';
-import { doc, updateDoc, getDocs, collectionGroup, query, where, collection, getDoc, orderBy, onSnapshot } from 'firebase/firestore';
+import { doc, getDocs, collectionGroup, query, where, collection, getDoc, orderBy, onSnapshot } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
 import type { Lot, Bid } from '@/functions/src/types';
@@ -36,21 +34,12 @@ const UserProfilePage = () => {
   const [loadingBids, setLoadingBids] = useState(true);
   const [loadingWonLots, setLoadingWonLots] = useState(true);
 
-  const [pushEnabled, setPushEnabled] = useState(false);
-  const [emailNotificationsEnabled, setEmailNotificationsEnabled] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-
   useEffect(() => {
     document.title = 'Мій Профіль - ReefUA';
-    if (firestoreUser) {
-      setPushEnabled(firestoreUser.pushEnabled);
-      setEmailNotificationsEnabled(firestoreUser.emailNotifications);
-    }
-  }, [firestoreUser]);
+  }, []);
 
   const handleReviewSubmitted = useCallback(() => {
-    // This function can be used to manually re-trigger the fetch if needed,
-    // but the onSnapshot listener should handle it automatically.
+    // This function can be used to manually re-trigger the fetch if needed.
   }, []);
 
   useEffect(() => {
@@ -65,11 +54,8 @@ const UserProfilePage = () => {
     const unsubscribe = onSnapshot(allWonLotsQuery, (snapshot) => {
       const allLotsList = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id })) as Lot[];
       
-      // Filter for lots that require user action
       const actionRequiredLots = allLotsList.filter(lot => {
-        // Action 1: Lot is won and needs to be ordered
         if (lot.status === 'sold') return true;
-        // Action 2: Lot is processed/shipped/completed and a review has not been left
         if ((lot.status === 'processing' || lot.status === 'shipped' || lot.status === 'completed') && !lot.reviewLeft) return true;
         return false;
       });
@@ -121,25 +107,6 @@ const UserProfilePage = () => {
     }
   }, [user, fetchBids]);
   
-  const handleSettingsSave = async () => {
-    if (!user) return;
-    setIsSaving(true);
-    const userDocRef = doc(db, 'users', user.uid);
-    try {
-      await updateDoc(userDocRef, {
-        pushEnabled,
-        emailNotifications: emailNotificationsEnabled,
-        updatedAt: new Date().toISOString(),
-      });
-      toast({ title: 'Успішно', description: 'Налаштування збережено.' });
-    } catch (error) {
-      console.error("Error updating settings:", error);
-      toast({ variant: 'destructive', title: 'Помилка', description: 'Не вдалося зберегти налаштування.' });
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
   if (loading) {
     return <div className="container mx-auto py-8 flex justify-center items-center h-[calc(100vh-200px)]"><Loader2 className="h-16 w-16 animate-spin text-primary" /></div>;
   }
@@ -147,6 +114,10 @@ const UserProfilePage = () => {
   if (!user || !firestoreUser) {
     return <div className="container mx-auto py-8 text-center"><h1 className="text-2xl font-bold">Будь ласка, увійдіть.</h1></div>;
   }
+
+  // Correctly read the bot username from environment variables
+  const botUsername = process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME || '';
+  const telegramConnectUrl = `https://t.me/${botUsername}?start=${user.uid}`;
 
   return (
     <div className="container mx-auto py-8">
@@ -170,6 +141,7 @@ const UserProfilePage = () => {
           <TabsTrigger value="payments"><History className="inline h-4 w-4 mr-1 md:mr-2" />Історія замовлень</TabsTrigger>
           <TabsTrigger value="settings"><Bell className="inline h-4 w-4 mr-1 md:mr-2" />Сповіщення</TabsTrigger>
         </TabsList>
+        
         <TabsContent value="bids">
           <Card><CardHeader><CardTitle>Мої активні ставки</CardTitle></CardHeader>
             <CardContent>
@@ -211,13 +183,11 @@ const UserProfilePage = () => {
                         <Button variant="outline" size="sm" asChild>
                             <Link href={`/lot/${lot.id}`}><Eye className="mr-2 h-4 w-4"/>Переглянути</Link>
                         </Button>
-                        {/* Show Review button if lot is completed/shipped and no review is left */}
                         {!lot.reviewLeft && (lot.status === 'completed' || lot.status === 'shipped') && (
                           <LeaveReviewDialog lotId={lot.id} lotName={lot.name} onReviewSubmitted={handleReviewSubmitted}>
                             <Button size="sm"><MessageSquarePlus className="mr-2 h-4 w-4" />Відгук</Button>
                           </LeaveReviewDialog>
                         )}
-                        {/* Show Checkout button ONLY if the status is 'sold' */}
                         {lot.status === 'sold' && (
                             <Button size="sm" asChild>
                                 <Link href="/checkout"><CreditCard className="mr-2 h-4 w-4"/>Оформити замовлення</Link>
@@ -231,15 +201,44 @@ const UserProfilePage = () => {
             </CardContent>
           </Card>
         </TabsContent>
+        
         <TabsContent value="payments">
           <OrdersHistoryTab />
         </TabsContent>
+        
         <TabsContent value="settings">
-          <Card><CardHeader><CardTitle>Налаштування сповіщень</CardTitle></CardHeader>
-            <CardContent className="space-y-4">
-                <div className="flex items-center justify-between p-4 border rounded-lg"><Label htmlFor="push-notifications">Push-сповіщення</Label><Switch id="push-notifications" checked={pushEnabled} onCheckedChange={setPushEnabled}/></div>
-                <div className="flex items-center justify-between p-4 border rounded-lg"><Label htmlFor="email-notifications">Email-сповіщення</Label><Switch id="email-notifications" checked={emailNotificationsEnabled} onCheckedChange={setEmailNotificationsEnabled}/></div>
-                <Button onClick={handleSettingsSave} disabled={isSaving}>{isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Зберегти</Button>
+          <Card>
+            <CardHeader>
+              <CardTitle>Telegram Сповіщення</CardTitle>
+              <CardDescription>Підключіть ваш Telegram акаунт, щоб отримувати миттєві персональні сповіщення про ставки, продажі та нові повідомлення.</CardDescription>
+            </CardHeader>
+            <CardContent>
+                {firestoreUser?.telegramUserId ? (
+                  <div className="flex items-center gap-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+                      <CheckCircle className="h-8 w-8 text-green-600" />
+                      <div>
+                          <p className="font-semibold text-green-800">Telegram підключено!</p>
+                          <p className="text-sm text-green-700">Ви будете отримувати персональні сповіщення у вашому месенджері.</p>
+                      </div>
+                  </div>
+                ) : (
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 rounded-lg border p-4">
+                      <div className="flex items-start gap-4">
+                          <Bot className="h-8 w-8 text-sky-600 flex-shrink-0 mt-1" />
+                          <div>
+                              <p className="font-semibold">Активуйте персональні сповіщення</p>
+                              <p className="text-sm text-muted-foreground">Натисніть на кнопку, перейдіть у Telegram і натисніть "Start", щоб підключити ваш акаунт.</p>
+                          </div>
+                      </div>
+                      {botUsername ? (
+                        <Button asChild className="w-full sm:w-auto flex-shrink-0">
+                            <Link href={telegramConnectUrl} target="_blank">Підключити Telegram</Link>
+                        </Button>
+                      ) : (
+                        <Button disabled className="w-full sm:w-auto flex-shrink-0">Налаштування</Button>
+                      )}
+                  </div>
+                )}
             </CardContent>
           </Card>
         </TabsContent>

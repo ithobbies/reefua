@@ -1,4 +1,4 @@
-# **App Name**: Benthos Bazaar
+# **App Name**: ReefUA
 
 ## Core Features:
 
