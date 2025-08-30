@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -24,6 +24,8 @@ import { v4 as uuidv4 } from 'uuid';
 import type { Lot } from '@/functions/src/types';
 import { FLOW_OPTIONS, PAR_OPTIONS, difficultyOptions } from '@/lib/options';
 import { productCategories, Category, Subcategory } from '@/lib/categories-data';
+import { ImageCropper } from '@/components/ui/image-cropper';
+import { regionsOfUkraine, Region } from '@/lib/regions-data'; // Corrected import
 
 type SaleType = 'auction' | 'direct';
 
@@ -32,6 +34,8 @@ interface LotFormData {
   description: string;
   category: string;
   subcategory: string;
+  region: string;
+  city: string;
   images: string[];
   parameters: {
     difficulty: string;
@@ -59,8 +63,8 @@ const InfoTooltip = ({ title, items }: { title: string, items: { label: string; 
       <TooltipContent className="max-w-xs p-3">
         <div className="font-bold text-foreground mb-2">{title}</div>
         <ul className="space-y-2">
-          {items.map((item, index) => (
-            <li key={index} className="text-sm">
+          {items.map((item) => (
+            <li key={item.label} className="text-sm">
               <span className="font-semibold text-foreground">{item.label}</span>
               <p className="text-muted-foreground">{item.description}</p>
             </li>
@@ -74,18 +78,20 @@ const InfoTooltip = ({ title, items }: { title: string, items: { label: string; 
 export function LotForm({ existingLot }: LotFormProps) {
   const { toast } = useToast();
   const router = useRouter();
-  const { user, loading: authLoading } = useAuth();
+  const { user, firestoreUser, loading: authLoading } = useAuth();
   const isEditMode = !!existingLot;
   
-  const [saleType, setSaleType] = useState<SaleType>(existingLot?.type || 'auction');
+  const [saleType, setSaleType] = useState<SaleType>(existingLot?.type || 'direct');
   const [formData, setFormData] = useState<Partial<LotFormData>>({
     name: existingLot?.name || '',
     description: existingLot?.description || '',
     category: existingLot?.category || '',
     subcategory: existingLot?.subcategory || '',
     images: existingLot?.images || [],
+    region: existingLot?.region || '',
+    city: existingLot?.city || '',
     parameters: existingLot?.parameters || { difficulty: '', par: '', flow: '' },
-    type: existingLot?.type || 'auction',
+    type: existingLot?.type || 'direct',
     startingBid: existingLot?.startingBid,
     buyNowPrice: existingLot?.buyNowPrice,
     durationDays: existingLot?.durationDays || 5, 
@@ -93,11 +99,17 @@ export function LotForm({ existingLot }: LotFormProps) {
   });
   
   const [subcategories, setSubcategories] = useState<Subcategory[]>([]);
+  const [cities, setCities] = useState<string[]>([]);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(existingLot?.images?.[0] || null);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  const [cropModalOpen, setCropModalOpen] = useState(false);
+  const [imgSrcToCrop, setImgSrcToCrop] = useState('');
+  const [originalFileName, setOriginalFileName] = useState('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     document.title = isEditMode ? 'Редагувати лот' : 'Створити новий лот - ReefUA';
@@ -113,8 +125,33 @@ export function LotForm({ existingLot }: LotFormProps) {
             setSubcategories(currentCategory.subcategories);
         }
     }
+    
+    if (existingLot?.region) {
+        const currentRegion = regionsOfUkraine.find(reg => reg.slug === existingLot.region); // Corrected
+        if (currentRegion) {
+            setCities(currentRegion.cities.map(c => c.name));
+        }
+    }
 
   }, [authLoading, user, router, toast, isEditMode, existingLot]);
+
+  // --- ДОДАНО: ЛОГІКА АВТОЗАПОВНЕННЯ ДЛЯ МАГАЗИНІВ ---
+  useEffect(() => {
+    if (!isEditMode && firestoreUser?.roles?.includes('shop')) {
+      const { shopRegion, shopCity } = firestoreUser;
+      if (shopRegion && shopCity) {
+        const regionData = regionsOfUkraine.find(r => r.slug === shopRegion); // Corrected
+        if (regionData) {
+          const cityData = regionData.cities.find(c => c.slug === shopCity);
+          if (cityData) {
+            setFormData(prev => ({ ...prev, region: regionData.slug, city: cityData.slug }));
+            setCities(regionData.cities.map(c => c.name)); 
+          }
+        }
+      }
+    }
+  }, [isEditMode, firestoreUser]);
+  // --- КІНЕЦЬ ДОДАНОЇ ЛОГІКИ ---
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
@@ -137,6 +174,10 @@ export function LotForm({ existingLot }: LotFormProps) {
         const selectedCategory = productCategories.find(cat => cat.slug === value);
         setSubcategories(selectedCategory ? selectedCategory.subcategories : []);
         setFormData(prev => ({ ...prev, category: value as string, subcategory: '' }));
+    } else if (name === 'region') {
+        const selectedRegion = regionsOfUkraine.find(reg => reg.slug === value); // Corrected
+        setCities(selectedRegion ? selectedRegion.cities.map(c => c.name) : []);
+        setFormData(prev => ({ ...prev, region: value as string, city: '' }));
     } else if (name.includes('.')) {
         const [parent, child] = name.split('.');
         setFormData(prev => ({ ...prev, [parent]: { ...(prev as any)[parent], [child]: value }}));
@@ -153,10 +194,25 @@ export function LotForm({ existingLot }: LotFormProps) {
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
-      setImageFile(file);
-      setImagePreview(URL.createObjectURL(file));
+      setOriginalFileName(file.name);
+      const reader = new FileReader();
+      reader.onload = () => {
+        setImgSrcToCrop(reader.result as string);
+        setCropModalOpen(true);
+      };
+      reader.readAsDataURL(file);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
     }
   };
+  
+  const handleCropConfirm = (croppedFile: File) => {
+    setImageFile(croppedFile);
+    setImagePreview(URL.createObjectURL(croppedFile));
+    setCropModalOpen(false);
+  };
+
 
   const uploadImage = async (): Promise<string> => {
       if (!imageFile) {
@@ -186,9 +242,13 @@ export function LotForm({ existingLot }: LotFormProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Basic validation
+    if (!isEditMode && !imageFile) {
+        toast({ variant: 'destructive', title: 'Помилка валідації', description: "Будь ласка, завантажте зображення." });
+        return;
+    }
+
     const isAuction = saleType === 'auction';
-    if (!formData.name || !formData.description || !formData.category || !formData.subcategory) {
+    if (!formData.name || !formData.description || !formData.category || !formData.subcategory || !formData.region || !formData.city) {
       toast({ variant: 'destructive', title: 'Помилка валідації', description: "Будь ласка, заповніть усі обов'язкові поля." });
       return;
     }
@@ -200,11 +260,7 @@ export function LotForm({ existingLot }: LotFormProps) {
         toast({ variant: 'destructive', title: 'Помилка валідації', description: "Будь ласка, вкажіть ціну для прямого продажу." });
         return;
     }
-    if (!imageFile && !isEditMode) {
-        toast({ variant: 'destructive', title: 'Помилка валідації', description: "Будь ласка, завантажте зображення." });
-        return;
-    }
-
+    
     setIsSubmitting(true);
 
     try {
@@ -215,16 +271,17 @@ export function LotForm({ existingLot }: LotFormProps) {
             ...restOfFormData,
             images: imageUrl ? [imageUrl] : existingLot?.images || [],
             type: saleType,
-            updatedAt: serverTimestamp() // Add updated timestamp
+            updatedAt: serverTimestamp()
         };
 
         if(isEditMode && existingLot) {
-            // --- CAREFUL DATA CLEANUP FOR UPDATE ---
             const updatePayload: { [key: string]: any } = {
                 name: payload.name,
                 description: payload.description,
                 category: payload.category,
                 subcategory: payload.subcategory,
+                region: payload.region,
+                city: payload.city,
                 images: payload.images,
                 updatedAt: payload.updatedAt,
             };
@@ -236,11 +293,9 @@ export function LotForm({ existingLot }: LotFormProps) {
             if (saleType === 'auction') {
                 updatePayload.startingBid = payload.startingBid || 0;
                 updatePayload.buyNowPrice = payload.buyNowPrice || null;
-                // We set other type's price to null to clean up the document
                 updatePayload.price = null; 
-            } else { // 'direct'
+            } else {
                 updatePayload.price = payload.price || 0;
-                // Clean up auction-specific fields
                 updatePayload.startingBid = null;
                 updatePayload.buyNowPrice = null;
                 updatePayload.endTime = null;
@@ -250,7 +305,6 @@ export function LotForm({ existingLot }: LotFormProps) {
             toast({ title: 'Лот оновлено!', description: `Лот "${formData.name}" успішно оновлено.` });
             router.push(`/dashboard/lots`);
         } else {
-            // --- LOGIC FOR CREATING A NEW LOT (UNCHANGED) ---
             if (payload.category !== 'corals') {
                 delete payload.parameters;
             }
@@ -284,149 +338,190 @@ export function LotForm({ existingLot }: LotFormProps) {
   const buttonText = isEditMode ? 'Зберегти зміни' : 'Створити лот';
 
   return (
-    <div className="space-y-6">
-       <div className="flex items-center gap-4">
-         <Button variant="outline" size="icon" asChild><Link href="/dashboard/lots"><ArrowLeft className="h-4 w-4" /></Link></Button>
-        <h1 className="text-2xl font-headline font-semibold text-primary">{pageTitle}</h1>
-      </div>
-      <form onSubmit={handleSubmit}>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 space-y-6">
-            <Card>
-              <CardHeader><CardTitle>Основна інформація</CardTitle><CardDescription>Надайте деталі про ваш лот.</CardDescription></CardHeader>
-              <CardContent className="space-y-4">
-                <div><Label htmlFor="name">Назва лоту*</Label><Input id="name" name="name" placeholder="Фраг Acropora Red Planet" value={formData.name || ''} onChange={handleChange} required disabled={isLoading} /></div>
-                <div><Label htmlFor="description">Опис лоту*</Label><Textarea id="description" name="description" placeholder="Детальний опис вашого коралу, його особливості, розмір тощо." value={formData.description || ''} onChange={handleChange} required disabled={isLoading} /></div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <Label htmlFor="category">Категорія*</Label>
-                        <Select name="category" value={formData.category || ''} onValueChange={(val) => handleSelectChange('category', val)} required disabled={isLoading}>
-                            <SelectTrigger><SelectValue placeholder="Оберіть категорію" /></SelectTrigger>
-                            <SelectContent>{productCategories.map(cat => <SelectItem key={cat.slug} value={cat.slug}>{cat.name}</SelectItem>)}</SelectContent>
-                        </Select>
-                    </div>
-                    <div>
-                        <Label htmlFor="subcategory">Підкатегорія*</Label>
-                        <Select name="subcategory" value={formData.subcategory || ''} onValueChange={(val) => handleSelectChange('subcategory', val)} required disabled={isLoading || subcategories.length === 0}>
-                            <SelectTrigger><SelectValue placeholder={subcategories.length > 0 ? "Оберіть підкатегорію" : "Спочатку оберіть категорію"} /></SelectTrigger>
-                            <SelectContent>{subcategories.map(sub => <SelectItem key={sub.slug} value={sub.slug}>{sub.name}</SelectItem>)}</SelectContent>
-                        </Select>
-                    </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-                 <CardHeader>
-                    <CardTitle>Тип продажу</CardTitle>
-                    {!isEditMode && <CardDescription>Виберіть, як ви хочете продати товар.</CardDescription>}
-                 </CardHeader>
-                <CardContent>
-                    <RadioGroup value={saleType} onValueChange={handleSaleTypeChange} className="flex gap-4" disabled={isEditMode}>
-                        <div className="flex items-center space-x-2">
-                            <RadioGroupItem value="auction" id="auction" />
-                            <Label htmlFor="auction">Аукціон</Label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                            <RadioGroupItem value="direct" id="direct" />
-                            <Label htmlFor="direct">Прямий продаж</Label>
-                        </div>
-                    </RadioGroup>
-                </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader><CardTitle>{saleType === 'auction' ? "Налаштування аукціону" : "Ціна"}</CardTitle></CardHeader>
-              <CardContent className="space-y-4">
-                {saleType === 'auction' ? (
-                <>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div><Label htmlFor="startingBid">Стартова ціна (грн)*</Label><Input id="startingBid" name="startingBid" type="number" placeholder="100" value={formData.startingBid || ''} onChange={handleChange} required disabled={isLoading} /></div>
-                      <div><Label htmlFor="buyNowPrice">Ціна "Купити зараз" (грн, необов'язково)</Label><Input id="buyNowPrice" name="buyNowPrice" type="number" placeholder="500" value={formData.buyNowPrice || ''} onChange={handleChange} disabled={isLoading} /></div>
-                    </div>
-                    {!isEditMode && (
-                    <div>
-                      <Label htmlFor="durationDays">Тривалість аукціону*</Label>
-                       <Select name="durationDays" value={String(formData.durationDays || 5)} onValueChange={(val) => handleSelectChange('durationDays', parseInt(val, 10))} required>
-                            <SelectTrigger><SelectValue placeholder="Оберіть тривалість" /></SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="3">3 дні</SelectItem>
-                                <SelectItem value="5">5 днів</SelectItem>
-                                <SelectItem value="7">7 днів</SelectItem>
-                            </SelectContent>
-                        </Select>
-                    </div>
-                    )}
-                </>
-                ) : (
-                    <div><Label htmlFor="price">Ціна (грн)*</Label><Input id="price" name="price" type="number" placeholder="300" value={formData.price || ''} onChange={handleChange} required disabled={isLoading} /></div>
-                )}
-              </CardContent>
-            </Card>
-            
-            {formData.category === 'corals' && (
-                <Card>
-                <CardHeader><CardTitle>Параметри утримання</CardTitle></CardHeader>
-                <CardContent className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <div>
-                        <div className="flex items-center gap-2 mb-1.5">
-                        <Label htmlFor="difficulty">Складність</Label>
-                        <InfoTooltip title="Складність утримання" items={difficultyOptions} />
-                        </div>
-                        <Select name="parameters.difficulty" value={formData.parameters?.difficulty || ''} onValueChange={(val) => handleSelectChange('parameters.difficulty', val)} disabled={isLoading}>
-                            <SelectTrigger><SelectValue placeholder="Оберіть складність" /></SelectTrigger>
-                            <SelectContent>
-                                {difficultyOptions.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
-                            </SelectContent>
-                        </Select>
-                    </div>
-                    <div>
-                        <div className="flex items-center gap-2 mb-1.5">
-                        <Label htmlFor="par">PAR</Label>
-                        <InfoTooltip title="Рівень освітлення (PAR)" items={PAR_OPTIONS} />
-                        </div>
-                        <Select name="parameters.par" value={formData.parameters?.par || ''} onValueChange={(val) => handleSelectChange('parameters.par', val)} disabled={isLoading}>
-                            <SelectTrigger><SelectValue placeholder="Оберіть PAR" /></SelectTrigger>
-                            <SelectContent>
-                                {PAR_OPTIONS.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
-                            </SelectContent>
-                        </Select>
-                    </div>
-                    <div>
-                        <div className="flex items-center gap-2 mb-1.5">
-                        <Label htmlFor="flow">Течія</Label>
-                        <InfoTooltip title="Сила течії" items={FLOW_OPTIONS} />
-                        </div>
-                        <Select name="parameters.flow" value={formData.parameters?.flow || ''} onValueChange={(val) => handleSelectChange('parameters.flow', val)} disabled={isLoading}>
-                            <SelectTrigger><SelectValue placeholder="Оберіть течію" /></SelectTrigger>
-                            <SelectContent>
-                                {FLOW_OPTIONS.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
-                            </SelectContent>
-                        </Select>
-                    </div>
-                </CardContent>
-                </Card>
-            )}
-          </div>
-
-          <div className="lg:col-span-1 space-y-6">
-            <Card>
-              <CardHeader><CardTitle>Зображення лоту*</CardTitle><CardDescription>Завантажте основне фото вашого лоту.</CardDescription></CardHeader>
-              <CardContent>
-                <Label htmlFor="image" className={`block w-full cursor-pointer ${isLoading ? 'cursor-not-allowed' : ''}`}>
-                  <div className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-muted rounded-md hover:border-primary transition-colors">
-                    {imagePreview ? <img src={imagePreview} alt="Попередній перегляд" className="max-h-48 rounded-md object-contain" /> : (<><UploadCloud className="h-12 w-12 text-muted-foreground" /><p className="mt-2 text-sm text-muted-foreground">Натисніть, щоб завантажити</p><p className="text-xs text-muted-foreground">(PNG, JPG, WEBP до 5MB)</p></>)}
-                  </div>
-                </Label>
-                <Input id="image" name="image" type="file" onChange={handleImageChange} accept="image/*" className="sr-only" disabled={isLoading} required={!isEditMode}/>
-                {isUploading && <div className="w-full bg-muted rounded-full h-2.5 mt-2"><div className="bg-primary h-2.5 rounded-full" style={{width: `${uploadProgress}%`}}></div></div>}
-                <p className="mt-2 text-xs text-muted-foreground text-center">Для додавання більше фотографій, відредагуйте лот після створення.</p>
-              </CardContent>
-            </Card>
-            <Button type="submit" className="w-full text-lg py-3" disabled={isLoading}>{isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}{isLoading ? 'Обробка...' : buttonText}</Button>
-          </div>
+    <>
+      <div className="space-y-6">
+        <div className="flex items-center gap-4">
+          <Button variant="outline" size="icon" asChild><Link href="/dashboard/lots"><ArrowLeft className="h-4 w-4" /></Link></Button>
+          <h1 className="text-2xl font-headline font-semibold text-primary">{pageTitle}</h1>
         </div>
-      </form>
-    </div>
+        <form onSubmit={handleSubmit} noValidate>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2 space-y-6">
+              <Card>
+                <CardHeader><CardTitle>Основна інформація</CardTitle><CardDescription>Надайте деталі про ваш лот.</CardDescription></CardHeader>
+                <CardContent className="space-y-4">
+                  <div><Label htmlFor="name">Назва лоту*</Label><Input id="name" name="name" placeholder="Фраг Acropora Red Planet" value={formData.name || ''} onChange={handleChange} required disabled={isLoading} /></div>
+                  <div><Label htmlFor="description">Опис лоту*</Label><Textarea id="description" name="description" placeholder="Детальний опис вашого коралу, його особливості, розмір тощо." value={formData.description || ''} onChange={handleChange} required disabled={isLoading} /></div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                          <Label htmlFor="category">Категорія*</Label>
+                          <Select name="category" value={formData.category || ''} onValueChange={(val) => handleSelectChange('category', val)} required disabled={isLoading}>
+                              <SelectTrigger><SelectValue placeholder="Оберіть категорію" /></SelectTrigger>
+                              <SelectContent>{productCategories.map(cat => <SelectItem key={cat.slug} value={cat.slug}>{cat.name}</SelectItem>)}</SelectContent>
+                          </Select>
+                      </div>
+                      <div>
+                          <Label htmlFor="subcategory">Підкатегорія*</Label>
+                          <Select name="subcategory" value={formData.subcategory || ''} onValueChange={(val) => handleSelectChange('subcategory', val)} required disabled={isLoading || subcategories.length === 0}>
+                              <SelectTrigger><SelectValue placeholder={subcategories.length > 0 ? "Оберіть підкатегорію" : "Спочатку оберіть категорію"} /></SelectTrigger>
+                              <SelectContent>{subcategories.map(sub => <SelectItem key={sub.slug} value={sub.slug}>{sub.name}</SelectItem>)}</SelectContent>
+                          </Select>
+                      </div>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <Label htmlFor="region">Область*</Label>
+                            <Select name="region" value={formData.region || ''} onValueChange={(val) => handleSelectChange('region', val)} required disabled={isLoading}>
+                                <SelectTrigger><SelectValue placeholder="Оберіть область" /></SelectTrigger>
+                                <SelectContent>{regionsOfUkraine.map(reg => <SelectItem key={reg.slug} value={reg.slug}>{reg.name}</SelectItem>)}</SelectContent>
+                            </Select>
+                        </div>
+                        <div>
+                            <Label htmlFor="city">Населений пункт*</Label>
+                            <Select name="city" value={formData.city || ''} onValueChange={(val) => handleSelectChange('city', val)} required disabled={isLoading || cities.length === 0}>
+                                <SelectTrigger><SelectValue placeholder={cities.length > 0 ? "Оберіть місто" : "Спочатку оберіть область"} /></SelectTrigger>
+                                <SelectContent>{cities.map(city => <SelectItem key={city} value={city}>{city}</SelectItem>)}</SelectContent>
+                            </Select>
+                        </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                  <CardHeader>
+                      <CardTitle>Тип продажу</CardTitle>
+                      {!isEditMode && <CardDescription>Виберіть, як ви хочете продати товар.</CardDescription>}
+                  </CardHeader>
+                  <CardContent>
+                      <RadioGroup defaultValue="direct" value={saleType} onValueChange={handleSaleTypeChange} className="flex gap-4" disabled={isEditMode}>
+                          <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="auction" id="auction" />
+                              <Label htmlFor="auction">Аукціон</Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="direct" id="direct" />
+                              <Label htmlFor="direct">Прямий продаж</Label>
+                          </div>
+                      </RadioGroup>
+                  </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader><CardTitle>{saleType === 'auction' ? "Налаштування аукціону" : "Ціна"}</CardTitle></CardHeader>
+                <CardContent className="space-y-4">
+                  {saleType === 'auction' ? (
+                  <>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div><Label htmlFor="startingBid">Стартова ціна (грн)*</Label><Input id="startingBid" name="startingBid" type="number" placeholder="100" value={formData.startingBid || ''} onChange={handleChange} required disabled={isLoading} /></div>
+                        <div><Label htmlFor="buyNowPrice">Ціна "Купити зараз" (грн, необов'язково)</Label><Input id="buyNowPrice" name="buyNowPrice" type="number" placeholder="500" value={formData.buyNowPrice || ''} onChange={handleChange} disabled={isLoading} /></div>
+                      </div>
+                      {!isEditMode && (
+                      <div>
+                        <Label htmlFor="durationDays">Тривалість аукціону*</Label>
+                        <Select name="durationDays" value={String(formData.durationDays || 5)} onValueChange={(val) => handleSelectChange('durationDays', parseInt(val, 10))} required>
+                              <SelectTrigger><SelectValue placeholder="Оберіть тривалість" /></SelectTrigger>
+                              <SelectContent>
+                                  <SelectItem value="3">3 дні</SelectItem>
+                                  <SelectItem value="5">5 днів</SelectItem>
+                                  <SelectItem value="7">7 днів</SelectItem>
+                              </SelectContent>
+                          </Select>
+                      </div>
+                      )}
+                  </>
+                  ) : (
+                      <div><Label htmlFor="price">Ціна (грн)*</Label><Input id="price" name="price" type="number" placeholder="300" value={formData.price || ''} onChange={handleChange} required disabled={isLoading} /></div>
+                  )}
+
+                </CardContent>
+              </Card>
+              
+              {formData.category === 'corals' && (
+                  <Card>
+                  <CardHeader><CardTitle>Параметри утримання</CardTitle></CardHeader>
+                  <CardContent className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      <div>
+                          <div className="flex items-center gap-2 mb-1.5">
+                          <Label htmlFor="difficulty">Складність</Label>
+                          <InfoTooltip title="Складність утримання" items={difficultyOptions} />
+                          </div>
+                          <Select name="parameters.difficulty" value={formData.parameters?.difficulty || ''} onValueChange={(val) => handleSelectChange('parameters.difficulty', val)} disabled={isLoading}>
+                              <SelectTrigger><SelectValue placeholder="Оберіть складність" /></SelectTrigger>
+                              <SelectContent>
+                                  {difficultyOptions.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
+
+                              </SelectContent>
+                          </Select>
+                      </div>
+                      <div>
+                          <div className="flex items-center gap-2 mb-1.5">
+                          <Label htmlFor="par">PAR</Label>
+                          <InfoTooltip title="Рівень освітлення (PAR)" items={PAR_OPTIONS} />
+                          </div>
+                          <Select name="parameters.par" value={formData.parameters?.par || ''} onValueChange={(val) => handleSelectChange('parameters.par', val)} disabled={isLoading}>
+                              <SelectTrigger><SelectValue placeholder="Оберіть PAR" /></SelectTrigger>
+                              <SelectContent>
+                                  {PAR_OPTIONS.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
+
+                              </SelectContent>
+                          </Select>
+                      </div>
+                      <div>
+                          <div className="flex items-center gap-2 mb-1.5">
+                          <Label htmlFor="flow">Течія</Label>
+                          <InfoTooltip title="Сила течії" items={FLOW_OPTIONS} />
+                          </div>
+                          <Select name="parameters.flow" value={formData.parameters?.flow || ''} onValueChange={(val) => handleSelectChange('parameters.flow', val)} disabled={isLoading}>
+                              <SelectTrigger><SelectValue placeholder="Оберіть течію" /></SelectTrigger>
+                              <SelectContent>
+                                  {FLOW_OPTIONS.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
+
+                              </SelectContent>
+                          </Select>
+                      </div>
+                  </CardContent>
+                  </Card>
+              )}
+            </div>
+
+            <div className="lg:col-span-1 space-y-6">
+              <Card>
+                <CardHeader><CardTitle>Зображення лоту*</CardTitle><CardDescription>Завантажте основне фото вашого лоту.</CardDescription></CardHeader>
+                <CardContent>
+                  <Label htmlFor="image" className={`block w-full cursor-pointer ${isLoading ? 'cursor-not-allowed' : ''}`}>
+                    <div className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-muted rounded-md hover:border-primary transition-colors">
+                      {imagePreview ? <img src={imagePreview} alt="Попередній перегляд" className="max-h-48 rounded-md object-contain" /> : (<><UploadCloud className="h-12 w-12 text-muted-foreground" /><p className="mt-2 text-sm text-muted-foreground">Натисніть, щоб завантажити</p><p className="text-xs text-muted-foreground">(PNG, JPG, WEBP до 5MB)</p></>)}
+
+                    </div>
+                  </Label>
+                  <Input ref={fileInputRef} id="image" name="image" type="file" onChange={handleImageChange} accept="image/*" className="sr-only" disabled={isLoading}/>
+                  {isUploading && <div className="w-full bg-muted rounded-full h-2.5 mt-2"><div className="bg-primary h-2.5 rounded-full" style={{width: `${uploadProgress}%`}}></div></div>}
+
+                  <p className="mt-2 text-xs text-muted-foreground text-center">Для додавання більше фотографій, відредагуйте лот після створення.</p>
+                </CardContent>
+              </Card>
+              <Button type="submit" className="w-full text-lg py-3" disabled={isLoading}>{isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}{isLoading ? 'Обробка...' : buttonText}</Button>
+            </div>
+          </div>
+        </form>
+      </div>
+      
+      {cropModalOpen && imgSrcToCrop && (
+        <ImageCropper
+          isOpen={cropModalOpen}
+          imgSrc={imgSrcToCrop}
+          aspect={4 / 3}
+          circularCrop={false}
+          onClose={() => setCropModalOpen(false)}
+
+          onConfirm={handleCropConfirm}
+
+          originalFileName={originalFileName}
+
+        />
+      )}
+
+    </>
+
   );
 }

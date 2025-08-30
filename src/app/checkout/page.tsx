@@ -14,16 +14,29 @@ import { functions, db } from '@/lib/firebase';
 import { httpsCallable, HttpsCallableResult } from 'firebase/functions';
 import { useAuth } from '@/context/auth-context';
 import type { Lot, ShippingInfo } from '@/functions/src/types';
-import { collection, query, where, getDocs } from 'firebase/firestore';
+import { collection, query, where, getDocs, doc, writeBatch } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
 import { X } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
+
+interface CheckoutItem {
+  id: string; // lotId для аукціонів, cartItemId для прямих продажів
+  type: 'auction' | 'direct';
+  lotId: string;
+  lotData: {
+    name: string;
+    price: number;
+    images: string[];
+    sellerUsername: string;
+  };
+}
+
 
 const CheckoutPage = () => {
   const { toast } = useToast();
   const { user } = useAuth();
   const router = useRouter();
-  const [wonLots, setWonLots] = React.useState<Lot[]>([]);
+  const [itemsToCheckout, setItemsToCheckout] = React.useState<CheckoutItem[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [selectedShipping, setSelectedShipping] = React.useState<ShippingInfo['shippingMethod'] | undefined>(undefined);
@@ -38,79 +51,104 @@ const CheckoutPage = () => {
 
   React.useEffect(() => {
     if (user) {
-      const fetchWonLots = async () => {
+      const fetchItems = async () => {
         setIsLoading(true);
+        const fetchedItems: CheckoutItem[] = [];
         try {
-          const lotsQuery = query(
-            collection(db, 'lots'), 
-            where('winnerUid', '==', user.uid),
-            where('status', '==', 'sold')
-          );
-          const querySnapshot = await getDocs(lotsQuery);
-          const lotsData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Lot[];
-          setWonLots(lotsData);
+          // 1. Завантажуємо виграні аукціони
+          const lotsQuery = query(collection(db, 'lots'), where('winnerUid', '==', user.uid), where('status', '==', 'sold'));
+          const lotsSnapshot = await getDocs(lotsQuery);
+          lotsSnapshot.forEach(doc => {
+            const lot = doc.data() as Lot;
+            fetchedItems.push({ 
+              id: doc.id, 
+              type: 'auction',
+              lotId: doc.id,
+              lotData: {
+                  name: lot.name,
+                  price: lot.finalPrice || lot.currentBid,
+                  images: lot.images,
+                  sellerUsername: lot.sellerUsername
+              }
+            });
+          });
+
+          // 2. Завантажуємо товари з кошика
+          const cartQuery = query(collection(db, 'cartItems'), where('userId', '==', user.uid));
+          const cartSnapshot = await getDocs(cartQuery);
+          cartSnapshot.forEach(doc => {
+            const cartItem = doc.data();
+            fetchedItems.push({
+              id: doc.id,
+              type: 'direct',
+              lotId: cartItem.lotId,
+              lotData: {
+                name: cartItem.lotData.name,
+                price: cartItem.lotData.price,
+                images: cartItem.lotData.images,
+                sellerUsername: cartItem.lotData.sellerUsername
+              }
+            });
+          });
+          
+          setItemsToCheckout(fetchedItems);
         } catch (error) {
-          console.error("Error fetching won lots: ", error);
-          toast({ title: "Помилка", description: "Не вдалося завантажити виграні лоти.", variant: "destructive" });
+          console.error("Error fetching items for checkout: ", error);
+          toast({ title: "Помилка", description: "Не вдалося завантажити товари.", variant: "destructive" });
         }
         setIsLoading(false);
       };
-      fetchWonLots();
+      fetchItems();
     }
   }, [user, toast]);
   
-  const handleRemoveLot = (lotId: string) => {
-      setWonLots(prevLots => prevLots.filter(lot => lot.id !== lotId));
+  const handleRemoveItem = (itemId: string, type: 'auction' | 'direct') => {
+      if (type === 'direct') {
+          setItemsToCheckout(prevItems => prevItems.filter(item => item.id !== itemId));
+          toast({ title: "Видалено", description: "Товар видалено з цього замовлення. Він залишився у вашому кошику." });
+      } else {
+          toast({ title: "Дія неможлива", description: "Ви не можете видалити виграний аукціон. Зв'яжіться з продавцем для скасування." });
+      }
   };
 
-  const totalAmount = wonLots.reduce((sum, lot) => sum + (lot.finalPrice || 0), 0);
+  const totalAmount = itemsToCheckout.reduce((sum, item) => sum + item.lotData.price, 0);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (wonLots.length === 0) {
-        toast({ title: "Порожнє замовлення", description: "Будь ласка, додайте хоча б один лот.", variant: "destructive" });
+    if (itemsToCheckout.length === 0 || !selectedShipping || !user) {
+        toast({ title: "Помилка", description: "Будь ласка, заповніть усі необхідні поля.", variant: "destructive" });
         return;
-    }
-    if (!selectedShipping) {
-      toast({ title: "Помилка валідації", description: "Будь ласка, оберіть спосіб доставки.", variant: "destructive" });
-      return;
-    }
-    if (!user) {
-         toast({ title: "Помилка", description: "Ви повинні бути авторизовані.", variant: "destructive" });
-         return;
     }
 
     setIsSubmitting(true);
 
     const shippingInfo: ShippingInfo = {
-      firstName,
-      lastName,
-      phone,
-      shippingMethod: selectedShipping,
-      city: showAddressFields || selectedShipping === 'other' ? city : undefined,
-      department: showAddressFields ? department : undefined,
-      details: selectedShipping === 'other' ? details : undefined,
+      firstName, lastName, phone, shippingMethod: selectedShipping,
+      city: city || undefined, department: department || undefined, details: details || undefined,
     };
+
+    const allLotIds = itemsToCheckout.map(i => i.lotId);
+    const cartItemIdsToDelete = itemsToCheckout.filter(i => i.type === 'direct').map(i => i.id);
 
     try {
       const createOrder = httpsCallable(functions, 'createOrder');
-      const result: HttpsCallableResult = await createOrder({
-        lotIds: wonLots.map(lot => lot.id),
-        shippingInfo,
-      });
+      const result: HttpsCallableResult = await createOrder({ lotIds: allLotIds, shippingInfo });
+
+      if (cartItemIdsToDelete.length > 0) {
+          const batch = writeBatch(db);
+          cartItemIdsToDelete.forEach(id => {
+              batch.delete(doc(db, "cartItems", id));
+          });
+          await batch.commit();
+      }
 
       const { orderIds } = result.data as { orderIds: string[] };
       router.push(`/checkout/success?orderIds=${orderIds.join(',')}`);
 
     } catch (error: any) {
         console.error("Order creation error:", error);
-        if (error.code === 'functions/failed-precondition' && error.details) {
-            const { lotId, lotName } = error.details;
-            toast({ title: "Лот недоступний", description: `Лот "${lotName}" більше не доступний і був видалений з вашого замовлення.`, variant: "destructive", duration: 5000 });
-            handleRemoveLot(lotId);
-        } else {
-            toast({ title: "Помилка оформлення замовлення", description: error.message || "Виникла невідома помилка.", variant: "destructive" });
-        }
+        toast({ title: "Помилка оформлення замовлення", description: error.message || "Виникла невідома помилка.", variant: "destructive" });
+    } finally {
         setIsSubmitting(false);
     }
   };
@@ -119,7 +157,7 @@ const CheckoutPage = () => {
       return <div className="container mx-auto py-8 text-center">Завантаження...</div>
   }
 
-  if (!isLoading && wonLots.length === 0) {
+  if (!isLoading && itemsToCheckout.length === 0) {
     return (
       <div className="container mx-auto py-8 text-center">
         <h1 className="text-3xl font-headline font-bold mb-4">Ваш кошик порожній</h1>
@@ -140,16 +178,16 @@ const CheckoutPage = () => {
           <Card>
             <CardHeader><CardTitle>Виграні лоти</CardTitle></CardHeader>
             <CardContent className="space-y-4">
-              {wonLots.map((lot) => (
-                <React.Fragment key={lot.id}>
+              {itemsToCheckout.map((item) => (
+                <React.Fragment key={item.id}>
                 <div className="flex items-center gap-4">
-                  <Image src={(lot.images && lot.images[0]) || '/placeholder.png'} alt={lot.name} width={80} height={60} className="rounded-md object-cover"/>
+                  <Image src={(item.lotData.images && item.lotData.images[0]) || '/placeholder.png'} alt={item.lotData.name} width={80} height={60} className="rounded-md object-cover"/>
                   <div className="flex-grow">
-                    <h3 className="font-semibold">{lot.name}</h3>
-                    <p className="text-sm text-muted-foreground">Продавець: {lot.sellerUsername}</p>
+                    <h3 className="font-semibold">{item.lotData.name}</h3>
+                    <p className="text-sm text-muted-foreground">Продавець: {item.lotData.sellerUsername}</p>
                   </div>
-                  <p className="font-semibold text-primary mr-2">{(lot.finalPrice || 0).toFixed(2)} грн</p>
-                  <Button variant="ghost" size="icon" onClick={() => handleRemoveLot(lot.id)}><X className="h-4 w-4"/></Button>
+                  <p className="font-semibold text-primary mr-2">{item.lotData.price.toFixed(2)} грн</p>
+                  <Button variant="ghost" size="icon" onClick={() => handleRemoveItem(item.id, item.type)}><X className="h-4 w-4"/></Button>
                 </div>
                 <Separator className="my-2"/>
                 </React.Fragment>
@@ -219,7 +257,7 @@ const CheckoutPage = () => {
             <CardHeader><CardTitle>Сума замовлення</CardTitle></CardHeader>
             <CardContent className="space-y-4">
               <div className="flex justify-between">
-                <span>Товари ({wonLots.length} шт.):</span>
+                <span>Товари ({itemsToCheckout.length} шт.):</span>
                 <span>{totalAmount.toFixed(2)} грн</span>
               </div>
               <div className="flex justify-between">
@@ -233,7 +271,7 @@ const CheckoutPage = () => {
               </div>
             </CardContent>
             <CardFooter>
-              <Button type="submit" className="w-full text-lg py-3" disabled={isSubmitting || wonLots.length === 0}>
+              <Button type="submit" className="w-full text-lg py-3" disabled={isSubmitting || itemsToCheckout.length === 0}>
                 {isSubmitting ? 'Оформлення...' : 'Оформити замовлення'}
               </Button>
             </CardFooter>

@@ -11,14 +11,18 @@ export interface User {
   createdAt: IsoDateString;
   updatedAt: IsoDateString;
   isActive: boolean;
-  roles: ('user' | 'seller' | 'admin')[];
+  roles: ('user' | 'seller' | 'admin' | 'shop')[];
   lastLogin: IsoDateString;
   pushEnabled: boolean;
   emailNotifications: boolean;
   balance?: number;
   sellerRating?: number;
   sellerReviewCount?: number;
-  telegramUserId?: number; // <-- ADDED THIS LINE
+  telegramUserId?: number;
+  // ДОДАНО: Поля для налаштувань магазину
+  shopPhoneNumber?: string;
+  shopRegion?: string;
+  shopCity?: string;
 }
 
 export interface LotParameters {
@@ -47,9 +51,14 @@ export interface Lot {
   endTime: IsoDateString;
   sellerUid: string;
   sellerUsername: string;
+  sellerAccountType?: 'individual' | 'shop';
+  sellerIsShop?: boolean; 
   sellerProfile?: SellerProfile;
   category: string;
-  subcategory: string; // <-- Added this line
+  subcategory: string;
+  region: string;
+  city: string;
+  phoneNumber?: string; // ДОДАНО: Поле для телефону в лоті
   status: 'active' | 'sold' | 'processing' | 'shipped' | 'completed' | 'unsold' | 'cancelled';
   winnerUid?: string | null;
   winnerUsername?: string | null;
@@ -58,6 +67,7 @@ export interface Lot {
   parameters?: LotParameters;
   reviewLeft?: boolean;
   type: 'auction' | 'direct';
+  keepActiveAfterSale?: boolean; 
 }
 
 export interface Bid {
@@ -136,4 +146,5 @@ export interface Order {
     trackingNumber?: string;
     createdAt: IsoDateString;
     updatedAt: IsoDateString;
+    reviewLeft?: boolean;
 }

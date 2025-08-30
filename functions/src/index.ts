@@ -17,3 +17,4 @@ export * from './orders';
 export * from './notifications';
 export * from './dashboard';
 export * from './telegram';
+export * from './cart';

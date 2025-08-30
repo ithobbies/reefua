@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updateUserProfile = exports.createUserDocument = void 0;
+exports.getLotsBySeller = exports.updateUserProfile = exports.createUserDocument = void 0;
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
 if (admin.apps.length === 0) {
@@ -60,6 +60,29 @@ exports.updateUserProfile = functions.https.onCall(async (data, context) => {
     catch (error) {
         console.error("Error updating user profile:", error);
         throw new functions.https.HttpsError("internal", "An unexpected error occurred while updating the profile.");
+    }
+});
+exports.getLotsBySeller = functions.https.onCall(async (data, context) => {
+    const userId = data.userId;
+    if (!userId || typeof userId !== "string") {
+        throw new functions.https.HttpsError("invalid-argument", "The function must be called with a 'userId' string argument.");
+    }
+    try {
+        const lotsSnapshot = await admin.firestore()
+            .collection("lots")
+            .where("sellerUid", "==", userId)
+            .where("status", "==", "active")
+            .orderBy("createdAt", "desc")
+            .get();
+        if (lotsSnapshot.empty) {
+            return [];
+        }
+        const lots = lotsSnapshot.docs.map((doc) => (Object.assign({ id: doc.id }, doc.data())));
+        return lots;
+    }
+    catch (error) {
+        console.error("Error fetching lots by seller:", error);
+        throw new functions.https.HttpsError("internal", "An error occurred while fetching the lots.");
     }
 });
 //# sourceMappingURL=user.js.map

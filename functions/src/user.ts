@@ -1,6 +1,7 @@
 
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
+import { Lot, User } from "./types";
 
 if (admin.apps.length === 0) {
     admin.initializeApp();
@@ -20,6 +21,7 @@ export const createUserDocument = functions.auth.user().onCreate(async (user) =>
         photoURL: photoURL || null,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
+        roles: ['user'], // Default role
     };
 
     try {
@@ -31,7 +33,6 @@ export const createUserDocument = functions.auth.user().onCreate(async (user) =>
         return null;
     }
 });
-
 
 /**
  * Updates a user's profile information in both Firestore and Firebase Auth.
@@ -49,13 +50,11 @@ export const updateUserProfile = functions.https.onCall(async (data, context) =>
     }
 
     try {
-        // 1. Update Firebase Authentication user
         await admin.auth().updateUser(uid, {
             displayName: username,
             photoURL: photoURL,
         });
 
-        // 2. Update Firestore user document
         const userDocRef = admin.firestore().collection("users").doc(uid);
         await userDocRef.update({
             username: username,
@@ -69,4 +68,85 @@ export const updateUserProfile = functions.https.onCall(async (data, context) =>
         console.error("Error updating user profile:", error);
         throw new functions.https.HttpsError("internal", "An unexpected error occurred while updating the profile.");
     }
+});
+
+/**
+ * Updates the shop settings for a user with the 'shop' role.
+ */
+export const updateShopSettings = functions.https.onCall(async (data, context) => {
+    if (!context.auth) {
+        throw new functions.https.HttpsError("unauthenticated", "You must be logged in.");
+    }
+
+    const { uid } = context.auth;
+    const { shopPhoneNumber, shopRegion, shopCity } = data;
+
+    const userRef = admin.firestore().collection("users").doc(uid);
+
+    try {
+        const userDoc = await userRef.get();
+        if (!userDoc.exists) {
+            throw new functions.https.HttpsError("not-found", "User profile not found.");
+        }
+        
+        const userData = userDoc.data() as User;
+        if (!userData.roles?.includes('shop')) {
+            throw new functions.https.HttpsError("permission-denied", "You must be a shop to update these settings.");
+        }
+
+        const updateData = {
+            shopPhoneNumber: shopPhoneNumber || null,
+            shopRegion: shopRegion || null,
+            shopCity: shopCity || null,
+            updatedAt: new Date().toISOString(),
+        };
+
+        await userRef.update(updateData);
+
+        return { success: true, message: "Shop settings updated successfully." };
+
+    } catch (error) {
+        console.error("Error updating shop settings:", error);
+        if (error instanceof functions.https.HttpsError) {
+            throw error;
+        }
+        throw new functions.https.HttpsError("internal", "An unexpected error occurred.");
+    }
+});
+
+
+export const getLotsBySeller = functions.https.onCall(async (data, context) => {
+  const userId = data.userId;
+  if (!userId || typeof userId !== "string") {
+    throw new functions.https.HttpsError(
+      "invalid-argument",
+      "The function must be called with a 'userId' string argument."
+    );
+  }
+
+  try {
+    const lotsSnapshot = await admin.firestore()
+      .collection("lots")
+      .where("sellerUid", "==", userId)
+      .where("status", "==", "active")
+      .orderBy("createdAt", "desc")
+      .get();
+
+    if (lotsSnapshot.empty) {
+      return [];
+    }
+
+    const lots = lotsSnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    })) as Lot[];
+
+    return lots;
+  } catch (error) {
+    console.error("Error fetching lots by seller:", error);
+    throw new functions.https.HttpsError(
+      "internal",
+      "An error occurred while fetching the lots."
+    );
+  }
 });

@@ -1,46 +1,42 @@
+
+'use client';
+
+import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
+import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { Switch } from '@/components/ui/switch';
+import { ShopSettingsForm } from './shop-settings-form';
+import { useAuth } from '@/context/auth-context';
+import { Loader2 } from 'lucide-react';
 import type { Metadata } from 'next';
 
-export const metadata: Metadata = {
-  title: 'Налаштування - Панель Продавця',
-  description: 'Керуйте налаштуваннями вашого профілю продавця та магазину.',
-};
+// Metadata can't be used in client components directly, but we can manage the title using useEffect if needed.
+// For simplicity, we'll keep the main layout's title or set it via other means.
 
 export default function DashboardSettingsPage() {
+  const { firestoreUser, loading } = useAuth();
+
+  React.useEffect(() => {
+    document.title = 'Налаштування - Панель Продавця';
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-full pt-20">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  const isShop = firestoreUser?.roles?.includes('shop');
+
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-headline font-semibold text-primary">Налаштування Продавця</h1>
+      <h1 className="text-2xl font-headline font-semibold text-primary">Налаштування</h1>
       
-      <Card>
-        <CardHeader>
-          <CardTitle>Інформація про магазин</CardTitle>
-          <CardDescription>Назва вашого магазину, опис та контактна інформація.</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <Label htmlFor="shopName">Назва магазину</Label>
-            <Input id="shopName" defaultValue="Мій Рифовий Куточок" />
-          </div>
-          <div>
-            <Label htmlFor="shopDescription">Опис магазину</Label>
-            <Textarea id="shopDescription" defaultValue="Продаж якісних фрагів коралів та морських мешканців." />
-          </div>
-          <div>
-            <Label htmlFor="contactEmail">Контактний Email</Label>
-            <Input id="contactEmail" type="email" defaultValue="seller@example.com" />
-          </div>
-           <div>
-            <Label htmlFor="contactPhone">Контактний телефон</Label>
-            <Input id="contactPhone" type="tel" defaultValue="+380501234567" />
-          </div>
-          <Button>Зберегти інформацію</Button>
-        </CardContent>
-      </Card>
+      {/* Форма налаштувань магазину, яка відображається тільки для магазинів */}
+      {isShop && <ShopSettingsForm />}
 
       <Card>
         <CardHeader>
@@ -55,7 +51,7 @@ export default function DashboardSettingsPage() {
                 Отримувати сповіщення, коли хтось робить ставку.
               </span>
             </Label>
-            <Switch id="newBidNotification" defaultChecked />
+            <Switch id="newBidNotification" defaultChecked disabled />
           </div>
           <div className="flex items-center justify-between rounded-lg border p-4">
             <Label htmlFor="lotSoldNotification" className="flex flex-col gap-1">
@@ -64,7 +60,7 @@ export default function DashboardSettingsPage() {
                 Сповіщення, коли ваш лот успішно продано.
               </span>
             </Label>
-            <Switch id="lotSoldNotification" defaultChecked />
+            <Switch id="lotSoldNotification" defaultChecked disabled />
           </div>
            <div className="flex items-center justify-between rounded-lg border p-4">
             <Label htmlFor="newMessageNotification" className="flex flex-col gap-1">
@@ -73,9 +69,9 @@ export default function DashboardSettingsPage() {
                 Сповіщення про нові запитання або повідомлення.
               </span>
             </Label>
-            <Switch id="newMessageNotification" />
+            <Switch id="newMessageNotification" disabled />
           </div>
-          <Button>Зберегти налаштування сповіщень</Button>
+          <Button disabled>Зберегти налаштування сповіщень (у розробці)</Button>
         </CardContent>
       </Card>
 
@@ -85,8 +81,8 @@ export default function DashboardSettingsPage() {
           <CardDescription>Налаштуйте способи отримання платежів (у розробці).</CardDescription>
         </CardHeader>
         <CardContent>
-          <p className="text-muted-foreground">Цей розділ знаходиться у розробці. Незабаром ви зможете підключити LiqPay, Fondy та інші платіжні системи.</p>
-        </CardContent>
+          <p className="text-muted-foreground">Цей розділ знаходиться у розробці.</p>
+        </Content>
       </Card>
     </div>
   );

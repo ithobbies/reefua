@@ -40,15 +40,27 @@ export const createOrder = functions.region('us-central1').https.onCall(async (d
                     throw new functions.https.HttpsError('not-found', `Один з лотів більше не існує. Будь ласка, оновіть сторінку.`, { lotId: lotDoc.id });
                 }
                 const lotData = lotDoc.data() as Lot;
+                
+                // MODIFICATION START: New validation logic
+                if (lotData.type === 'auction') {
+                    // Auction logic remains the same: must be the winner of a sold lot
+                    if (lotData.winnerUid !== buyerUid) {
+                        throw new functions.https.HttpsError('permission-denied', `You do not have permission to order lot "${lotData.name}".`);
+                    }
+                    if (lotData.status !== 'sold') {
+                        throw new functions.https.HttpsError('failed-precondition', `Лот "${lotData.name}" більше не доступний для замовлення.`, { lotId: lotData.id, lotName: lotData.name });
+                    }
+                } else if (lotData.type === 'direct') {
+                    // Direct sale logic: lot must simply be active. No winner check.
+                    if (lotData.status !== 'active') {
+                         throw new functions.https.HttpsError('failed-precondition', `Лот "${lotData.name}" більше не доступний для замовлення.`, { lotId: lotData.id, lotName: lotData.name });
+                    }
+                } else {
+                    // Should not happen, but good to have a fallback
+                    throw new functions.https.HttpsError('internal', 'Invalid lot type encountered.');
+                }
+                // MODIFICATION END
 
-                if (lotData.winnerUid !== buyerUid) {
-                    throw new functions.https.HttpsError('permission-denied', `You do not have permission to order lot "${lotData.name}".`);
-                }
-                
-                if (lotData.status !== 'sold') {
-                    throw new functions.https.HttpsError('failed-precondition', `Лот "${lotData.name}" більше не доступний для замовлення.`, { lotId: lotData.id, lotName: lotData.name });
-                }
-                
                 if (!lotsBySeller[lotData.sellerUid]) {
                     lotsBySeller[lotData.sellerUid] = [];
                 }
@@ -58,8 +70,9 @@ export const createOrder = functions.region('us-central1').https.onCall(async (d
             // 2. Create a separate order for each seller
             for (const sellerUid in lotsBySeller) {
                 const sellerLots = lotsBySeller[sellerUid];
-                const totalAmount = sellerLots.reduce((sum, lot) => sum + (lot.finalPrice || 0), 0);
-                const sellerUsername = sellerLots[0].sellerUsername; // Get username from the first lot
+                // MODIFICATION: Use 'price' for direct sales and 'finalPrice' for auctions
+                const totalAmount = sellerLots.reduce((sum, lot) => sum + (lot.type === 'direct' ? lot.price! : lot.finalPrice!), 0);
+                const sellerUsername = sellerLots[0].sellerUsername;
                 
                 const orderRef = db.collection('orders').doc();
                 const now = new Date().toISOString();
@@ -72,8 +85,9 @@ export const createOrder = functions.region('us-central1').https.onCall(async (d
                     lots: sellerLots.map(l => ({ 
                         id: l.id, 
                         name: l.name, 
-                        images: l.images, 
-                        finalPrice: l.finalPrice,
+                        images: l.images,
+                        // MODIFICATION: Use correct price based on type
+                        finalPrice: l.type === 'direct' ? l.price : l.finalPrice,
                     })),
                     totalAmount,
                     shippingInfo,
@@ -85,9 +99,11 @@ export const createOrder = functions.region('us-central1').https.onCall(async (d
                 transaction.set(orderRef, newOrder);
                 createdOrderIds.push(orderRef.id);
 
-                // 3. Update the status of each lot included in the order
+                // 3. Update status only for auction lots
                 for (const lot of sellerLots) {
-                    transaction.update(db.collection('lots').doc(lot.id), { status: 'processing' });
+                    if (lot.type === 'auction') {
+                        transaction.update(db.collection('lots').doc(lot.id), { status: 'processing' });
+                    }
                 }
             }
         });
@@ -130,14 +146,28 @@ export const onOrderUpdate = functions.region('us-central1').firestore
 
         const batch = db.batch();
         
-        for (const lotInfo of orderAfter.lots) {
-            const lotRef = db.collection('lots').doc(lotInfo.id);
-            batch.update(lotRef, { status: newStatus });
+        // MODIFICATION: Only update status for auction lots within an order. Direct sale lots are not status-managed.
+        const lotIdsToUpdate = orderAfter.lots
+            .filter(lot => lot.id) // Ensure lot id exists
+            .map(lot => lot.id);
+        
+        if (lotIdsToUpdate.length === 0) {
+            console.log('No lots to update for this order.');
+            return null;
         }
+
+        const lotsSnapshot = await db.collection('lots').where(admin.firestore.FieldPath.documentId(), 'in', lotIdsToUpdate).get();
+        
+        lotsSnapshot.forEach(doc => {
+            const lot = doc.data() as Lot;
+            if (lot.type === 'auction') {
+                batch.update(doc.ref, { status: newStatus });
+            }
+        });
 
         try {
             await batch.commit();
-            console.log(`Successfully synced status for ${orderAfter.lots.length} lots in order ${orderAfter.id}.`);
+            console.log(`Successfully synced status for auction lots in order ${orderAfter.id}.`);
             return { success: true };
         } catch (error) {
             console.error(`Failed to sync lot statuses for order ${orderAfter.id}`, error);

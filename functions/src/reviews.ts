@@ -1,7 +1,7 @@
 
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
-import { Review, Lot, User } from "./types";
+import { Review, Order, User } from "./types"; // Змінено Lot на Order
 
 const db = admin.firestore();
 
@@ -10,37 +10,36 @@ export const leaveReview = functions.https.onCall(async (data, context) => {
         throw new functions.https.HttpsError("unauthenticated", "You must be logged in to leave a review.");
     }
 
-    const { lotId, rating, comment } = data;
+    const { orderId, rating, comment } = data; // Змінено lotId на orderId
     const buyerUid = context.auth.uid;
 
-    if (!lotId || typeof rating !== 'number' || rating < 1 || rating > 5 || typeof comment !== 'string' || comment.trim() === '') {
-        throw new functions.https.HttpsError("invalid-argument", "Please provide a valid lot ID, a rating between 1 and 5, and a non-empty comment.");
+    if (!orderId || typeof rating !== 'number' || rating < 1 || rating > 5 || typeof comment !== 'string' || comment.trim() === '') {
+        throw new functions.https.HttpsError("invalid-argument", "Please provide a valid order ID, a rating between 1 and 5, and a non-empty comment.");
     }
 
-    const lotRef = db.collection('lots').doc(lotId);
+    const orderRef = db.collection('orders').doc(orderId); // Змінено на orders
     const reviewRef = db.collection('reviews').doc();
 
     try {
         await db.runTransaction(async (transaction) => {
-            const lotDoc = await transaction.get(lotRef);
+            const orderDoc = await transaction.get(orderRef);
 
-            if (!lotDoc.exists) {
-                throw new functions.https.HttpsError("not-found", "The specified lot does not exist.");
+            if (!orderDoc.exists) {
+                throw new functions.https.HttpsError("not-found", "The specified order does not exist.");
             }
 
-            const lotData = lotDoc.data() as Lot;
+            const orderData = orderDoc.data() as Order;
             
-            // Allow reviews for shipped or completed lots
-            if (lotData.status !== 'shipped' && lotData.status !== 'completed') {
-                throw new functions.https.HttpsError("failed-precondition", "You can only leave reviews for shipped or completed lots.");
+            if (orderData.status !== 'shipped' && orderData.status !== 'completed') {
+                throw new functions.https.HttpsError("failed-precondition", "You can only leave reviews for shipped or completed orders.");
             }
 
-            if (lotData.winnerUid !== buyerUid) {
-                throw new functions.https.HttpsError("permission-denied", "You can only leave reviews for lots you have won.");
+            if (orderData.buyerUid !== buyerUid) {
+                throw new functions.https.HttpsError("permission-denied", "You can only leave reviews for orders you have purchased.");
             }
 
-            if (lotData.reviewLeft === true) {
-                throw new functions.https.HttpsError("already-exists", "A review has already been left for this lot.");
+            if (orderData.reviewLeft === true) {
+                throw new functions.https.HttpsError("already-exists", "A review has already been left for this order.");
             }
             
             const buyerDoc = await transaction.get(db.collection('users').doc(buyerUid));
@@ -50,28 +49,27 @@ export const leaveReview = functions.https.onCall(async (data, context) => {
             const buyerUsername = (buyerDoc.data() as User).username;
 
 
-            const sellerRef = db.collection('users').doc(lotData.sellerUid);
+            const sellerRef = db.collection('users').doc(orderData.sellerUid);
             const sellerDoc = await transaction.get(sellerRef);
             if (!sellerDoc.exists) {
                  throw new functions.https.HttpsError("not-found", "The seller's profile could not be found.");
             }
             const sellerData = sellerDoc.data() as User;
             
-            // --- Rating Calculation ---
             const currentRating = sellerData.sellerRating || 0;
             const currentReviewCount = sellerData.sellerReviewCount || 0;
             
             const newReviewCount = currentReviewCount + 1;
             const newRating = ((currentRating * currentReviewCount) + rating) / newReviewCount;
 
-            // Create the new review
+            // Створюємо відгук (зберігаємо інформацію про перший лот для контексту)
             const newReview: Review = {
                 id: reviewRef.id,
-                sellerUid: lotData.sellerUid,
+                sellerUid: orderData.sellerUid,
                 buyerUid,
                 buyerUsername,
-                lotId,
-                lotName: lotData.name,
+                lotId: orderData.lots[0].id, // Зберігаємо ID першого лота
+                lotName: `${orderData.lots[0].name}${orderData.lots.length > 1 ? ` та ще ${orderData.lots.length - 1}` : ''}`,
                 rating,
                 comment,
                 createdAt: new Date().toISOString(),
@@ -79,10 +77,9 @@ export const leaveReview = functions.https.onCall(async (data, context) => {
             
             transaction.set(reviewRef, newReview);
             
-            // **THE FIX:** Mark the lot so a second review can't be left
-            transaction.update(lotRef, { reviewLeft: true });
+            // Ставимо позначку на ЗАМОВЛЕННЯ, а не на лот
+            transaction.update(orderRef, { reviewLeft: true });
 
-            // Update the seller's aggregate rating
             transaction.update(sellerRef, {
                 sellerRating: newRating,
                 sellerReviewCount: newReviewCount,

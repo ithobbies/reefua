@@ -1,3 +1,4 @@
+
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
 import type { Lot, User } from "./types";
@@ -16,12 +17,23 @@ export const createLot = functions.region('us-central1').https.onCall(async (dat
     if (!userDoc.exists) {
         throw new functions.https.HttpsError("not-found", "Seller profile does not exist.");
     }
-    const sellerUsername = (userDoc.data() as User)?.username || 'Unknown Seller';
+    const userData = userDoc.data() as User;
+    const sellerUsername = userData.username || 'Unknown Seller';
+    const sellerAccountType = userData.roles?.includes('shop') ? 'shop' : 'individual';
 
-    const { name, description, category, subcategory, startingBid, buyNowPrice, endTime, images, parameters, type, price } = data;
+    // MODIFIED: Destructure region and city from data
+    const { name, description, category, subcategory, region, city, startingBid, buyNowPrice, endTime, images, parameters, type, price } = data;
+    
+    // --- ДОДАНО: ЛОГІКА ВИЗНАЧЕННЯ ДАНИХ ДЛЯ МАГАЗИНУ ---
+    const isShop = sellerAccountType === 'shop';
+    const lotRegion = isShop && userData.shopRegion ? userData.shopRegion : region;
+    const lotCity = isShop && userData.shopCity ? userData.shopCity : city;
+    const lotPhoneNumber = isShop ? userData.shopPhoneNumber : undefined;
+    // --- КІНЕЦЬ ДОДАНОЇ ЛОГІКИ ---
 
-    if (!name || !description || !category || !subcategory || !images || !Array.isArray(images) || images.length === 0 || !type) {
-        throw new functions.https.HttpsError("invalid-argument", "Required lot information is missing or invalid, including subcategory.");
+    // MODIFIED: Add region and city to validation
+    if (!name || !description || !category || !subcategory || !lotRegion || !lotCity || !images || !Array.isArray(images) || images.length === 0 || !type) {
+        throw new functions.https.HttpsError("invalid-argument", "Required lot information is missing or invalid, including location.");
     }
 
     const lotRef = db.collection("lots").doc();
@@ -44,8 +56,12 @@ export const createLot = functions.region('us-central1').https.onCall(async (dat
             price,
             sellerUid,
             sellerUsername,
+            sellerAccountType,
             category,
             subcategory,
+            region: lotRegion,      // ЗМІНЕНО
+            city: lotCity,          // ЗМІНЕНО
+            phoneNumber: lotPhoneNumber, // ДОДАНО
             status: 'active',
             createdAt: nowISO,
             endTime: thirtyDaysFromNow.toISOString(),
@@ -73,8 +89,12 @@ export const createLot = functions.region('us-central1').https.onCall(async (dat
             endTime,
             sellerUid,
             sellerUsername,
+            sellerAccountType,
             category,
             subcategory,
+            region: lotRegion,      // ЗМІНЕНО
+            city: lotCity,          // ЗМІНЕНО
+            phoneNumber: lotPhoneNumber, // ДОДАНО
             status: 'active',
             createdAt: nowISO,
             parameters: parameters || {},
@@ -92,7 +112,7 @@ export const createLot = functions.region('us-central1').https.onCall(async (dat
 
     return { success: true, id: newLot.id };
 });
-
+// ... (the rest of the file remains unchanged)
 export const buyNow = functions.region('us-central1').https.onRequest(async (req, res) => {
     res.set('Access-Control-Allow-Origin', '*');
     res.set('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -154,26 +174,24 @@ export const buyNow = functions.region('us-central1').https.onRequest(async (req
                 throw err;
             }
 
-            let finalPrice: number | undefined | null;
+            if (lot.type === 'auction') {
+                const finalPrice = lot.buyNowPrice;
+                if (!finalPrice) {
+                    const err = new Error("Цей лот не можна купити зараз.") as any;
+                    err.status = 412;
+                    throw err;
+                }
+                
+                transaction.update(lotRef, {
+                    status: 'sold',
+                    winnerUid: buyerUid,
+                    finalPrice: finalPrice,
+                    endTime: new Date().toISOString(),
+                });
 
-            if (lot.type === 'direct') {
-                finalPrice = lot.price;
-            } else if (lot.type === 'auction') {
-                finalPrice = lot.buyNowPrice;
+            } else if (lot.type === 'direct') {
+                // No transaction update is needed for direct sales.
             }
-
-            if (!finalPrice) {
-                 const err = new Error("Цей лот не можна купити зараз.") as any;
-                err.status = 412;
-                throw err;
-            }
-
-            transaction.update(lotRef, {
-                status: 'sold',
-                winnerUid: buyerUid,
-                finalPrice: finalPrice,
-                endTime: new Date().toISOString(),
-            });
         });
 
         res.status(200).json({ data: { success: true, message: "Вітаємо з покупкою!" } });
@@ -209,10 +227,6 @@ export const expireDirectSales = functions.pubsub.schedule('every 24 hours').onR
     return null;
 });
 
-/**
- * Searches active lots based on a query string.
- * This function performs a case-insensitive search on lot name, description, and category.
- */
 export const searchLots = functions.region('us-central1').https.onCall(async (data, context) => {
     const { query } = data;
 
@@ -231,7 +245,6 @@ export const searchLots = functions.region('us-central1').https.onCall(async (da
 
         const allLots = lotsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Lot[];
 
-        // Filter in memory with defensive checks for undefined fields
         const filteredLots = allLots.filter(lot => {
             const nameMatch = lot.name?.toLowerCase().includes(lowerCaseQuery) || false;
             const descriptionMatch = lot.description?.toLowerCase().includes(lowerCaseQuery) || false;

@@ -4,14 +4,18 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { doc, getDoc, collection, query, where, orderBy, onSnapshot } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
-import type { User, Review } from '@/functions/src/types';
+import { functions, db } from '@/lib/firebase';
+import type { User, Review, Lot } from '@/functions/src/types';
+import { httpsCallable } from 'firebase/functions';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Star } from 'lucide-react';
+import { Star, Store } from 'lucide-react'; // Додано Store
 import { Loader2 } from 'lucide-react';
 import { StatsCard } from '@/components/dashboard/stats-card';
+import LotCard from '@/components/lots/lot-card';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Badge } from '@/components/ui/badge'; // Додано Badge
 
 const RatingStars = ({ rating, className = '' }: { rating: number, className?: string }) => (
   <div className="flex">
@@ -27,7 +31,9 @@ export default function PublicProfilePage() {
 
   const [seller, setSeller] = useState<User | null>(null);
   const [reviews, setReviews] = useState<Review[]>([]);
+  const [sellerLots, setSellerLots] = useState<Lot[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isLoadingLots, setIsLoadingLots] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -54,6 +60,21 @@ export default function PublicProfilePage() {
       }
     };
 
+    const fetchSellerLots = async () => {
+      if (!params.id) return;
+      setIsLoadingLots(true);
+      try {
+        const getLotsBySeller = httpsCallable(functions, "getLotsBySeller");
+        const result = await getLotsBySeller({ userId: params.id });
+        console.log("[DEBUG] Raw data from getLotsBySeller:", result.data);
+        setSellerLots(result.data as Lot[]);
+      } catch (error) {
+        console.error("Error fetching seller lots:", error);
+      } finally {
+        setIsLoadingLots(false);
+      }
+    };
+
     const unsubscribeReviews = onSnapshot(
         query(collection(db, 'reviews'), where('sellerUid', '==', userId), orderBy('createdAt', 'desc')),
         (snapshot) => {
@@ -65,7 +86,7 @@ export default function PublicProfilePage() {
         }
     );
     
-    Promise.all([fetchSellerData()]).finally(() => setLoading(false));
+    Promise.all([fetchSellerData(), fetchSellerLots()]).finally(() => setLoading(false));
 
     return () => unsubscribeReviews();
   }, [userId]);
@@ -87,6 +108,11 @@ export default function PublicProfilePage() {
   const registrationDate = new Date(seller.createdAt).toLocaleDateString('uk-UA');
   const fallbackInitial = seller.username ? seller.username[0].toUpperCase() : 'S';
 
+  console.log("[DEBUG] State before render:", {
+    isLoadingLots,
+    sellerLots,
+  });
+
   return (
     <div className="container mx-auto py-8">
       <div className="flex flex-col md:flex-row items-center md:items-start gap-6 mb-8">
@@ -95,7 +121,15 @@ export default function PublicProfilePage() {
           <AvatarFallback>{fallbackInitial}</AvatarFallback>
         </Avatar>
         <div className="text-center md:text-left mt-4 md:mt-0">
-          <h1 className="text-3xl font-headline font-bold text-primary">{seller.username}</h1>
+          <div className="flex items-center gap-4 justify-center md:justify-start">
+            <h1 className="text-3xl font-headline font-bold text-primary">{seller.username}</h1>
+            {seller.roles?.includes('shop') && (
+              <Badge variant="outline" className="text-base border-green-600 text-green-700 bg-green-50">
+                  <Store className="h-4 w-4 mr-2" />
+                  Магазин
+              </Badge>
+            )}
+          </div>
           <p className="text-sm text-muted-foreground">Учасник з: {registrationDate}</p>
           <div className="flex items-center gap-2 mt-2 justify-center md:justify-start">
              <RatingStars rating={seller.sellerRating || 0} />
@@ -105,36 +139,65 @@ export default function PublicProfilePage() {
         </div>
       </div>
 
-       <Card>
-        <CardHeader>
-          <CardTitle>Відгуки Покупців</CardTitle>
-          <CardDescription>Що говорять покупці про цього продавця.</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          {reviews.length > 0 ? (
-            reviews.map(review => (
-              <Card key={review.id} className="p-4 bg-secondary/50">
-                <div className="flex items-start gap-4">
-                  <Avatar className="h-9 w-9">
-                    <AvatarFallback>{review.buyerUsername.substring(0,2).toUpperCase()}</AvatarFallback>
-                  </Avatar>
-                  <div className="flex-grow">
-                    <div className="flex items-center justify-between">
-                      <h4 className="font-semibold">{review.buyerUsername}</h4>
-                      <span className="text-xs text-muted-foreground">{new Date(review.createdAt).toLocaleDateString('uk-UA')}</span>
-                    </div>
-                    <div className="my-1"><RatingStars rating={review.rating} /></div>
-                    <p className="text-sm text-muted-foreground mb-1">Лот: <span className="font-medium text-primary">{review.lotName}</span></p>
-                    <p className="text-sm">{review.comment}</p>
+       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-3">
+          <Card>
+            <CardHeader>
+              <CardTitle>Лоти продавця</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {isLoadingLots ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {Array.from({ length: 3 }).map((_, i) => (
+                      <Skeleton key={i} className="h-96 w-full" />
+                    ))}
                   </div>
-                </div>
-              </Card>
-            ))
-          ) : (
-             <p className="text-muted-foreground text-center py-10">У цього продавця ще немає відгуків.</p>
-          )}
-        </CardContent>
-      </Card>
+                ) : sellerLots.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {sellerLots.map((lot) => (
+                      <LotCard key={lot.id} lot={lot} />
+                    ))}
+                  </div>
+                ) : (
+                  <p>Продавець ще не виставив жодного лота.</p>
+                )}
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="lg:col-span-3">
+          <Card>
+            <CardHeader>
+              <CardTitle>Відгуки Покупців</CardTitle>
+              <CardDescription>Що говорять покупці про цього продавця.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {reviews.length > 0 ? (
+                reviews.map(review => (
+                  <Card key={review.id} className="p-4 bg-secondary/50">
+                    <div className="flex items-start gap-4">
+                      <Avatar className="h-9 w-9">
+                        <AvatarFallback>{review.buyerUsername.substring(0,2).toUpperCase()}</AvatarFallback>
+                      </Avatar>
+                      <div className="flex-grow">
+                        <div className="flex items-center justify-between">
+                          <h4 className="font-semibold">{review.buyerUsername}</h4>
+                          <span className="text-xs text-muted-foreground">{new Date(review.createdAt).toLocaleDateString('uk-UA')}</span>
+                        </div>
+                        <div className="my-1"><RatingStars rating={review.rating} /></div>
+                        <p className="text-sm text-muted-foreground mb-1">Лот: <span className="font-medium text-primary">{review.lotName}</span></p>
+                        <p className="text-sm">{review.comment}</p>
+                      </div>
+                    </div>
+                  </Card>
+                ))
+              ) : (
+                <p className="text-muted-foreground text-center py-10">У цього продавця ще немає відгуків.</p>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      </div>
     </div>
   );
 }

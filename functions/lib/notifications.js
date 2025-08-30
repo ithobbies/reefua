@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.onOrderCreatedSendEmail = exports.onNewLotSendTelegramNotification = exports.onNewBidNotifyOutbidUser = exports.onLotSold = exports.onNewChatMessage = void 0;
+exports.onOrderCreatedNotifications = exports.onNewLotSendTelegramNotification = exports.onNewBidNotifyOutbidUser = exports.onLotSold = exports.onNewChatMessage = void 0;
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
 const axios_1 = require("axios");
@@ -9,6 +9,17 @@ const telegramBotToken = (0, params_1.defineString)('TELEGRAM_BOT_TOKEN');
 const telegramChatId = (0, params_1.defineString)('TELEGRAM_CHAT_ID');
 const db = admin.firestore();
 // --- Reusable Telegram Functions ---
+// Helper function to escape special characters for Telegram's original Markdown parser.
+const escapeMarkdown = (text) => {
+    if (!text)
+        return '';
+    // Characters to escape for Markdown: _, *, `, [
+    return text
+        .replace(/_/g, '\\_')
+        .replace(/\*/g, '\\*')
+        .replace(/`/g, '\\`')
+        .replace(/\[/g, '\\[');
+};
 async function sendTelegramMessage(userId, text) {
     var _a;
     const token = telegramBotToken.value();
@@ -189,21 +200,64 @@ exports.onNewLotSendTelegramNotification = functions.region('us-central1').fires
     }
     const lotUrl = `https://reefua.store/lot/${lotId}`;
     const imageUrl = lot.images[0];
+    const name = escapeMarkdown(lot.name);
+    const sellerUsername = escapeMarkdown(lot.sellerUsername);
+    const location = escapeMarkdown(`${lot.city}, ${lot.region}`);
     let priceInfo = lot.type === 'auction'
         ? `*Стартова ціна:* ${lot.startingBid} грн` + (lot.buyNowPrice ? `\n*Купити зараз:* ${lot.buyNowPrice} грн` : '')
         : `*Ціна:* ${lot.price} грн`;
     const caption = `
 🆕 *Новий лот на ReefUA!*
 
-*Назва:* ${lot.name}
-*Продавець:* ${lot.sellerUsername}
+*Назва:* ${name}
+*Продавець:* ${sellerUsername}
+📍 *Місце:* ${location}
 ${priceInfo}
 
 [Переглянути лот](${lotUrl})
         `;
     await sendTelegramPhoto(telegramChatId.value(), imageUrl, caption);
 });
-exports.onOrderCreatedSendEmail = functions.region('us-central1').firestore
+exports.onOrderCreatedNotifications = functions.region('us-central1').firestore
     .document('orders/{orderId}')
-    .onCreate(async (snap, context) => { });
+    .onCreate(async (snap, context) => {
+    var _a;
+    const order = snap.data();
+    const { buyerUid, sellerUid } = order;
+    const siteUrl = 'https://reefua.store';
+    const [buyerDoc, sellerDoc] = await Promise.all([
+        db.collection('users').doc(buyerUid).get(),
+        db.collection('users').doc(sellerUid).get()
+    ]);
+    if (buyerDoc.exists) {
+        const buyer = buyerDoc.data();
+        if (buyer.telegramUserId) {
+            const message = `
+✅ *Дякуємо за покупку!*
+
+Ваше замовлення *№${order.id.substring(0, 6)}...* було успішно створено.
+Продавець отримав сповіщення і зв'яжеться з вами найближчим часом.
+
+[Переглянути історію замовлень](${siteUrl}/profile)
+                `;
+            await sendTelegramMessage(buyer.telegramUserId, message);
+        }
+    }
+    if (sellerDoc.exists) {
+        const seller = sellerDoc.data();
+        if (seller.telegramUserId) {
+            const buyerUsername = ((_a = buyerDoc.data()) === null || _a === void 0 ? void 0 : _a.username) || 'покупець';
+            const lotNames = order.lots.map(l => `"${l.name}"`).join(', ');
+            const message = `
+🔔 *У вас нове замовлення!*
+
+Покупець *${buyerUsername}* оформив замовлення *№${order.id.substring(0, 6)}...* на товари: ${lotNames}.
+Загальна сума: *${order.totalAmount.toFixed(2)} грн*.
+
+Будь ласка, перейдіть до [панелі продажів](${siteUrl}/dashboard/sales), щоб переглянути деталі та відправити товар.
+                `;
+            await sendTelegramMessage(seller.telegramUserId, message);
+        }
+    }
+});
 //# sourceMappingURL=notifications.js.map

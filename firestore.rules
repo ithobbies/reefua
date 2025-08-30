@@ -4,6 +4,12 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
+    // --- Кошик (Cart Items) ---
+    match /cartItems/{cartItemId} {
+      allow read, delete: if request.auth != null && request.auth.uid == resource.data.userId;
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
+    }
+
     // --- Лоты (Lots) ---
     match /lots/{lotId} {
       allow read: if true;

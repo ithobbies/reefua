@@ -15,10 +15,14 @@ exports.createLot = functions.region('us-central1').https.onCall(async (data, co
     if (!userDoc.exists) {
         throw new functions.https.HttpsError("not-found", "Seller profile does not exist.");
     }
-    const sellerUsername = ((_a = userDoc.data()) === null || _a === void 0 ? void 0 : _a.username) || 'Unknown Seller';
-    const { name, description, category, subcategory, startingBid, buyNowPrice, endTime, images, parameters, type, price } = data;
-    if (!name || !description || !category || !subcategory || !images || !Array.isArray(images) || images.length === 0 || !type) {
-        throw new functions.https.HttpsError("invalid-argument", "Required lot information is missing or invalid, including subcategory.");
+    const userData = userDoc.data();
+    const sellerUsername = userData.username || 'Unknown Seller';
+    const sellerAccountType = ((_a = userData.roles) === null || _a === void 0 ? void 0 : _a.includes('shop')) ? 'shop' : 'individual';
+    // MODIFIED: Destructure region and city from data
+    const { name, description, category, subcategory, region, city, startingBid, buyNowPrice, endTime, images, parameters, type, price } = data;
+    // MODIFIED: Add region and city to validation
+    if (!name || !description || !category || !subcategory || !region || !city || !images || !Array.isArray(images) || images.length === 0 || !type) {
+        throw new functions.https.HttpsError("invalid-argument", "Required lot information is missing or invalid, including location.");
     }
     const lotRef = db.collection("lots").doc();
     const now = new Date();
@@ -37,8 +41,11 @@ exports.createLot = functions.region('us-central1').https.onCall(async (data, co
             price,
             sellerUid,
             sellerUsername,
+            sellerAccountType,
             category,
             subcategory,
+            region, // MODIFIED: Add to lot object
+            city, // MODIFIED: Add to lot object
             status: 'active',
             createdAt: nowISO,
             endTime: thirtyDaysFromNow.toISOString(),
@@ -67,8 +74,11 @@ exports.createLot = functions.region('us-central1').https.onCall(async (data, co
             endTime,
             sellerUid,
             sellerUsername,
+            sellerAccountType,
             category,
             subcategory,
+            region, // MODIFIED: Add to lot object
+            city, // MODIFIED: Add to lot object
             status: 'active',
             createdAt: nowISO,
             parameters: parameters || {},
@@ -137,24 +147,23 @@ exports.buyNow = functions.region('us-central1').https.onRequest(async (req, res
                 err.status = 412;
                 throw err;
             }
-            let finalPrice;
-            if (lot.type === 'direct') {
-                finalPrice = lot.price;
+            if (lot.type === 'auction') {
+                const finalPrice = lot.buyNowPrice;
+                if (!finalPrice) {
+                    const err = new Error("Цей лот не можна купити зараз.");
+                    err.status = 412;
+                    throw err;
+                }
+                transaction.update(lotRef, {
+                    status: 'sold',
+                    winnerUid: buyerUid,
+                    finalPrice: finalPrice,
+                    endTime: new Date().toISOString(),
+                });
             }
-            else if (lot.type === 'auction') {
-                finalPrice = lot.buyNowPrice;
+            else if (lot.type === 'direct') {
+                // No transaction update is needed for direct sales.
             }
-            if (!finalPrice) {
-                const err = new Error("Цей лот не можна купити зараз.");
-                err.status = 412;
-                throw err;
-            }
-            transaction.update(lotRef, {
-                status: 'sold',
-                winnerUid: buyerUid,
-                finalPrice: finalPrice,
-                endTime: new Date().toISOString(),
-            });
         });
         res.status(200).json({ data: { success: true, message: "Вітаємо з покупкою!" } });
     }
@@ -183,10 +192,6 @@ exports.expireDirectSales = functions.pubsub.schedule('every 24 hours').onRun(as
     console.log(`Expired ${snapshot.size} direct sales lots.`);
     return null;
 });
-/**
- * Searches active lots based on a query string.
- * This function performs a case-insensitive search on lot name, description, and category.
- */
 exports.searchLots = functions.region('us-central1').https.onCall(async (data, context) => {
     const { query } = data;
     if (typeof query !== 'string' || query.trim().length === 0) {
@@ -199,7 +204,6 @@ exports.searchLots = functions.region('us-central1').https.onCall(async (data, c
             return [];
         }
         const allLots = lotsSnapshot.docs.map(doc => (Object.assign({ id: doc.id }, doc.data())));
-        // Filter in memory with defensive checks for undefined fields
         const filteredLots = allLots.filter(lot => {
             var _a, _b, _c, _d;
             const nameMatch = ((_a = lot.name) === null || _a === void 0 ? void 0 : _a.toLowerCase().includes(lowerCaseQuery)) || false;

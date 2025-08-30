@@ -7,11 +7,13 @@ import { db } from '@/lib/firebase';
 import { useAuth } from '@/context/auth-context';
 import { type Order, type User } from '@/functions/src/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2 } from 'lucide-react';
+import { Loader2, MessageSquarePlus } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
+import { Button } from '@/components/ui/button';
+import { LeaveReviewDialog } from '@/components/profile/leave-review-dialog';
 
 // Helper to get a readable name for shipping method
 const getShippingMethodName = (method: Order['shippingInfo']['shippingMethod']) => {
@@ -107,6 +109,8 @@ export const OrdersHistoryTab = () => {
                 <Accordion type="single" collapsible className="w-full">
                     {orders.map(order => {
                         const seller = sellers[order.sellerUid];
+                        const canLeaveReview = (order.status === 'shipped' || order.status === 'completed') && !order.reviewLeft;
+                        const lotNameForReview = `${order.lots[0].name}${order.lots.length > 1 ? ` та ще ${order.lots.length - 1}` : ''}`;
                         return (
                             <AccordionItem value={order.id} key={order.id}>
                                 <AccordionTrigger>
@@ -119,12 +123,22 @@ export const OrdersHistoryTab = () => {
                                 </AccordionTrigger>
                                 <AccordionContent>
                                     <div className="p-4 bg-muted/50 rounded-lg grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        <div className="space-y-2">
-                                            <h4 className="font-semibold">Деталі замовлення</h4>
-                                            {seller ? <p><strong>Продавець:</strong> <Link href={`/profile/${order.sellerUid}`} className="text-primary hover:underline">{seller.username}</Link></p> : <p>Продавець: ...</p>}
-                                            <p><strong>Спосіб доставки:</strong> {getShippingMethodName(order.shippingInfo.shippingMethod)}</p>
-                                            <p><strong>Адреса:</strong> {order.shippingInfo.city ? `${order.shippingInfo.city}, ${order.shippingInfo.department}` : 'Самовивіз або інше'}</p>
-                                            {order.trackingNumber && <p><strong>ТТН:</strong> {order.trackingNumber}</p>}
+                                        <div className="space-y-4">
+                                            <div>
+                                                <h4 className="font-semibold mb-2">Деталі замовлення</h4>
+                                                {seller ? <p><strong>Продавець:</strong> <Link href={`/profile/${order.sellerUid}`} className="text-primary hover:underline">{seller.username}</Link></p> : <p>Продавець: ...</p>}
+                                                <p><strong>Спосіб доставки:</strong> {getShippingMethodName(order.shippingInfo.shippingMethod)}</p>
+                                                <p><strong>Адреса:</strong> {order.shippingInfo.city ? `${order.shippingInfo.city}, ${order.shippingInfo.department}` : 'Самовивіз або інше'}</p>
+                                                {order.trackingNumber && <p><strong>ТТН:</strong> {order.trackingNumber}</p>}
+                                            </div>
+                                            {canLeaveReview && (
+                                                <div>
+                                                    <h4 className="font-semibold mb-2">Дії</h4>
+                                                    <LeaveReviewDialog orderId={order.id} lotName={lotNameForReview} onReviewSubmitted={() => {}}>
+                                                        <Button size="sm"><MessageSquarePlus className="mr-2 h-4 w-4" />Залишити відгук</Button>
+                                                    </LeaveReviewDialog>
+                                                </div>
+                                            )}
                                         </div>
                                         <div className="space-y-2">
                                             <h4 className="font-semibold">Лоти в замовленні</h4>

@@ -76,7 +76,7 @@ export default function HomePage() {
           where('status', '==', 'active'),
           where('type', '==', 'direct'),
           orderBy('createdAt', 'desc'),
-          limit(4)
+          limit(8)
         );
         const lotSnapshot = await getDocs(q);
         const lotsList = lotSnapshot.docs.map(doc => ({
@@ -119,6 +119,27 @@ export default function HomePage() {
     <div>
       <section className="mb-12">
         <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-headline font-bold text-primary flex items-center">
+            <ShoppingBag className="mr-2 h-6 w-6 text-accent" />
+            Нові товари на продаж
+          </h2>
+          <Button variant="link" asChild>
+            <Link href="/auctions?type=direct">Переглянути всі</Link>
+          </Button>
+        </div>
+        {loadingDirect ? renderSkeleton(8) : directSaleLots.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {directSaleLots.map((lot) => (
+              <LotCard key={lot.id} lot={lot} onLotPurchased={handleLotPurchased} />
+            ))}
+          </div>
+        ) : (
+          <p className="text-muted-foreground">Наразі немає товарів для прямої покупки.</p>
+        )}
+      </section>
+      
+      <section className="mb-12">
+        <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-headline font-bold text-primary">Нові Аукціони</h2>
           <Button variant="link" asChild>
             <Link href="/auctions?type=auction">Переглянути всі</Link>
@@ -153,27 +174,6 @@ export default function HomePage() {
           </div>
         ) : (
           <p className="text-muted-foreground">Наразі немає активних аукціонів, що скоро завершаться.</p>
-        )}
-      </section>
-
-      <section>
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-headline font-bold text-primary flex items-center">
-            <ShoppingBag className="mr-2 h-6 w-6 text-accent" />
-            Нові товари на продаж
-          </h2>
-          <Button variant="link" asChild>
-            <Link href="/auctions?type=direct">Переглянути всі</Link>
-          </Button>
-        </div>
-        {loadingDirect ? renderSkeleton() : directSaleLots.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {directSaleLots.map((lot) => (
-              <LotCard key={lot.id} lot={lot} onLotPurchased={handleLotPurchased} />
-            ))}
-          </div>
-        ) : (
-          <p className="text-muted-foreground">Наразі немає товарів для прямої покупки.</p>
         )}
       </section>
     </div>

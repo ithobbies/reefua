@@ -27,7 +27,7 @@ import { usePathname, useRouter } from 'next/navigation';
 
 const navLinks = [
   { href: '/', label: 'Головна', icon: Home },
-  { href: '/auctions', label: 'Аукціони', icon: GanttChartSquare },
+  { href: '/auctions', label: "Об'яви", icon: GanttChartSquare },
   { href: '/sell', label: 'Продати', icon: PlusSquare },
   { href: '/rules', label: 'Правила', icon: Gavel },
 ];

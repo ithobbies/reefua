@@ -7,18 +7,29 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge'; 
-import { Edit3, Bell, Gavel, Trophy, History, LayoutDashboardIcon, Loader2, MessageSquarePlus, Eye, CreditCard, Bot, CheckCircle } from 'lucide-react';
+import { Edit3, Bell, Gavel, Trophy, History, LayoutDashboardIcon, Loader2, MessageSquarePlus, Eye, CreditCard, Bot, CheckCircle, Trash2 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import React, { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '@/context/auth-context';
-import { doc, getDocs, collectionGroup, query, where, collection, getDoc, orderBy, onSnapshot } from 'firebase/firestore';
+import { doc, getDocs, collectionGroup, query, where, collection, getDoc, orderBy, onSnapshot, deleteDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
 import type { Lot, Bid } from '@/functions/src/types';
 import { EditProfileDialog } from '@/components/profile/edit-profile-dialog';
-import { LeaveReviewDialog } from '@/components/profile/leave-review-dialog';
+// import { LeaveReviewDialog } from '@/components/profile/leave-review-dialog'; // ІМПОРТ ВИДАЛЕНО
 import { OrdersHistoryTab } from '@/components/profile/orders-history-tab';
+
+interface CartItem {
+  id: string;
+  lotId: string;
+  lotData: {
+    name: string;
+    price: number;
+    images: string[];
+    sellerUsername: string;
+  };
+}
 
 interface UserBidInfo {
   lot: Lot;
@@ -31,16 +42,16 @@ const UserProfilePage = () => {
 
   const [userBids, setUserBids] = useState<UserBidInfo[]>([]);
   const [lotsForAction, setLotsForAction] = useState<Lot[]>([]);
+  const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [loadingBids, setLoadingBids] = useState(true);
   const [loadingWonLots, setLoadingWonLots] = useState(true);
+  const [loadingCart, setLoadingCart] = useState(true);
 
   useEffect(() => {
     document.title = 'Мій Профіль - ReefUA';
   }, []);
 
-  const handleReviewSubmitted = useCallback(() => {
-    // This function can be used to manually re-trigger the fetch if needed.
-  }, []);
+  // const handleReviewSubmitted = useCallback(() => {}, []); // ОБРОБНИК ВИДАЛЕНО
 
   useEffect(() => {
     if (!user) {
@@ -70,6 +81,35 @@ const UserProfilePage = () => {
 
     return () => unsubscribe();
   }, [user, toast]);
+
+  useEffect(() => {
+    if (!user) {
+      setLoadingCart(false);
+      return;
+    }
+    setLoadingCart(true);
+    const cartQuery = query(collection(db, 'cartItems'), where('userId', '==', user.uid));
+    const unsubscribe = onSnapshot(cartQuery, (snapshot) => {
+        const items = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as CartItem[];
+        setCartItems(items);
+        setLoadingCart(false);
+    }, (error) => {
+        console.error("Error fetching cart items:", error);
+        toast({ variant: 'destructive', title: 'Помилка', description: 'Не вдалося завантажити кошик.' });
+        setLoadingCart(false);
+    });
+    return () => unsubscribe();
+  }, [user, toast]);
+
+  const handleRemoveFromCart = async (cartItemId: string) => {
+      try {
+          await deleteDoc(doc(db, 'cartItems', cartItemId));
+          toast({ title: "Товар видалено з кошика" });
+      } catch (error) {
+          console.error("Error removing item from cart:", error);
+          toast({ variant: 'destructive', title: 'Помилка', description: 'Не вдалося видалити товар.' });
+      }
+  };
   
   const fetchBids = useCallback(async () => {
       if (!user) return;
@@ -115,16 +155,18 @@ const UserProfilePage = () => {
     return <div className="container mx-auto py-8 text-center"><h1 className="text-2xl font-bold">Будь ласка, увійдіть.</h1></div>;
   }
 
-  // Correctly read the bot username from environment variables
   const botUsername = process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME || '';
   const telegramConnectUrl = `https://t.me/${botUsername}?start=${user.uid}`;
+
+  const allItemsForAction = [...cartItems, ...lotsForAction];
+  const canCheckout = cartItems.length > 0 || lotsForAction.some(lot => lot.status === 'sold');
 
   return (
     <div className="container mx-auto py-8">
        <div className="flex flex-col md:flex-row items-center md:items-start gap-6 mb-8">
          <Avatar className="h-24 w-24 md:h-32 md:w-32 border-4 border-primary"><AvatarImage src={firestoreUser.photoURL || undefined} /><AvatarFallback>{firestoreUser.username?.[0]}</AvatarFallback></Avatar>
         <div className="text-center md:text-left">
-          <h1 className="text-3xl font-headline font-bold text-primary">{firestoreUser.username}</h1>
+          <h1 className="text-3xl font.headline font-bold text-primary">{firestoreUser.username}</h1>
           <p className="text-muted-foreground">{firestoreUser.email}</p>
           <p className="text-sm text-muted-foreground">Учасник з: {new Date(firestoreUser.createdAt).toLocaleDateString('uk-UA')}</p>
           <div className="mt-3 flex flex-col sm:flex-row gap-2 items-center justify-center md:justify-start">
@@ -168,9 +210,23 @@ const UserProfilePage = () => {
            <Card>
             <CardHeader><CardTitle>Мої покупки</CardTitle><CardDescription>Лоти, що потребують вашої дії: оформлення замовлення або залишення відгуку.</CardDescription></CardHeader>
             <CardContent>
-              {loadingWonLots ? <div className="flex justify-center py-10"><Loader2 className="h-8 w-8 animate-spin"/></div> :
-               lotsForAction.length > 0 ? (
+              {loadingWonLots || loadingCart ? <div className="flex justify-center py-10"><Loader2 className="h-8 w-8 animate-spin"/></div> :
+               allItemsForAction.length > 0 ? (
                 <div className="space-y-4">
+                  {cartItems.map((item) => (
+                    <Card key={item.id} className="flex flex-col sm:flex-row items-center gap-4 p-4">
+                      <Image src={(item.lotData.images && item.lotData.images[0]) || '/placeholder.png'} alt={item.lotData.name} width={100} height={75} className="rounded-md object-cover" />
+                      <div className="flex-grow text-center sm:text-left">
+                        <h3 className="font-semibold text-lg">{item.lotData.name}</h3>
+                        <p className="text-sm text-muted-foreground">Продавець: {item.lotData.sellerUsername}</p>
+                        <p className="text-md font-semibold text-primary">Ціна: {item.lotData.price} грн</p>
+                      </div>
+                      <div className="flex flex-col sm:flex-row gap-2 self-center sm:items-center">
+                        <Button variant="outline" size="sm" asChild><Link href={`/lot/${item.lotId}`}><Eye className="mr-2 h-4 w-4"/>Переглянути</Link></Button>
+                        <Button variant="destructive" size="sm" onClick={() => handleRemoveFromCart(item.id)}><Trash2 className="mr-2 h-4 w-4"/>Видалити</Button>
+                      </div>
+                    </Card>
+                  ))}
                   {lotsForAction.map((lot) => (
                     <Card key={lot.id} className="flex flex-col sm:flex-row items-center gap-4 p-4">
                       <Image src={(lot.images && lot.images[0]) || '/placeholder.png'} alt={lot.name} width={100} height={75} className="rounded-md object-cover" />
@@ -183,19 +239,21 @@ const UserProfilePage = () => {
                         <Button variant="outline" size="sm" asChild>
                             <Link href={`/lot/${lot.id}`}><Eye className="mr-2 h-4 w-4"/>Переглянути</Link>
                         </Button>
-                        {!lot.reviewLeft && (lot.status === 'completed' || lot.status === 'shipped') && (
-                          <LeaveReviewDialog lotId={lot.id} lotName={lot.name} onReviewSubmitted={handleReviewSubmitted}>
-                            <Button size="sm"><MessageSquarePlus className="mr-2 h-4 w-4" />Відгук</Button>
-                          </LeaveReviewDialog>
-                        )}
+                        {/* ЛОГІКУ ВІДГУКУ ВИДАЛЕНО ЗВІДСИ */}
                         {lot.status === 'sold' && (
-                            <Button size="sm" asChild>
-                                <Link href="/checkout"><CreditCard className="mr-2 h-4 w-4"/>Оформити замовлення</Link>
-                            </Button>
+                           <Badge>Очікує оформлення</Badge>
                         )}
                       </div>
                     </Card>
                   ))}
+                  {canCheckout && (
+                      <div className="pt-4 border-t mt-4 flex justify-end">
+                          <Button size="lg" asChild>
+                              <Link href="/checkout"><CreditCard className="mr-2 h-4 w-4"/>Оформити замовлення</Link>
+                          </Button>
+                      </div>
+                  )}
+
                 </div>
               ) : <p className="text-center text-muted-foreground py-10">У вас немає покупок, що потребують дій.</p>}
             </CardContent>

@@ -13,13 +13,13 @@ import { functions } from '@/lib/firebase';
 import { Loader2 } from 'lucide-react';
 
 interface LeaveReviewDialogProps {
-  lotId: string;
-  lotName: string;
+  orderId: string; // Змінено з lotId
+  lotName: string; // Залишаємо для відображення
   onReviewSubmitted: () => void;
   children: React.ReactNode;
 }
 
-export function LeaveReviewDialog({ lotId, lotName, onReviewSubmitted, children }: LeaveReviewDialogProps) {
+export function LeaveReviewDialog({ orderId, lotName, onReviewSubmitted, children }: LeaveReviewDialogProps) {
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -39,7 +39,8 @@ export function LeaveReviewDialog({ lotId, lotName, onReviewSubmitted, children 
     setIsSubmitting(true);
     try {
       const leaveReviewFunction = httpsCallable(functions, 'leaveReview');
-      await leaveReviewFunction({ lotId, rating, comment });
+      // Надсилаємо orderId замість lotId
+      await leaveReviewFunction({ orderId, rating, comment });
       
       toast({ title: 'Дякуємо!', description: 'Ваш відгук було успішно надіслано.' });
       onReviewSubmitted();
@@ -58,9 +59,9 @@ export function LeaveReviewDialog({ lotId, lotName, onReviewSubmitted, children 
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Залишити відгук для "{lotName}"</DialogTitle>
+          <DialogTitle>Залишити відгук для замовлення</DialogTitle>
           <DialogDescription>
-            Оцініть вашу покупку та залиште коментар для продавця. Ваш відгук допоможе іншим покупцям.
+            Ви залишаєте відгук для покупки: "{lotName}". Ваш відгук допоможе іншим покупцям.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
