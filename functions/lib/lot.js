@@ -20,8 +20,14 @@ exports.createLot = functions.region('us-central1').https.onCall(async (data, co
     const sellerAccountType = ((_a = userData.roles) === null || _a === void 0 ? void 0 : _a.includes('shop')) ? 'shop' : 'individual';
     // MODIFIED: Destructure region and city from data
     const { name, description, category, subcategory, region, city, startingBid, buyNowPrice, endTime, images, parameters, type, price } = data;
+    // --- ДОДАНО: ЛОГІКА ВИЗНАЧЕННЯ ДАНИХ ДЛЯ МАГАЗИНУ ---
+    const isShop = sellerAccountType === 'shop';
+    const lotRegion = isShop && userData.shopRegion ? userData.shopRegion : region;
+    const lotCity = isShop && userData.shopCity ? userData.shopCity : city;
+    const lotPhoneNumber = isShop ? userData.shopPhoneNumber : undefined;
+    // --- КІНЕЦЬ ДОДАНОЇ ЛОГІКИ ---
     // MODIFIED: Add region and city to validation
-    if (!name || !description || !category || !subcategory || !region || !city || !images || !Array.isArray(images) || images.length === 0 || !type) {
+    if (!name || !description || !category || !subcategory || !lotRegion || !lotCity || !images || !Array.isArray(images) || images.length === 0 || !type) {
         throw new functions.https.HttpsError("invalid-argument", "Required lot information is missing or invalid, including location.");
     }
     const lotRef = db.collection("lots").doc();
@@ -44,8 +50,9 @@ exports.createLot = functions.region('us-central1').https.onCall(async (data, co
             sellerAccountType,
             category,
             subcategory,
-            region, // MODIFIED: Add to lot object
-            city, // MODIFIED: Add to lot object
+            region: lotRegion, // ЗМІНЕНО
+            city: lotCity, // ЗМІНЕНО
+            phoneNumber: lotPhoneNumber, // ДОДАНО
             status: 'active',
             createdAt: nowISO,
             endTime: thirtyDaysFromNow.toISOString(),
@@ -77,8 +84,9 @@ exports.createLot = functions.region('us-central1').https.onCall(async (data, co
             sellerAccountType,
             category,
             subcategory,
-            region, // MODIFIED: Add to lot object
-            city, // MODIFIED: Add to lot object
+            region: lotRegion, // ЗМІНЕНО
+            city: lotCity, // ЗМІНЕНО
+            phoneNumber: lotPhoneNumber, // ДОДАНО
             status: 'active',
             createdAt: nowISO,
             parameters: parameters || {},
@@ -95,6 +103,7 @@ exports.createLot = functions.region('us-central1').https.onCall(async (data, co
     await lotRef.set(newLot);
     return { success: true, id: newLot.id };
 });
+// ... (the rest of the file remains unchanged)
 exports.buyNow = functions.region('us-central1').https.onRequest(async (req, res) => {
     res.set('Access-Control-Allow-Origin', '*');
     res.set('Access-Control-Allow-Methods', 'POST, OPTIONS');

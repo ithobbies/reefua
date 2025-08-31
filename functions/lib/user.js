@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getLotsBySeller = exports.updateUserProfile = exports.createUserDocument = void 0;
+exports.getLotsBySeller = exports.updateShopSettings = exports.updateUserProfile = exports.createUserDocument = void 0;
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
 if (admin.apps.length === 0) {
@@ -19,6 +19,7 @@ exports.createUserDocument = functions.auth.user().onCreate(async (user) => {
         photoURL: photoURL || null,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
+        roles: ['user'], // Default role
     };
     try {
         await userDocRef.set(newUser);
@@ -43,12 +44,10 @@ exports.updateUserProfile = functions.https.onCall(async (data, context) => {
         throw new functions.https.HttpsError("invalid-argument", "Username must be a string of at least 3 characters.");
     }
     try {
-        // 1. Update Firebase Authentication user
         await admin.auth().updateUser(uid, {
             displayName: username,
             photoURL: photoURL,
         });
-        // 2. Update Firestore user document
         const userDocRef = admin.firestore().collection("users").doc(uid);
         await userDocRef.update({
             username: username,
@@ -60,6 +59,43 @@ exports.updateUserProfile = functions.https.onCall(async (data, context) => {
     catch (error) {
         console.error("Error updating user profile:", error);
         throw new functions.https.HttpsError("internal", "An unexpected error occurred while updating the profile.");
+    }
+});
+/**
+ * Updates the shop settings for a user with the 'shop' role.
+ */
+exports.updateShopSettings = functions.https.onCall(async (data, context) => {
+    var _a;
+    if (!context.auth) {
+        throw new functions.https.HttpsError("unauthenticated", "You must be logged in.");
+    }
+    const { uid } = context.auth;
+    const { shopPhoneNumber, shopRegion, shopCity } = data;
+    const userRef = admin.firestore().collection("users").doc(uid);
+    try {
+        const userDoc = await userRef.get();
+        if (!userDoc.exists) {
+            throw new functions.https.HttpsError("not-found", "User profile not found.");
+        }
+        const userData = userDoc.data();
+        if (!((_a = userData.roles) === null || _a === void 0 ? void 0 : _a.includes('shop'))) {
+            throw new functions.https.HttpsError("permission-denied", "You must be a shop to update these settings.");
+        }
+        const updateData = {
+            shopPhoneNumber: shopPhoneNumber || null,
+            shopRegion: shopRegion || null,
+            shopCity: shopCity || null,
+            updatedAt: new Date().toISOString(),
+        };
+        await userRef.update(updateData);
+        return { success: true, message: "Shop settings updated successfully." };
+    }
+    catch (error) {
+        console.error("Error updating shop settings:", error);
+        if (error instanceof functions.https.HttpsError) {
+            throw error;
+        }
+        throw new functions.https.HttpsError("internal", "An unexpected error occurred.");
     }
 });
 exports.getLotsBySeller = functions.https.onCall(async (data, context) => {

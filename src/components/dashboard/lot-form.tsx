@@ -25,7 +25,7 @@ import type { Lot } from '@/functions/src/types';
 import { FLOW_OPTIONS, PAR_OPTIONS, difficultyOptions } from '@/lib/options';
 import { productCategories, Category, Subcategory } from '@/lib/categories-data';
 import { ImageCropper } from '@/components/ui/image-cropper';
-import { regionsOfUkraine, Region } from '@/lib/regions-data'; // Corrected import
+import { regionsOfUkraine, Region, City } from '@/lib/regions-data';
 
 type SaleType = 'auction' | 'direct';
 
@@ -63,8 +63,8 @@ const InfoTooltip = ({ title, items }: { title: string, items: { label: string; 
       <TooltipContent className="max-w-xs p-3">
         <div className="font-bold text-foreground mb-2">{title}</div>
         <ul className="space-y-2">
-          {items.map((item) => (
-            <li key={item.label} className="text-sm">
+          {items.map((item, index) => (
+            <li key={index} className="text-sm">
               <span className="font-semibold text-foreground">{item.label}</span>
               <p className="text-muted-foreground">{item.description}</p>
             </li>
@@ -81,25 +81,41 @@ export function LotForm({ existingLot }: LotFormProps) {
   const { user, firestoreUser, loading: authLoading } = useAuth();
   const isEditMode = !!existingLot;
   
-  const [saleType, setSaleType] = useState<SaleType>(existingLot?.type || 'direct');
-  const [formData, setFormData] = useState<Partial<LotFormData>>({
-    name: existingLot?.name || '',
-    description: existingLot?.description || '',
-    category: existingLot?.category || '',
-    subcategory: existingLot?.subcategory || '',
-    images: existingLot?.images || [],
-    region: existingLot?.region || '',
-    city: existingLot?.city || '',
-    parameters: existingLot?.parameters || { difficulty: '', par: '', flow: '' },
-    type: existingLot?.type || 'direct',
-    startingBid: existingLot?.startingBid,
-    buyNowPrice: existingLot?.buyNowPrice,
-    durationDays: existingLot?.durationDays || 5, 
-    price: existingLot?.price,
+  // Initialize form data with existing lot data or defaults
+  // For new lots by 'shop' users, set region and city from their profile
+  const [formData, setFormData] = useState<Partial<LotFormData>>(() => {
+    const initialData: Partial<LotFormData> = {
+      name: '',
+      description: '',
+      category: '',
+      subcategory: '',
+      images: [],
+      region: '',
+      city: '',
+      parameters: { difficulty: '', par: '', flow: '' },
+      type: 'direct',
+      durationDays: 5,
+    };
+
+    if (isEditMode && existingLot) {
+      return {
+        ...initialData,
+        ...existingLot,
+        durationDays: existingLot.durationDays || 5
+      };
+    }
+    
+    if (!isEditMode && firestoreUser?.roles?.includes('shop')) {
+      initialData.region = firestoreUser.shopRegion || '';
+      initialData.city = firestoreUser.shopCity || '';
+    }
+
+    return initialData;
   });
-  
+
+  const [saleType, setSaleType] = useState<SaleType>(existingLot?.type || 'direct');
   const [subcategories, setSubcategories] = useState<Subcategory[]>([]);
-  const [cities, setCities] = useState<string[]>([]);
+  const [cities, setCities] = useState<City[]>([]);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(existingLot?.images?.[0] || null);
   const [isUploading, setIsUploading] = useState(false);
@@ -119,39 +135,24 @@ export function LotForm({ existingLot }: LotFormProps) {
       router.push('/auctions');
     }
     
-    if (existingLot?.category) {
-        const currentCategory = productCategories.find(cat => cat.slug === existingLot.category);
-        if (currentCategory) {
-            setSubcategories(currentCategory.subcategories);
-        }
-    }
-    
-    if (existingLot?.region) {
-        const currentRegion = regionsOfUkraine.find(reg => reg.slug === existingLot.region); // Corrected
-        if (currentRegion) {
-            setCities(currentRegion.cities.map(c => c.name));
-        }
-    }
-
-  }, [authLoading, user, router, toast, isEditMode, existingLot]);
-
-  // --- ДОДАНО: ЛОГІКА АВТОЗАПОВНЕННЯ ДЛЯ МАГАЗИНІВ ---
-  useEffect(() => {
-    if (!isEditMode && firestoreUser?.roles?.includes('shop')) {
-      const { shopRegion, shopCity } = firestoreUser;
-      if (shopRegion && shopCity) {
-        const regionData = regionsOfUkraine.find(r => r.slug === shopRegion); // Corrected
-        if (regionData) {
-          const cityData = regionData.cities.find(c => c.slug === shopCity);
-          if (cityData) {
-            setFormData(prev => ({ ...prev, region: regionData.slug, city: cityData.slug }));
-            setCities(regionData.cities.map(c => c.name)); 
-          }
-        }
+    // Set initial subcategories and cities based on form data (works for both edit and new 'shop' user)
+    const currentCategorySlug = formData.category;
+    if (currentCategorySlug) {
+      const currentCategory = productCategories.find(cat => cat.slug === currentCategorySlug);
+      if (currentCategory) {
+          setSubcategories(currentCategory.subcategories);
       }
     }
-  }, [isEditMode, firestoreUser]);
-  // --- КІНЕЦЬ ДОДАНОЇ ЛОГІКИ ---
+    
+    const currentRegionSlug = formData.region;
+    if (currentRegionSlug) {
+      const currentRegion = regionsOfUkraine.find(reg => reg.slug === currentRegionSlug);
+      if (currentRegion) {
+          setCities(currentRegion.cities);
+      }
+    }
+
+  }, [authLoading, user, router, toast, isEditMode, formData.category, formData.region]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
@@ -175,8 +176,8 @@ export function LotForm({ existingLot }: LotFormProps) {
         setSubcategories(selectedCategory ? selectedCategory.subcategories : []);
         setFormData(prev => ({ ...prev, category: value as string, subcategory: '' }));
     } else if (name === 'region') {
-        const selectedRegion = regionsOfUkraine.find(reg => reg.slug === value); // Corrected
-        setCities(selectedRegion ? selectedRegion.cities.map(c => c.name) : []);
+        const selectedRegion = regionsOfUkraine.find(reg => reg.slug === value);
+        setCities(selectedRegion ? selectedRegion.cities : []);
         setFormData(prev => ({ ...prev, region: value as string, city: '' }));
     } else if (name.includes('.')) {
         const [parent, child] = name.split('.');
@@ -380,7 +381,7 @@ export function LotForm({ existingLot }: LotFormProps) {
                             <Label htmlFor="city">Населений пункт*</Label>
                             <Select name="city" value={formData.city || ''} onValueChange={(val) => handleSelectChange('city', val)} required disabled={isLoading || cities.length === 0}>
                                 <SelectTrigger><SelectValue placeholder={cities.length > 0 ? "Оберіть місто" : "Спочатку оберіть область"} /></SelectTrigger>
-                                <SelectContent>{cities.map(city => <SelectItem key={city} value={city}>{city}</SelectItem>)}</SelectContent>
+                                <SelectContent>{cities.map(city => <SelectItem key={city.slug} value={city.slug}>{city.name}</SelectItem>)}</SelectContent>
                             </Select>
                         </div>
                   </div>
@@ -432,7 +433,6 @@ export function LotForm({ existingLot }: LotFormProps) {
                   ) : (
                       <div><Label htmlFor="price">Ціна (грн)*</Label><Input id="price" name="price" type="number" placeholder="300" value={formData.price || ''} onChange={handleChange} required disabled={isLoading} /></div>
                   )}
-
                 </CardContent>
               </Card>
               
@@ -449,7 +449,6 @@ export function LotForm({ existingLot }: LotFormProps) {
                               <SelectTrigger><SelectValue placeholder="Оберіть складність" /></SelectTrigger>
                               <SelectContent>
                                   {difficultyOptions.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
-
                               </SelectContent>
                           </Select>
                       </div>
@@ -462,7 +461,6 @@ export function LotForm({ existingLot }: LotFormProps) {
                               <SelectTrigger><SelectValue placeholder="Оберіть PAR" /></SelectTrigger>
                               <SelectContent>
                                   {PAR_OPTIONS.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
-
                               </SelectContent>
                           </Select>
                       </div>
@@ -475,7 +473,6 @@ export function LotForm({ existingLot }: LotFormProps) {
                               <SelectTrigger><SelectValue placeholder="Оберіть течію" /></SelectTrigger>
                               <SelectContent>
                                   {FLOW_OPTIONS.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
-
                               </SelectContent>
                           </Select>
                       </div>
@@ -491,12 +488,10 @@ export function LotForm({ existingLot }: LotFormProps) {
                   <Label htmlFor="image" className={`block w-full cursor-pointer ${isLoading ? 'cursor-not-allowed' : ''}`}>
                     <div className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-muted rounded-md hover:border-primary transition-colors">
                       {imagePreview ? <img src={imagePreview} alt="Попередній перегляд" className="max-h-48 rounded-md object-contain" /> : (<><UploadCloud className="h-12 w-12 text-muted-foreground" /><p className="mt-2 text-sm text-muted-foreground">Натисніть, щоб завантажити</p><p className="text-xs text-muted-foreground">(PNG, JPG, WEBP до 5MB)</p></>)}
-
                     </div>
                   </Label>
                   <Input ref={fileInputRef} id="image" name="image" type="file" onChange={handleImageChange} accept="image/*" className="sr-only" disabled={isLoading}/>
                   {isUploading && <div className="w-full bg-muted rounded-full h-2.5 mt-2"><div className="bg-primary h-2.5 rounded-full" style={{width: `${uploadProgress}%`}}></div></div>}
-
                   <p className="mt-2 text-xs text-muted-foreground text-center">Для додавання більше фотографій, відредагуйте лот після створення.</p>
                 </CardContent>
               </Card>
@@ -513,15 +508,10 @@ export function LotForm({ existingLot }: LotFormProps) {
           aspect={4 / 3}
           circularCrop={false}
           onClose={() => setCropModalOpen(false)}
-
           onConfirm={handleCropConfirm}
-
           originalFileName={originalFileName}
-
         />
       )}
-
     </>
-
   );
 }

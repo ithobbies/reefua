@@ -6,13 +6,13 @@ import { useSearchParams } from 'next/navigation';
 import LotCard from '@/components/lots/lot-card';
 import { db, functions } from '@/lib/firebase';
 import { httpsCallable } from 'firebase/functions';
-import { collection, getDocs, query, where, orderBy, QueryConstraint, doc, getDoc } from 'firebase/firestore';
-import { type Lot, type SellerProfile } from '@/functions/src/types';
+import { collection, getDocs, query, where, orderBy } from 'firebase/firestore';
+import { type Lot } from '@/functions/src/types';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Input } from '@/components/ui/input';
-import { Search, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { productCategories, Category } from '@/lib/categories-data'; // 1. ІМПОРТУЄМО ПРАВИЛЬНІ ДАНІ
 
 type SaleTypeFilter = 'all' | 'auction' | 'direct';
 
@@ -22,7 +22,7 @@ function AuctionsPageContent() {
   const searchQuery = searchParams.get('q');
 
   const [lots, setLots] = useState<Lot[]>([]);
-  const [categories, setCategories] = useState<string[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]); // 2. ОНОВЛЕНО ТИП СТАНУ
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [saleTypeFilter, setSaleTypeFilter] = useState<SaleTypeFilter>('all');
   const [loading, setLoading] = useState<boolean>(true);
@@ -63,28 +63,14 @@ function AuctionsPageContent() {
       }
     };
     
-    // This part can run independently as it's for filtering UI
-    const fetchCategories = async () => {
-        try {
-            const categoriesCollection = collection(db, 'categories');
-            const categorySnapshot = await getDocs(categoriesCollection);
-            const categoriesList = categorySnapshot.docs.map(doc => doc.data().name);
-            setCategories(categoriesList);
-        } catch (error) {
-            console.error("Error fetching categories: ", error);
-        }
-    };
-
+    // 3. ВИКОРИСТОВУЄМО ЛОКАЛЬНІ ДАНІ ЗАМІСТЬ ЗАПИТУ ДО FIREBASE
+    setCategories(productCategories);
     fetchLots();
-    fetchCategories();
   }, [searchQuery, toast]);
-  
-  const handleLotPurchased = (lotId: string) => {
-    setLots(prevLots => prevLots.filter(lot => lot.id !== lotId));
-  };
 
   const filteredLots = useMemo(() => {
     return lots.filter(lot => {
+      // 4. ФІЛЬТРУЄМО ЗА SLUG
       const matchesCategory = selectedCategory === 'all' || lot.category === selectedCategory;
       const matchesSaleType = saleTypeFilter === 'all' || lot.type === saleTypeFilter;
       return matchesCategory && matchesSaleType;
@@ -100,7 +86,7 @@ function AuctionsPageContent() {
       ) : lotsToRender.length > 0 ? (
         <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-6 space-y-6">
           {lotsToRender.map((lot) => (
-            <LotCard key={lot.id} lot={lot} onLotPurchased={handleLotPurchased} />
+            <LotCard key={lot.id} lot={lot} />
           ))}
         </div>
       ) : (
@@ -130,8 +116,9 @@ function AuctionsPageContent() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Всі категорії</SelectItem>
+                  {/* 5. ОНОВЛЕНО ВІДОБРАЖЕННЯ СПИСКУ */}
                   {categories.map(category => (
-                    <SelectItem key={category} value={category}>{category}</SelectItem>
+                    <SelectItem key={category.slug} value={category.slug}>{category.name}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -151,7 +138,6 @@ function AuctionsPageContent() {
     </div>
   );
 }
-
 
 // Use Suspense to handle the initial render of searchParams
 export default function AuctionsPage() {

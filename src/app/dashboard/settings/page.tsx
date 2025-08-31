@@ -9,10 +9,6 @@ import { Button } from '@/components/ui/button';
 import { ShopSettingsForm } from './shop-settings-form';
 import { useAuth } from '@/context/auth-context';
 import { Loader2 } from 'lucide-react';
-import type { Metadata } from 'next';
-
-// Metadata can't be used in client components directly, but we can manage the title using useEffect if needed.
-// For simplicity, we'll keep the main layout's title or set it via other means.
 
 export default function DashboardSettingsPage() {
   const { firestoreUser, loading } = useAuth();
@@ -35,7 +31,6 @@ export default function DashboardSettingsPage() {
     <div className="space-y-6">
       <h1 className="text-2xl font-headline font-semibold text-primary">Налаштування</h1>
       
-      {/* Форма налаштувань магазину, яка відображається тільки для магазинів */}
       {isShop && <ShopSettingsForm />}
 
       <Card>
@@ -82,7 +77,7 @@ export default function DashboardSettingsPage() {
         </CardHeader>
         <CardContent>
           <p className="text-muted-foreground">Цей розділ знаходиться у розробці.</p>
-        </Content>
+        </CardContent>
       </Card>
     </div>
   );

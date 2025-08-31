@@ -24,7 +24,7 @@ import { useToast } from '@/hooks/use-toast';
 import { difficultyOptions, getLabelByValue } from '@/lib/options';
 import { productCategories } from '@/lib/categories-data';
 import { categoryColors } from '@/lib/category-colors';
-import { regions } from '@/lib/regions-data';
+import { regionsOfUkraine } from '@/lib/regions-data';
 
 const getMinBidStep = (currentPrice: number): number => {
     if (currentPrice < 500) return 20;
@@ -59,9 +59,9 @@ export default function LotDetailPage() {
   const category = useMemo(() => lot ? productCategories.find(cat => cat.slug === lot.category || cat.name === lot.category) : null, [lot]);
   const subcategory = useMemo(() => category ? category.subcategories.find(sub => sub.slug === lot?.subcategory || sub.name === lot.subcategory) : null, [category, lot]);
 
-  const getRegionNameBySlug = (slug: string) => regions.find(r => r.slug === slug)?.name || slug;
+  const getRegionNameBySlug = (slug: string) => regionsOfUkraine.find(r => r.slug === slug)?.name || slug;
   const getCityNameBySlug = (regionSlug: string, citySlug: string) => {
-    const region = regions.find(r => r.slug === regionSlug);
+    const region = regionsOfUkraine.find(r => r.slug === regionSlug);
     return region?.cities.find(c => c.slug === citySlug)?.name || citySlug;
   };
 

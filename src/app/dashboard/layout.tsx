@@ -16,8 +16,8 @@ import {
   SidebarSeparator,
   useSidebar,
 } from '@/components/ui/sidebar';
-import { LayoutDashboard, ListChecks, Star, MessageSquare, ShoppingCart, ShieldCheck, Home } from 'lucide-react'; 
-import React from 'react';
+import { LayoutDashboard, ListChecks, Star, MessageSquare, ShoppingCart, ShieldCheck, Home, Settings } from 'lucide-react'; 
+import React, { useMemo } from 'react';
 import { useAuth } from '@/context/auth-context';
 import { BottomNavigation } from '@/components/layout/bottom-navigation';
 
@@ -36,13 +36,20 @@ const DashboardLayoutContent = ({ children }: { children: React.ReactNode }) => 
     }
   };
 
-  const menuItems = [
-    // { href: '/dashboard', label: 'Оглядова панель', icon: <LayoutDashboard /> }, // Removed as requested
-    { href: '/dashboard/lots', label: 'Мої лоти', icon: <ListChecks /> },
-    { href: '/dashboard/sales', label: 'Мої продажі', icon: <ShoppingCart /> },
-    { href: '/dashboard/messages', label: 'Повідомлення', icon: <MessageSquare /> },
-    { href: '/dashboard/reviews', label: 'Відгуки', icon: <Star /> },
-  ];
+  const menuItems = useMemo(() => {
+    const items = [
+      { href: '/dashboard/lots', label: 'Мої лоти', icon: <ListChecks /> },
+      { href: '/dashboard/sales', label: 'Мої продажі', icon: <ShoppingCart /> },
+      { href: '/dashboard/messages', label: 'Повідомлення', icon: <MessageSquare /> },
+      { href: '/dashboard/reviews', label: 'Відгуки', icon: <Star /> },
+    ];
+
+    if (roles.includes('shop')) {
+      items.push({ href: '/dashboard/settings', label: 'Налаштування', icon: <Settings /> });
+    }
+    
+    return items;
+  }, [roles]);
 
   const adminMenuItem = { 
     href: '/admin/dashboard', 

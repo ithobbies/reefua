@@ -12,7 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 import { functions } from '@/lib/firebase';
 import { httpsCallable } from 'firebase/functions';
 import { Loader2 } from 'lucide-react';
-import { regions } from '@/lib/regions-data';
+import { regionsOfUkraine as regions, City } from '@/lib/regions-data';
 
 export function ShopSettingsForm() {
     const { firestoreUser, loading } = useAuth();
@@ -23,7 +23,6 @@ export function ShopSettingsForm() {
     const [selectedCity, setSelectedCity] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
     
-    // Встановлюємо початкові значення, коли дані користувача завантажені
     useEffect(() => {
         if (firestoreUser) {
             setPhone(firestoreUser.shopPhoneNumber || '');
@@ -32,14 +31,14 @@ export function ShopSettingsForm() {
         }
     }, [firestoreUser]);
 
-    const cities = useMemo(() => {
+    const cities = useMemo<City[]>(() => {
         const regionData = regions.find(r => r.slug === selectedRegion);
         return regionData ? regionData.cities : [];
     }, [selectedRegion]);
     
-    // Скидуємо місто, якщо змінилася область
     useEffect(() => {
-        if (cities.length > 0 && !cities.find(c => c.slug === selectedCity)) {
+        // If the selected city is no longer in the available cities list, reset it.
+        if (cities.length > 0 && selectedCity && !cities.find(c => c.slug === selectedCity)) {
             setSelectedCity('');
         }
     }, [cities, selectedCity]);
@@ -64,10 +63,20 @@ export function ShopSettingsForm() {
     };
 
     if (loading) {
-        return <Card><CardHeader><CardTitle>Завантаження...</CardTitle></CardHeader></Card>
+        return (
+            <Card>
+                <CardHeader>
+                    <CardTitle>Завантаження...</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <div className="flex items-center justify-center p-8">
+                        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                    </div>
+                </CardContent>
+            </Card>
+        );
     }
 
-    // Форма рендериться, але буде показана тільки на батьківському компоненті, якщо роль 'shop'
     return (
         <Card>
             <CardHeader>

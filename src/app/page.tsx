@@ -7,34 +7,28 @@ import { db } from '@/lib/firebase';
 import { collection, getDocs, query, where, orderBy, limit } from 'firebase/firestore';
 import LotCard from '@/components/lots/lot-card';
 import { Button } from '@/components/ui/button';
-import { Flame, ShoppingBag } from 'lucide-react';
+import { Flame, ShoppingBag, Fish, Shell } from 'lucide-react';
 import type { Lot } from '@/functions/src/types';
 
 export default function HomePage() {
   const [newLots, setNewLots] = useState<Lot[]>([]);
   const [hotLots, setHotLots] = useState<Lot[]>([]);
-  const [directSaleLots, setDirectSaleLots] = useState<Lot[]>([]);
+  const [livestockLots, setLivestockLots] = useState<Lot[]>([]);
+  const [coralLots, setCoralLots] = useState<Lot[]>([]);
   const [loadingNew, setLoadingNew] = useState(true);
   const [loadingHot, setLoadingHot] = useState(true);
-  const [loadingDirect, setLoadingDirect] = useState(true);
+  const [loadingLivestock, setLoadingLivestock] = useState(true);
+  const [loadingCorals, setLoadingCorals] = useState(true);
 
   useEffect(() => {
     // Fetch only new AUCTIONS
     const fetchNewLots = async () => {
+      setLoadingNew(true);
       try {
         const lotsCollection = collection(db, 'lots');
-        const q = query(
-          lotsCollection,
-          where('status', '==', 'active'),
-          where('type', '==', 'auction'),
-          orderBy('createdAt', 'desc'),
-          limit(4)
-        );
+        const q = query(lotsCollection, where('status', '==', 'active'), where('type', '==', 'auction'), orderBy('createdAt', 'desc'), limit(4));
         const lotSnapshot = await getDocs(q);
-        const lotsList = lotSnapshot.docs.map(doc => ({
-          ...doc.data(),
-          id: doc.id,
-        })) as Lot[];
+        const lotsList = lotSnapshot.docs.map(doc => ({ ...doc.data(), id: doc.id })) as Lot[];
         setNewLots(lotsList);
       } catch (error) {
         console.error("Error fetching new lots: ", error);
@@ -45,20 +39,12 @@ export default function HomePage() {
 
     // Fetch only hot AUCTIONS
     const fetchHotLots = async () => {
+      setLoadingHot(true);
       try {
         const lotsCollection = collection(db, 'lots');
-        const q = query(
-          lotsCollection,
-          where('status', '==', 'active'),
-          where('type', '==', 'auction'),
-          orderBy('endTime', 'asc'),
-          limit(8)
-        );
+        const q = query(lotsCollection, where('status', '==', 'active'), where('type', '==', 'auction'), orderBy('endTime', 'asc'), limit(8));
         const lotSnapshot = await getDocs(q);
-        const lotsList = lotSnapshot.docs.map(doc => ({
-          ...doc.data(),
-          id: doc.id,
-        })) as Lot[];
+        const lotsList = lotSnapshot.docs.map(doc => ({ ...doc.data(), id: doc.id })) as Lot[];
         setHotLots(lotsList);
       } catch (error) {
         console.error("Error fetching hot lots: ", error);
@@ -67,42 +53,45 @@ export default function HomePage() {
       }
     };
 
-    // Fetch new DIRECT SALE items
-    const fetchDirectSaleLots = async () => {
+    // Fetch new LIVESTOCK (non-corals)
+    const fetchLivestockLots = async () => {
+      setLoadingLivestock(true);
       try {
         const lotsCollection = collection(db, 'lots');
-        const q = query(
-          lotsCollection,
-          where('status', '==', 'active'),
-          where('type', '==', 'direct'),
-          orderBy('createdAt', 'desc'),
-          limit(8)
-        );
+        // ВИПРАВЛЕНО: Використовуємо правильний ідентифікатор категорії
+        const q = query(lotsCollection, where('status', '==', 'active'), where('type', '==', 'direct'), where('category', '==', 'livestock'), orderBy('createdAt', 'desc'), limit(8));
         const lotSnapshot = await getDocs(q);
-        const lotsList = lotSnapshot.docs.map(doc => ({
-          ...doc.data(),
-          id: doc.id,
-        })) as Lot[];
-        setDirectSaleLots(lotsList);
+        const lotsList = lotSnapshot.docs.map(doc => ({ ...doc.data(), id: doc.id })) as Lot[];
+        setLivestockLots(lotsList);
       } catch (error) {
         console.error("Error fetching direct sale lots: ", error);
       } finally {
-        setLoadingDirect(false);
+        setLoadingLivestock(false);
+      }
+    };
+    
+    // Fetch new CORALS
+    const fetchCoralLots = async () => {
+      setLoadingCorals(true);
+      try {
+        const lotsCollection = collection(db, 'lots');
+        const q = query(lotsCollection, where('status', '==', 'active'), where('type', '==', 'direct'), where('category', '==', 'corals'), orderBy('createdAt', 'desc'), limit(8));
+        const lotSnapshot = await getDocs(q);
+        const lotsList = lotSnapshot.docs.map(doc => ({ ...doc.data(), id: doc.id })) as Lot[];
+        setCoralLots(lotsList);
+      } catch (error) {
+        console.error("Error fetching direct sale lots: ", error);
+      } finally {
+        setLoadingCorals(false);
       }
     };
 
     fetchNewLots();
     fetchHotLots();
-    fetchDirectSaleLots();
+    fetchLivestockLots();
+    fetchCoralLots();
   }, []);
   
-  // When a lot is purchased, remove it from all relevant lists
-  const handleLotPurchased = (lotId: string) => {
-    setNewLots(prevLots => prevLots.filter(lot => lot.id !== lotId));
-    setHotLots(prevLots => prevLots.filter(lot => lot.id !== lotId));
-    setDirectSaleLots(prevLots => prevLots.filter(lot => lot.id !== lotId));
-  };
-
   const renderSkeleton = (count = 4) => (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
       {[...Array(count)].map((_, i) => (
@@ -120,35 +109,56 @@ export default function HomePage() {
       <section className="mb-12">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-headline font-bold text-primary flex items-center">
-            <ShoppingBag className="mr-2 h-6 w-6 text-accent" />
-            Нові товари на продаж
+            <Fish className="mr-2 h-6 w-6 text-accent" />
+            Нова живність
           </h2>
-          <Button variant="link" asChild>
-            <Link href="/auctions?type=direct">Переглянути всі</Link>
+          <Button variant="secondary" asChild>
+            <Link href="/auctions?type=direct&category=livestock">Переглянути всю</Link>
           </Button>
         </div>
-        {loadingDirect ? renderSkeleton(8) : directSaleLots.length > 0 ? (
+        {loadingLivestock ? renderSkeleton(8) : livestockLots.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {directSaleLots.map((lot) => (
-              <LotCard key={lot.id} lot={lot} onLotPurchased={handleLotPurchased} />
+            {livestockLots.map((lot) => (
+              <LotCard key={lot.id} lot={lot} />
             ))}
           </div>
         ) : (
-          <p className="text-muted-foreground">Наразі немає товарів для прямої покупки.</p>
+          <p className="text-muted-foreground">Наразі немає нових риб та безхребетних.</p>
         )}
       </section>
       
       <section className="mb-12">
         <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-headline font-bold text-primary flex items-center">
+            <Shell className="mr-2 h-6 w-6 text-accent" />
+            Нові корали
+          </h2>
+          <Button variant="secondary" asChild>
+            <Link href="/auctions?type=direct&category=corals">Переглянути всі</Link>
+          </Button>
+        </div>
+        {loadingCorals ? renderSkeleton(8) : coralLots.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {coralLots.map((lot) => (
+              <LotCard key={lot.id} lot={lot} />
+            ))}
+          </div>
+        ) : (
+          <p className="text-muted-foreground">Наразі немає нових коралів.</p>
+        )}
+      </section>
+
+      <section className="mb-12">
+        <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-headline font-bold text-primary">Нові Аукціони</h2>
-          <Button variant="link" asChild>
+          <Button variant="secondary" asChild>
             <Link href="/auctions?type=auction">Переглянути всі</Link>
           </Button>
         </div>
-        {loadingNew ? renderSkeleton() : newLots.length > 0 ? (
+        {loadingNew ? renderSkeleton(4) : newLots.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {newLots.map((lot) => (
-              <LotCard key={lot.id} lot={lot} onLotPurchased={handleLotPurchased} />
+              <LotCard key={lot.id} lot={lot} />
             ))}
           </div>
         ) : (
@@ -162,14 +172,14 @@ export default function HomePage() {
             <Flame className="mr-2 h-6 w-6 text-accent" />
             Гарячі Аукціони
           </h2>
-          <Button variant="link" asChild>
+          <Button variant="secondary" asChild>
             <Link href="/auctions?type=auction">Переглянути всі</Link>
           </Button>
         </div>
         {loadingHot ? renderSkeleton(8) : hotLots.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {hotLots.map((lot) => (
-              <LotCard key={lot.id} lot={lot} onLotPurchased={handleLotPurchased} />
+              <LotCard key={lot.id} lot={lot} />
             ))}
           </div>
         ) : (
