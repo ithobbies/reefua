@@ -5,14 +5,14 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { doc, getDoc, collection, query, where, orderBy, onSnapshot } from 'firebase/firestore';
 import { functions, db } from '@/lib/firebase';
-import type { User, Review, Lot } from '@/functions/src/types';
+import type { User, Review, Lot } from '@functions/types';
 import { httpsCallable } from 'firebase/functions';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Star, Store } from 'lucide-react'; // Додано Store
 import { Loader2 } from 'lucide-react';
-import { StatsCard } from '@/components/dashboard/stats-card';
+import StatsCard from '@/components/dashboard/stats-card';
 import LotCard from '@/components/lots/lot-card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge'; // Додано Badge

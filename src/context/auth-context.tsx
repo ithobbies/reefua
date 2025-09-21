@@ -5,11 +5,12 @@ import React, { createContext, useContext, useEffect, useState, ReactNode } from
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { auth, db } from '@/lib/firebase';
 import { doc, onSnapshot } from 'firebase/firestore';
-import type { User as FirestoreUser } from '@/functions/src/types';
+import type { User as FirestoreUser } from '@functions/types';
 
 interface AuthContextType {
   user: User | null;
   firestoreUser: FirestoreUser | null;
+  isAdmin: boolean;
   loading: boolean;
 }
 
@@ -18,6 +19,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [firestoreUser, setFirestoreUser] = useState<FirestoreUser | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -25,6 +27,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setUser(authUser);
       if (!authUser) {
         setFirestoreUser(null);
+        setIsAdmin(false);
         setLoading(false);
       }
     });
@@ -33,41 +36,39 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     if (user) {
-      setLoading(true); // Start loading when user object is available
+      setLoading(true);
       let initialCheckDone = false;
       const userDocRef = doc(db, 'users', user.uid);
       const unsubscribeFirestore = onSnapshot(userDocRef, (docSnap) => {
         if (docSnap.exists()) {
-          setFirestoreUser(docSnap.data() as FirestoreUser);
-          setLoading(false); // Firestore user found, stop loading
+          const userData = docSnap.data() as FirestoreUser;
+          setFirestoreUser(userData);
+          setIsAdmin(userData.roles?.includes('admin') ?? false);
+          setLoading(false);
         } else {
-          // Document doesn't exist
           if (!initialCheckDone) {
-            // If this is the first snapshot result and doc doesn't exist,
-            // it means onUserCreate might still be running or has failed/not run yet.
-            // We stop global loading to prevent indefinite skeleton.
             setFirestoreUser(null);
+            setIsAdmin(false);
             setLoading(false);
           }
-          // For subsequent snapshots, if the doc is created, the above if(docSnap.exists()) will handle it.
         }
         initialCheckDone = true;
       }, (error) => {
         console.error("Error subscribing to user document:", error);
         setFirestoreUser(null);
-        setLoading(false); // Error, stop loading
+        setIsAdmin(false);
+        setLoading(false);
       });
       
       return () => unsubscribeFirestore();
     } else {
-      // No user, ensure loading is false if it wasn't already set by onAuthStateChanged
       if (loading) {
         setLoading(false);
       }
     }
-  }, [user]); // This effect depends on the 'user' object
+  }, [user]);
 
-  const value = { user, firestoreUser, loading };
+  const value = { user, firestoreUser, isAdmin, loading };
 
   return (
     <AuthContext.Provider value={value}>
@@ -83,4 +84,3 @@ export const useAuth = () => {
   }
   return context;
 };
-

@@ -6,7 +6,7 @@ import { useAuth } from '@/context/auth-context';
 import { useChat } from '@/context/chat-context';
 import { db } from '@/lib/firebase';
 import { collection, query, where, orderBy, onSnapshot } from 'firebase/firestore';
-import type { Chat } from '@/functions/src/types';
+import type { Chat } from '@functions/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Loader2, MessageSquare } from 'lucide-react';

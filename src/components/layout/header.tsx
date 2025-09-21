@@ -6,7 +6,7 @@ import SiteLogoIcon from '@/components/icons/site-logo-icon';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Search, Menu, LogOut, User as UserIcon, LayoutDashboard, DollarSign, Loader2, Home, GanttChartSquare, PlusSquare, LogIn, Gavel } from 'lucide-react';
+import { Search, Menu, LogOut, User as UserIcon, LayoutDashboard, DollarSign, Loader2, Home, GanttChartSquare, PlusSquare, LogIn, Gavel, BookText } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -28,6 +28,7 @@ import { usePathname, useRouter } from 'next/navigation';
 const navLinks = [
   { href: '/', label: 'Головна', icon: Home },
   { href: '/auctions', label: "Об'яви", icon: GanttChartSquare },
+  { href: '/blog', label: 'Блог', icon: BookText },
   { href: '/sell', label: 'Продати', icon: PlusSquare },
   { href: '/rules', label: 'Правила', icon: Gavel },
 ];

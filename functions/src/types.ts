@@ -59,7 +59,7 @@ export interface Lot {
   region: string;
   city: string;
   phoneNumber?: string; // ДОДАНО: Поле для телефону в лоті
-  status: 'active' | 'sold' | 'processing' | 'shipped' | 'completed' | 'unsold' | 'cancelled';
+  status: 'active' | 'sold' | 'processing' | 'shipped' | 'completed' | 'unsold' | 'cancelled' | 'finished';
   winnerUid?: string | null;
   winnerUsername?: string | null;
   finalPrice?: number | null;
@@ -101,7 +101,7 @@ export interface ChatMessage {
 }
 
 export interface Chat {
-  id: string; // Composite ID: lotId_buyerUid
+  id: string; // Composite ID: lotId_buyerUid or orderId
   participantUids: string[]; // [buyerUid, sellerUid]
   participantInfo: {
     [uid: string]: {
@@ -109,9 +109,6 @@ export interface Chat {
       photoURL?: string | null;
     }
   };
-  lotId: string;
-  lotName: string;
-  lotImage: string;
   lastMessage: {
     text: string;
     timestamp: IsoDateString;
@@ -119,6 +116,15 @@ export interface Chat {
   } | null;
   createdAt: IsoDateString;
   updatedAt: IsoDateString;
+
+  // Link to a lot (optional)
+  lotId?: string;
+  lotName?: string;
+  lotImage?: string;
+
+  // Link to an order (optional)
+  orderId?: string;
+  orderTitle?: string;
 }
 
 // --- Order System Types ---

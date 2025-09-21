@@ -8,7 +8,7 @@ import { Star, TrendingUp, MessageSquare } from 'lucide-react';
 import { useAuth } from '@/context/auth-context';
 import { db } from '@/lib/firebase';
 import { collection, query, where, orderBy, onSnapshot } from 'firebase/firestore';
-import type { Review } from '@/functions/src/types';
+import type { Review } from '@functions/types';
 import { Loader2 } from 'lucide-react';
 import StatsCard from '@/components/dashboard/stats-card'; // Corrected import
 

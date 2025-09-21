@@ -3,19 +3,21 @@
 
 import React, { useEffect, useState } from 'react';
 import { doc, onSnapshot, updateDoc } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
-import { type Order } from '@/functions/src/types';
+import { db, functions } from '@/lib/firebase';
+import { type Order } from '@functions/types';
 import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/context/auth-context';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Loader2 } from 'lucide-react';
+import { ArrowLeft, Loader2, MessageCircle } from 'lucide-react';
 import Image from 'next/image';
 import { Separator } from '@/components/ui/separator';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
+import { ChatWidget } from '@/components/chat/chat-widget';
+import { httpsCallable } from 'firebase/functions';
 
 const getShippingMethodName = (method: Order['shippingInfo']['shippingMethod']) => {
     switch(method) {
@@ -27,6 +29,13 @@ const getShippingMethodName = (method: Order['shippingInfo']['shippingMethod']) 
     }
 }
 
+interface ChatData {
+    chatId: string;
+    lotName: string;
+    lotImage: string;
+    sellerName: string;
+}
+
 const OrderDetailsPage = () => {
     const { orderId } = useParams();
     const { user } = useAuth();
@@ -36,6 +45,8 @@ const OrderDetailsPage = () => {
     const [order, setOrder] = useState<Order | null>(null);
     const [loading, setLoading] = useState(true);
     const [isUpdating, setIsUpdating] = useState(false);
+    const [activeChat, setActiveChat] = useState<ChatData | null>(null);
+    const [isChatLoading, setIsChatLoading] = useState(false);
     
     const [status, setStatus] = useState<Order['status'] | undefined>();
     const [trackingNumber, setTrackingNumber] = useState('');
@@ -84,6 +95,38 @@ const OrderDetailsPage = () => {
             setIsUpdating(false);
         }
     };
+    
+    const handleContactBuyer = async () => {
+        if (!order || !user) return;
+        
+        setIsChatLoading(true);
+        try {
+            // CORRECT: Use the new cloud function for orders
+            const startOrGetChatForOrder = httpsCallable(functions, 'startOrGetChatForOrder');
+            
+            // CORRECT: Pass the orderId to the function
+            const result = await startOrGetChatForOrder({ orderId: order.id });
+            const chatId = (result.data as { chatId: string }).chatId;
+
+            // Adapt data for the existing ChatWidget component
+            setActiveChat({
+                chatId: chatId,
+                lotName: `Замовлення №${order.id.substring(0, 8)}`, // Use order ID for the title
+                lotImage: order.lots[0]?.images[0] || '/placeholder.png', // Use the first lot's image
+                sellerName: order.shippingInfo.firstName, // This is the buyer's name, which is correct for the seller's view
+            });
+
+        } catch (error) {
+            console.error("Error creating or getting chat: ", error);
+            toast({
+                title: 'Помилка чату',
+                description: 'Не вдалося відкрити або створити чат.',
+                variant: 'destructive',
+            });
+        } finally {
+            setIsChatLoading(false);
+        }
+    };
 
 
     if (loading) {
@@ -129,8 +172,14 @@ const OrderDetailsPage = () => {
                             <CardTitle>Інформація про доставку</CardTitle>
                             <CardDescription>Адреса покупця для відправки замовлення.</CardDescription>
                         </CardHeader>
-                        <CardContent className="space-y-2">
-                            <p><strong>Ім'я:</strong> {order.shippingInfo.firstName} {order.shippingInfo.lastName}</p>
+                        <CardContent className="space-y-3">
+                            <div className="flex items-center justify-between">
+                                <p><strong>Ім'я:</strong> {order.shippingInfo.firstName} {order.shippingInfo.lastName}</p>
+                                <Button variant="outline" size="sm" onClick={handleContactBuyer} disabled={isChatLoading}>
+                                    {isChatLoading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <MessageCircle className="h-4 w-4 mr-2" />}
+                                    Зв'язатися з покупцем
+                                </Button>
+                            </div>
                             <p><strong>Телефон:</strong> {order.shippingInfo.phone}</p>
                             <p><strong>Спосіб доставки:</strong> {getShippingMethodName(order.shippingInfo.shippingMethod)}</p>
                             {order.shippingInfo.city && <p><strong>Місто:</strong> {order.shippingInfo.city}</p>}
@@ -182,6 +231,16 @@ const OrderDetailsPage = () => {
                     </Card>
                 </div>
             </div>
+
+            {activeChat && (
+                <ChatWidget
+                    chatId={activeChat.chatId}
+                    lotName={activeChat.lotName}
+                    lotImage={activeChat.lotImage}
+                    sellerName={activeChat.sellerName}
+                    onClose={() => setActiveChat(null)}
+                />
+            )}
         </div>
     );
 };

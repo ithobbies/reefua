@@ -4,15 +4,15 @@
 import { Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-interface RatingStarsProps {
+export interface RatingStarsProps {
   rating: number;
   className?: string;
   starClassName?: string;
+  starSize?: number;
 }
 
-export const RatingStars = ({ rating, className, starClassName }: RatingStarsProps) => {
+export const RatingStars = ({ rating, className, starClassName, starSize = 16 }: RatingStarsProps) => {
   const fullStars = Math.floor(rating);
-  const partialStar = rating % 1 > 0; // Check if there's a fractional part
 
   return (
     <div className={cn("flex items-center", className)}>
@@ -20,12 +20,13 @@ export const RatingStars = ({ rating, className, starClassName }: RatingStarsPro
         <Star
           key={i}
           className={cn(
-            'h-4 w-4 stroke-1',
+            'stroke-1',
             i < fullStars
               ? 'fill-yellow-400 text-yellow-400'
               : 'fill-muted stroke-muted-foreground',
             starClassName
           )}
+          style={{ width: starSize, height: starSize }}
         />
       ))}
     </div>

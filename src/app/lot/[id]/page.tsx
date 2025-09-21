@@ -19,7 +19,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Loader2, Zap, Wind, ShieldAlert, UserCircle, CalendarDays, Tag, Trophy, AlignLeft, Info, MessageCircle, MapPin, ShoppingCart, Store, Phone } from 'lucide-react';
 import { RatingStars } from '@/components/ui/rating-stars';
-import type { Lot, Bid as BidType, User } from '@/functions/src/types';
+import type { Lot, Bid as BidType, User } from '@functions/types';
 import { useToast } from '@/hooks/use-toast';
 import { difficultyOptions, getLabelByValue } from '@/lib/options';
 import { productCategories } from '@/lib/categories-data';
@@ -57,7 +57,7 @@ export default function LotDetailPage() {
   const { startChatFromLot, isStarting: isChatStarting } = useChat();
 
   const category = useMemo(() => lot ? productCategories.find(cat => cat.slug === lot.category || cat.name === lot.category) : null, [lot]);
-  const subcategory = useMemo(() => category ? category.subcategories.find(sub => sub.slug === lot?.subcategory || sub.name === lot.subcategory) : null, [category, lot]);
+  const subcategory = useMemo(() => category ? category.subcategories.find(sub => sub.slug === lot?.subcategory || sub.name === lot?.subcategory) : null, [category, lot]);
 
   const getRegionNameBySlug = (slug: string) => regionsOfUkraine.find(r => r.slug === slug)?.name || slug;
   const getCityNameBySlug = (regionSlug: string, citySlug: string) => {

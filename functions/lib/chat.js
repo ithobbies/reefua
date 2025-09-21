@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.sendMessage = exports.startOrGetChat = void 0;
+exports.sendMessage = exports.startOrGetChatForOrder = exports.startOrGetChat = void 0;
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
 const db = admin.firestore();
@@ -47,6 +47,59 @@ exports.startOrGetChat = functions.https.onCall(async (data, context) => {
             lotId: lotId,
             lotName: lotData.name,
             lotImage: lotData.images[0] || '',
+            lastMessage: null,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+        };
+        await chatRef.set(newChat);
+        return { chatId: newChat.id };
+    }
+});
+exports.startOrGetChatForOrder = functions.https.onCall(async (data, context) => {
+    if (!context.auth) {
+        throw new functions.https.HttpsError("unauthenticated", "You must be logged in to start a chat.");
+    }
+    const currentUserUid = context.auth.uid;
+    const { orderId } = data;
+    if (!orderId) {
+        throw new functions.https.HttpsError("invalid-argument", "Order ID must be provided.");
+    }
+    const orderRef = db.collection('orders').doc(orderId);
+    const orderDoc = await orderRef.get();
+    if (!orderDoc.exists) {
+        throw new functions.https.HttpsError("not-found", "The specified order does not exist.");
+    }
+    const orderData = orderDoc.data();
+    const { buyerUid, sellerUid } = orderData;
+    // Verify that the current user is a participant in the order
+    if (currentUserUid !== buyerUid && currentUserUid !== sellerUid) {
+        throw new functions.https.HttpsError("permission-denied", "You are not a participant in this order.");
+    }
+    // The chat ID is deterministic based on the order ID.
+    // This ensures a single chat per order.
+    const chatId = orderId;
+    const chatRef = db.collection('chats').doc(chatId);
+    const chatDoc = await chatRef.get();
+    if (chatDoc.exists) {
+        return { chatId: chatDoc.id };
+    }
+    else {
+        const buyerDoc = await db.collection('users').doc(buyerUid).get();
+        const sellerDoc = await db.collection('users').doc(sellerUid).get();
+        if (!buyerDoc.exists || !sellerDoc.exists) {
+            throw new functions.https.HttpsError("not-found", "User profile not found for one of the participants.");
+        }
+        const buyerData = buyerDoc.data();
+        const sellerData = sellerDoc.data();
+        const newChat = {
+            id: chatId,
+            participantUids: [buyerUid, sellerUid],
+            participantInfo: {
+                [buyerUid]: { username: buyerData.username, photoURL: buyerData.photoURL },
+                [sellerUid]: { username: sellerData.username, photoURL: sellerData.photoURL },
+            },
+            orderId: orderId,
+            orderTitle: `Замовлення №${orderId.substring(0, 8)}`, // Example title
             lastMessage: null,
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),

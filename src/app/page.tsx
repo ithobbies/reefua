@@ -8,7 +8,7 @@ import { collection, getDocs, query, where, orderBy, limit } from 'firebase/fire
 import LotCard from '@/components/lots/lot-card';
 import { Button } from '@/components/ui/button';
 import { Flame, ShoppingBag, Fish, Shell } from 'lucide-react';
-import type { Lot } from '@/functions/src/types';
+import type { Lot } from '@functions/types';
 
 export default function HomePage() {
   const [newLots, setNewLots] = useState<Lot[]>([]);

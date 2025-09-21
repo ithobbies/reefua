@@ -5,7 +5,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
-import { Lot } from '@/functions/src/types';
+import { Lot } from '@functions/types';
 import { Loader2 } from 'lucide-react';
 import { LotForm } from '@/components/dashboard/lot-form';
 
@@ -58,5 +58,5 @@ export default function EditLotPage() {
     return <p className="text-red-500 text-center">{error}</p>;
   }
   
-  return <LotForm existingLot={lot} />;
+  return <LotForm existingLot={lot || undefined} />;
 }

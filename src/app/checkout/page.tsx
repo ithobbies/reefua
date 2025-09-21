@@ -13,7 +13,7 @@ import React from 'react';
 import { functions, db } from '@/lib/firebase';
 import { httpsCallable, HttpsCallableResult } from 'firebase/functions';
 import { useAuth } from '@/context/auth-context';
-import type { Lot, ShippingInfo } from '@/functions/src/types';
+import type { Lot, ShippingInfo } from '@functions/types';
 import { collection, query, where, getDocs, doc, writeBatch } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
 import { X } from 'lucide-react';

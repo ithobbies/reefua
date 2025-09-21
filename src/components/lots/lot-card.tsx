@@ -5,7 +5,7 @@ import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import type { Lot } from '@/functions/src/types';
+import type { Lot } from '@functions/types';
 import { useAuth } from '@/context/auth-context';
 import { useToast } from '@/hooks/use-toast';
 import { useSellerProfile } from '@/hooks/use-seller-profile';

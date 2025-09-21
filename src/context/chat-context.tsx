@@ -5,7 +5,7 @@ import React, { createContext, useState, useContext, ReactNode } from 'react';
 import { httpsCallable } from 'firebase/functions';
 import { functions } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
-import type { Chat } from '@/functions/src/types';
+import type { Chat } from '@functions/types';
 import { useAuth } from './auth-context';
 
 // This interface defines what information our active chat widget needs to display.
@@ -69,7 +69,12 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   
   // Used when a user clicks on a conversation from their message list.
   const openChatFromList = (chat: Chat) => {
-    if (!user) return; // Should not happen if the user is viewing their message list
+    if (!user) return;
+
+    if (!chat.lotId || !chat.lotName || !chat.lotImage) {
+        toast({variant: "destructive", title: "Помилка чату", description: "Не вдалося відкрити чат, відсутня інформація про лот."})
+        return;
+    }
 
     // Determine who the "other" person is in the chat.
     const otherUid = chat.participantUids.find(uid => uid !== user.uid);

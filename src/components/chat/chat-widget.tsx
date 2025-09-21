@@ -9,7 +9,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
 import { db, functions } from '@/lib/firebase';
 import { useAuth } from '@/context/auth-context';
-import type { ChatMessage } from '@/functions/src/types';
+import type { ChatMessage } from '@functions/types';
 import { Send, Loader2, X, MessageCircle, ArrowLeft } from 'lucide-react';
 import { httpsCallable } from 'firebase/functions';
 import { useToast } from '@/hooks/use-toast';
@@ -94,7 +94,7 @@ export function ChatWidget({ chatId, lotName, lotImage, sellerName, onClose }: C
       <CardContent className="flex-grow p-0 min-h-0 flex flex-col">
         {/* Sticky Lot Info Header */}
         <div className="flex items-center gap-3 p-3 border-b bg-background/95 z-10">
-            <Image src={lotImage || '/placeholder.png'} alt={lotName} width={40} height={40} className="rounded-md object-cover"/>
+            <Image src={lotImage || '/placeholder.png'} alt={lotName || 'Зображення лоту'} width={40} height={40} className="rounded-md object-cover"/>
             <p className="text-sm font-medium text-foreground truncate">{lotName}</p>
         </div>
         

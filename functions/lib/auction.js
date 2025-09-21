@@ -1,8 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.endAuctions = void 0;
+exports.notifyOnExpiringListings = exports.endAuctions = void 0;
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
+const telegram_1 = require("./telegram");
 const db = admin.firestore();
 /**
  * A scheduled function that runs every minute to end auctions.
@@ -18,7 +19,7 @@ exports.endAuctions = functions.pubsub
         .where("type", "==", "auction");
     const snapshot = await query.get();
     if (snapshot.empty) {
-        console.log("No auctions to end at this time.");
+        // This is a normal exit, no need to log every minute.
         return null;
     }
     const promises = snapshot.docs.map(async (doc) => {
@@ -30,25 +31,59 @@ exports.endAuctions = functions.pubsub
             .limit(1)
             .get();
         if (bidsSnapshot.empty) {
-            // If no bids, mark as unsold
-            console.log(`Lot ${doc.id} (${lotData.name}) is unsold.`);
-            return lotRef.update({ status: "unsold" });
+            console.log(`Lot ${doc.id} (${lotData.name}) is marked as 'finished' (no bids).`);
+            return lotRef.update({ status: "finished" });
         }
         else {
-            // If there's a winner, get their data from the winning bid
             const winningBid = bidsSnapshot.docs[0].data();
             console.log(`Lot ${doc.id} (${lotData.name}) sold to ${winningBid.username} for ${winningBid.amount}.`);
-            // Update the lot with winner's UID, username, and the final price
             return lotRef.update({
                 status: "sold",
                 winnerUid: winningBid.userUid,
-                winnerUsername: winningBid.username, // Added winner's username
+                winnerUsername: winningBid.username,
                 finalPrice: winningBid.amount,
             });
         }
     });
     await Promise.all(promises);
     console.log(`Successfully processed ${snapshot.docs.length} ended auctions.`);
+    return null;
+});
+/**
+ * Notifies users whose direct sale listings are expiring in approximately 24 hours.
+ * Runs once a day at a set time (e.g., 10:00 AM UTC).
+ */
+exports.notifyOnExpiringListings = functions.region('us-central1').pubsub
+    .schedule('0 10 * * *')
+    .timeZone('UTC')
+    .onRun(async (context) => {
+    console.log('Checking for listings that will expire in the next 24 hours...');
+    const now = new Date();
+    const twentyFourHoursFromNow = new Date(now.getTime() + (24 * 60 * 60 * 1000));
+    const query = db.collection('lots')
+        .where('type', '==', 'direct')
+        .where('status', '==', 'active')
+        .where('endTime', '<=', twentyFourHoursFromNow.toISOString())
+        .where('endTime', '>', now.toISOString());
+    const snapshot = await query.get();
+    if (snapshot.empty) {
+        console.log('No direct sale listings are expiring soon.');
+        return null;
+    }
+    for (const doc of snapshot.docs) {
+        const lot = doc.data();
+        const userRef = db.collection('users').doc(lot.sellerUid);
+        const userDoc = await userRef.get();
+        if (userDoc.exists) {
+            const userData = userDoc.data();
+            if (userData.telegramUserId) {
+                const message = `🔔 Нагадування: Термін дії вашого оголошення "${lot.name}" закінчується завтра. Ви зможете активувати його знову після деактивації.`;
+                // Do not await inside the loop to avoid long execution times
+                (0, telegram_1.sendTelegramMessage)(userData.telegramUserId, message).catch((err) => console.error(err));
+            }
+        }
+    }
+    console.log(`Sent ${snapshot.size} expiration warnings.`);
     return null;
 });
 //# sourceMappingURL=auction.js.map

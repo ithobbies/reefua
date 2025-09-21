@@ -1,5 +1,5 @@
 
-export const GA_TRACKING_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
+export const GA_TRACKING_ID = process.env.NEXT_PUBLIC_GA_ID || '';
 
 // https://developers.google.com/analytics/devguides/collection/gtagjs/pages
 export const pageview = (url: URL) => {
@@ -10,7 +10,6 @@ export const pageview = (url: URL) => {
   }
 };
 
-// https://developers.google.com/analytics/devguides/collection/gtagjs/events
 type GTagEvent = {
   action: string;
   category: string;
@@ -18,6 +17,7 @@ type GTagEvent = {
   value: number;
 };
 
+// https://developers.google.com/analytics/devguides/collection/gtagjs/events
 export const event = ({ action, category, label, value }: GTagEvent) => {
   if (GA_TRACKING_ID) {
     window.gtag("event", action, {
@@ -27,3 +27,9 @@ export const event = ({ action, category, label, value }: GTagEvent) => {
     });
   }
 };
+
+declare global {
+  interface Window {
+    gtag: (param1: string, param2: string, param3: object) => void;
+  }
+}

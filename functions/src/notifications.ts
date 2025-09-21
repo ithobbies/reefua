@@ -4,11 +4,29 @@ import * as admin from 'firebase-admin';
 import axios from 'axios';
 import { type User, type Lot, type Bid, type Chat, type ChatMessage, Order } from './types';
 import { defineString } from 'firebase-functions/params';
+import { regionsOfUkraine } from './lib/regions-data'; // --- 1. IMPORT DATA ---
 
 const telegramBotToken = defineString('TELEGRAM_BOT_TOKEN');
 const telegramChatId = defineString('TELEGRAM_CHAT_ID');
 
 const db = admin.firestore();
+
+// --- 2. ADD HELPER FUNCTION ---
+/**
+ * Finds the readable names for region and city based on their slugs.
+ * @param regionSlug The slug for the region (e.g., 'lvivska-oblast').
+ * @param citySlug The slug for the city (e.g., 'lviv').
+ * @returns An object with readable names or the original slugs if not found.
+ */
+function getLocationNames(regionSlug: string, citySlug: string): { regionName: string; cityName: string } {
+    const region = regionsOfUkraine.find(r => r.slug === regionSlug);
+    const city = region?.cities.find(c => c.slug === citySlug);
+
+    return {
+        regionName: region?.name || regionSlug, // Fallback to slug if not found
+        cityName: city?.name || citySlug,       // Fallback to slug if not found
+    };
+}
 
 // --- Reusable Telegram Functions ---
 
@@ -217,9 +235,12 @@ export const onNewLotSendTelegramNotification = functions.region('us-central1').
         const lotUrl = `https://reefua.store/lot/${lotId}`;
         const imageUrl = lot.images[0];
         
+        // --- 3. USE THE HELPER ---
+        const { cityName, regionName } = getLocationNames(lot.region, lot.city);
+
         const name = escapeMarkdown(lot.name);
         const sellerUsername = escapeMarkdown(lot.sellerUsername);
-        const location = escapeMarkdown(`${lot.city}, ${lot.region}`);
+        const location = escapeMarkdown(`${cityName}, ${regionName}`);
 
         let priceInfo = lot.type === 'auction' 
             ? `*Стартова ціна:* ${lot.startingBid} грн` + (lot.buyNowPrice ? `\n*Купити зараз:* ${lot.buyNowPrice} грн` : '')

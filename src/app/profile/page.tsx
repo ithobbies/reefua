@@ -15,7 +15,7 @@ import { useAuth } from '@/context/auth-context';
 import { doc, getDocs, collectionGroup, query, where, collection, getDoc, orderBy, onSnapshot, deleteDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
-import type { Lot, Bid } from '@/functions/src/types';
+import type { Lot, Bid } from '@functions/types';
 import { EditProfileDialog } from '@/components/profile/edit-profile-dialog';
 // import { LeaveReviewDialog } from '@/components/profile/leave-review-dialog'; // ІМПОРТ ВИДАЛЕНО
 import { OrdersHistoryTab } from '@/components/profile/orders-history-tab';

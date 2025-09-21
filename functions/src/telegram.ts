@@ -15,7 +15,7 @@ const db = admin.firestore();
  * @param {number} userId The Telegram user ID to send the message to.
  * @param {string} text The message text.
  */
-async function sendTelegramMessage(userId: number, text: string) {
+export async function sendTelegramMessage(userId: number, text: string) {
     const token = telegramBotToken.value();
     if (!token) {
         console.error('Telegram token is not configured.');

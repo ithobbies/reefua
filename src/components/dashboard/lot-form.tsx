@@ -21,7 +21,7 @@ import { httpsCallable } from 'firebase/functions';
 import { doc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { getStorage, ref, uploadBytesResumable, getDownloadURL, FirebaseStorage } from "firebase/storage";
 import { v4 as uuidv4 } from 'uuid';
-import type { Lot } from '@/functions/src/types';
+import type { Lot } from '@functions/types';
 import { FLOW_OPTIONS, PAR_OPTIONS, difficultyOptions } from '@/lib/options';
 import { productCategories, Category, Subcategory } from '@/lib/categories-data';
 import { ImageCropper } from '@/components/ui/image-cropper';
@@ -101,7 +101,13 @@ export function LotForm({ existingLot }: LotFormProps) {
       return {
         ...initialData,
         ...existingLot,
-        durationDays: existingLot.durationDays || 5
+        buyNowPrice: existingLot.buyNowPrice === null ? undefined : existingLot.buyNowPrice,
+        price: existingLot.price === null ? undefined : existingLot.price,
+        parameters: {
+          difficulty: existingLot.parameters?.difficulty || '',
+          par: existingLot.parameters?.par || '',
+          flow: existingLot.parameters?.flow || '',
+        },
       };
     }
     

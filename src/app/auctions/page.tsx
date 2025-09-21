@@ -7,12 +7,12 @@ import LotCard from '@/components/lots/lot-card';
 import { db, functions } from '@/lib/firebase';
 import { httpsCallable } from 'firebase/functions';
 import { collection, getDocs, query, where, orderBy } from 'firebase/firestore';
-import { type Lot } from '@/functions/src/types';
+import { type Lot } from '@functions/types';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { productCategories, Category } from '@/lib/categories-data'; // 1. ІМПОРТУЄМО ПРАВИЛЬНІ ДАНІ
+import { productCategories, Category } from '@/lib/categories-data';
 
 type SaleTypeFilter = 'all' | 'auction' | 'direct';
 
@@ -22,7 +22,7 @@ function AuctionsPageContent() {
   const searchQuery = searchParams.get('q');
 
   const [lots, setLots] = useState<Lot[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]); // 2. ОНОВЛЕНО ТИП СТАНУ
+  const [categories, setCategories] = useState<Category[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [saleTypeFilter, setSaleTypeFilter] = useState<SaleTypeFilter>('all');
   const [loading, setLoading] = useState<boolean>(true);
@@ -63,14 +63,12 @@ function AuctionsPageContent() {
       }
     };
     
-    // 3. ВИКОРИСТОВУЄМО ЛОКАЛЬНІ ДАНІ ЗАМІСТЬ ЗАПИТУ ДО FIREBASE
     setCategories(productCategories);
     fetchLots();
   }, [searchQuery, toast]);
 
   const filteredLots = useMemo(() => {
     return lots.filter(lot => {
-      // 4. ФІЛЬТРУЄМО ЗА SLUG
       const matchesCategory = selectedCategory === 'all' || lot.category === selectedCategory;
       const matchesSaleType = saleTypeFilter === 'all' || lot.type === saleTypeFilter;
       return matchesCategory && matchesSaleType;
@@ -102,7 +100,7 @@ function AuctionsPageContent() {
             <h1 className="text-3xl font-headline font-bold mb-2">{pageTitle}</h1>
             <p className="text-muted-foreground">Знайдіть найкращі пропозиції від перевірених продавців нашої спільноти.</p>
         </div>
-        <Tabs defaultValue="all" onValueChange={(value) => setSaleTypeFilter(value as SaleTypeFilter)}>
+        <Tabs defaultValue="all" onValueChange={(value: string) => setSaleTypeFilter(value as SaleTypeFilter)}>
           <div className="mb-8 space-y-4 md:space-y-0 md:flex md:justify-between md:items-center">
              <TabsList>
                 <TabsTrigger value="all">Всі</TabsTrigger>
@@ -110,13 +108,12 @@ function AuctionsPageContent() {
                 <TabsTrigger value="direct">Продаж</TabsTrigger>
             </TabsList>
             <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
-              <Select onValueChange={setSelectedCategory} defaultValue="all">
+              <Select onValueChange={(value: string) => setSelectedCategory(value)} defaultValue="all">
                 <SelectTrigger className="w-full sm:w-auto md:min-w-[200px]">
                   <SelectValue placeholder="Фільтрувати за категорією" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Всі категорії</SelectItem>
-                  {/* 5. ОНОВЛЕНО ВІДОБРАЖЕННЯ СПИСКУ */}
                   {categories.map(category => (
                     <SelectItem key={category.slug} value={category.slug}>{category.name}</SelectItem>
                   ))}

@@ -5,9 +5,25 @@ const functions = require("firebase-functions");
 const admin = require("firebase-admin");
 const axios_1 = require("axios");
 const params_1 = require("firebase-functions/params");
+const regions_data_1 = require("./lib/regions-data"); // --- 1. IMPORT DATA ---
 const telegramBotToken = (0, params_1.defineString)('TELEGRAM_BOT_TOKEN');
 const telegramChatId = (0, params_1.defineString)('TELEGRAM_CHAT_ID');
 const db = admin.firestore();
+// --- 2. ADD HELPER FUNCTION ---
+/**
+ * Finds the readable names for region and city based on their slugs.
+ * @param regionSlug The slug for the region (e.g., 'lvivska-oblast').
+ * @param citySlug The slug for the city (e.g., 'lviv').
+ * @returns An object with readable names or the original slugs if not found.
+ */
+function getLocationNames(regionSlug, citySlug) {
+    const region = regions_data_1.regionsOfUkraine.find(r => r.slug === regionSlug);
+    const city = region === null || region === void 0 ? void 0 : region.cities.find(c => c.slug === citySlug);
+    return {
+        regionName: (region === null || region === void 0 ? void 0 : region.name) || regionSlug, // Fallback to slug if not found
+        cityName: (city === null || city === void 0 ? void 0 : city.name) || citySlug, // Fallback to slug if not found
+    };
+}
 // --- Reusable Telegram Functions ---
 // Helper function to escape special characters for Telegram's original Markdown parser.
 const escapeMarkdown = (text) => {
@@ -200,9 +216,11 @@ exports.onNewLotSendTelegramNotification = functions.region('us-central1').fires
     }
     const lotUrl = `https://reefua.store/lot/${lotId}`;
     const imageUrl = lot.images[0];
+    // --- 3. USE THE HELPER ---
+    const { cityName, regionName } = getLocationNames(lot.region, lot.city);
     const name = escapeMarkdown(lot.name);
     const sellerUsername = escapeMarkdown(lot.sellerUsername);
-    const location = escapeMarkdown(`${lot.city}, ${lot.region}`);
+    const location = escapeMarkdown(`${cityName}, ${regionName}`);
     let priceInfo = lot.type === 'auction'
         ? `*Стартова ціна:* ${lot.startingBid} грн` + (lot.buyNowPrice ? `\n*Купити зараз:* ${lot.buyNowPrice} грн` : '')
         : `*Ціна:* ${lot.price} грн`;

@@ -16,7 +16,7 @@ import {
   SidebarSeparator,
   useSidebar,
 } from '@/components/ui/sidebar';
-import { LayoutDashboard, ListChecks, Star, MessageSquare, ShoppingCart, ShieldCheck, Home, Settings } from 'lucide-react'; 
+import { LayoutDashboard, ListChecks, Star, MessageSquare, ShoppingCart, ShieldCheck, Home, Settings, BookText } from 'lucide-react'; 
 import React, { useMemo } from 'react';
 import { useAuth } from '@/context/auth-context';
 import { BottomNavigation } from '@/components/layout/bottom-navigation';
@@ -25,7 +25,7 @@ import { BottomNavigation } from '@/components/layout/bottom-navigation';
 // because it must be used within a SidebarProvider.
 const DashboardLayoutContent = ({ children }: { children: React.ReactNode }) => {
   const pathname = usePathname();
-  const { firestoreUser } = useAuth();
+  const { firestoreUser, isAdmin } = useAuth();
   const { isMobile, setOpenMobile } = useSidebar(); 
   const roles = firestoreUser?.roles || [];
 
@@ -83,7 +83,7 @@ const DashboardLayoutContent = ({ children }: { children: React.ReactNode }) => 
                 );
             })}
 
-            {roles.includes('admin') && (
+            {isAdmin && (
               <>
                 <SidebarSeparator className="my-2" />
                 <SidebarMenuItem key={adminMenuItem.href}>
@@ -91,6 +91,14 @@ const DashboardLayoutContent = ({ children }: { children: React.ReactNode }) => 
                     <Link href={adminMenuItem.href} className="flex items-center" onClick={handleLinkClick}>
                       {adminMenuItem.icon}
                       <span className="group-data-[collapsible=icon]:hidden ml-2">{adminMenuItem.label}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem key="/admin/blog">
+                  <SidebarMenuButton asChild isActive={pathname.startsWith('/admin/blog')} tooltip={{ children: 'Керування блогом', side: 'right' }}>
+                    <Link href="/admin/blog" className="flex items-center" onClick={handleLinkClick}>
+                      <BookText />
+                      <span className="group-data-[collapsible=icon]:hidden ml-2">Керування блогом</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>

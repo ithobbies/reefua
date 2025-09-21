@@ -5,7 +5,7 @@ import React, { useEffect, useState } from 'react';
 import { collection, query, where, orderBy, onSnapshot, getDocs, doc, getDoc, DocumentData } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { useAuth } from '@/context/auth-context';
-import { type Order, type User } from '@/functions/src/types';
+import { type Order, type User } from '@functions/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2, MessageSquarePlus } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';

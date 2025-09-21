@@ -3,20 +3,23 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
-import { db } from '@/lib/firebase';
+import { db, functions } from '@/lib/firebase';
 import { useAuth } from '@/context/auth-context';
 import { collection, query, where, orderBy, onSnapshot, doc, deleteDoc } from 'firebase/firestore';
-import type { Lot } from '@/functions/src/types';
+import { httpsCallable } from 'firebase/functions';
+import type { Lot } from '@functions/types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { PlusCircle, Edit, Trash2, Loader2, Eye } from 'lucide-react';
+import { PlusCircle, Edit, Trash2, Loader2, Eye, RefreshCw } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { DeleteLotAlertDialog } from '@/components/dashboard/delete-lot-alert-dialog';
 
 type FilterType = 'all' | 'active' | 'completed';
+
+const reactivateLotCallable = httpsCallable(functions, 'reactivateLot');
 
 export default function DashboardLotsPage() {
   const { user, loading: authLoading } = useAuth();
@@ -24,6 +27,7 @@ export default function DashboardLotsPage() {
   const [loadingLots, setLoadingLots] = useState(true);
   const [filter, setFilter] = useState<FilterType>('all');
   const { toast } = useToast();
+  const [isReactivating, setIsReactivating] = useState<string | null>(null);
 
   useEffect(() => {
     document.title = 'Мої лоти - Панель Продавця';
@@ -63,10 +67,10 @@ export default function DashboardLotsPage() {
 
   const filteredLots = useMemo(() => {
     if (filter === 'active') {
-      return lots.filter(lot => new Date(lot.endTime) > new Date());
+      return lots.filter(lot => lot.status === 'active');
     }
     if (filter === 'completed') {
-      return lots.filter(lot => new Date(lot.endTime) <= new Date());
+      return lots.filter(lot => lot.status !== 'active');
     }
     return lots; // 'all'
   }, [lots, filter]);
@@ -85,6 +89,41 @@ export default function DashboardLotsPage() {
         title: 'Помилка',
         description: 'Не вдалося видалити лот.',
       });
+    }
+  };
+
+  const handleReactivateLot = async (lotId: string) => {
+    setIsReactivating(lotId);
+    try {
+      await reactivateLotCallable({ lotId });
+      toast({
+        title: 'Успіх!',
+        description: 'Оголошення знову активне.',
+      });
+    } catch (error: any) {
+      console.error('Error reactivating lot:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Помилка',
+        description: error.message || 'Не вдалося активувати оголошення.',
+      });
+    } finally {
+      setIsReactivating(null);
+    }
+  };
+
+  const getStatusBadge = (status: Lot['status']) => {
+    switch (status) {
+      case 'active':
+        return <Badge variant="default">Активний</Badge>;
+      case 'sold':
+        return <Badge className="bg-green-600 text-white hover:bg-green-700">Продано</Badge>;
+      case 'unsold':
+        return <Badge variant="secondary">Не продано</Badge>;
+      case 'finished':
+          return <Badge variant="secondary">Завершено</Badge>;
+      default:
+        return <Badge variant="outline">{status}</Badge>;
     }
   };
 
@@ -139,10 +178,10 @@ export default function DashboardLotsPage() {
               </TableHeader>
               <TableBody>
                 {filteredLots.map((lot) => {
-                  const isActive = new Date(lot.endTime) > new Date();
                   const hasBids = lot.bidCount > 0;
-                  const canBeEdited = isActive && !hasBids;
-                  const isDeleteDisabled = isActive && hasBids;
+                  const canBeEdited = lot.status === 'active' && !hasBids;
+                  const isDeleteDisabled = lot.status === 'active' && hasBids;
+                  const canBeReactivated = lot.status === 'unsold' || lot.status === 'finished';
 
                   return (
                     <TableRow key={lot.id}>
@@ -150,11 +189,24 @@ export default function DashboardLotsPage() {
                       <TableCell>{lot.currentBid} грн</TableCell>
                       <TableCell>{lot.bidCount || 0}</TableCell>
                       <TableCell>
-                        <Badge variant={isActive ? 'default' : 'secondary'}>
-                          {isActive ? 'Активний' : 'Завершений'}
-                        </Badge>
+                        {getStatusBadge(lot.status)}
                       </TableCell>
                       <TableCell className="space-x-2">
+                        {canBeReactivated && (
+                            <Button
+                                variant="outline"
+                                size="icon"
+                                aria-label="Активувати знову"
+                                onClick={() => handleReactivateLot(lot.id)}
+                                disabled={isReactivating === lot.id}
+                            >
+                                {isReactivating === lot.id ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                                ) : (
+                                <RefreshCw className="h-4 w-4" />
+                                )}
+                            </Button>
+                        )}
                         {canBeEdited ? (
                           <Button variant="outline" size="icon" aria-label="Редагувати лот" asChild>
                             <Link href={`/dashboard/lots/edit/${lot.id}`}>
@@ -162,11 +214,13 @@ export default function DashboardLotsPage() {
                             </Link>
                           </Button>
                         ) : (
-                          <Button variant="outline" size="icon" aria-label="Переглянути лот" asChild>
-                            <Link href={`/lot/${lot.id}`}>
-                              <Eye className="h-4 w-4" />
-                            </Link>
-                          </Button>
+                          !canBeReactivated && (
+                            <Button variant="outline" size="icon" aria-label="Переглянути лот" asChild>
+                                <Link href={`/lot/${lot.id}`}>
+                                <Eye className="h-4 w-4" />
+                                </Link>
+                            </Button>
+                          )
                         )}
                         <DeleteLotAlertDialog onDelete={() => handleDeleteLot(lot.id)}>
                            <Button variant="destructive" size="icon" aria-label="Видалити лот" disabled={isDeleteDisabled}>

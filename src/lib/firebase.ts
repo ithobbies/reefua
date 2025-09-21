@@ -3,6 +3,7 @@ import { initializeApp, getApps, getApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getFunctions } from "firebase/functions";
+import { getStorage } from "firebase/storage"; // 1. Import getStorage
 
 // Your web app's Firebase configuration pulled from environment variables
 const firebaseConfig = {
@@ -19,7 +20,7 @@ const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 
 const auth = getAuth(app);
 const db = getFirestore(app);
-// Explicitly connect to the 'us-central1' region for all cloud functions
 const functions = getFunctions(app, 'us-central1');
+const storage = getStorage(app); // 2. Initialize storage
 
-export { app, auth, db, functions };
+export { app, auth, db, functions, storage }; // 3. Export storage
