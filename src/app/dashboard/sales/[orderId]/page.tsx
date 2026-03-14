@@ -232,15 +232,17 @@ const OrderDetailsPage = () => {
                 </div>
             </div>
 
+            {/* --- NECESSARY FIX START --- */}
+            {/* The ChatWidget component props have been updated. */}
+            {/* It is now self-contained and only requires a `chatId` and `onClose` handler. */}
+            {/* The following lines have been corrected to remove the deprecated props. */}
             {activeChat && (
                 <ChatWidget
                     chatId={activeChat.chatId}
-                    lotName={activeChat.lotName}
-                    lotImage={activeChat.lotImage}
-                    sellerName={activeChat.sellerName}
                     onClose={() => setActiveChat(null)}
                 />
             )}
+            {/* --- NECESSARY FIX END --- */}
         </div>
     );
 };

@@ -1,13 +1,42 @@
 {
+  "functions": [
+    {
+      "source": "functions",
+      "runtime": "nodejs18",
+      "name": "nextServer"
+    }
+  ],
   "hosting": {
-    "source": ".",
-    "ignore": [
-      "firebase.json",
-      "**/.*",
-      "**/node_modules/**"
-    ],
-    "frameworksBackend": {
-      "region": "us-central1"
+    "public": ".next",
+    "cleanUrls": true,
+    "rewrites": [
+      {
+        "source": "**",
+        "function": "nextServer"
+      }
+    ]
+  },
+  "firestore": {
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  },
+  "storage": {
+    "rules": "storage.rules"
+  },
+  "emulators": {
+    "auth": {
+      "port": 9099
+    },
+    "firestore": {
+      "port": 8080
+    },
+    "storage": {
+      "port": 9199,
+      "rules": "storage.rules",
+      "cors": "cors.json"
+    },
+    "ui": {
+      "enabled": true
     }
   }
 }

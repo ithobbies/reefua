@@ -113,6 +113,14 @@ export const startOrGetChatForOrder = functions.https.onCall(async (data, contex
         
         const buyerData = buyerDoc.data() as User;
         const sellerData = sellerDoc.data() as User;
+        
+        // --- MODIFICATION START ---
+        // Get context from the first lot in the order to display in the chat header.
+        const primaryLot = orderData.lots && orderData.lots[0] ? orderData.lots[0] : null;
+
+        if (!primaryLot) {
+            throw new functions.https.HttpsError("failed-precondition", "The order has no lots associated with it, cannot create a chat.");
+        }
 
         const newChat: Chat = {
             id: chatId,
@@ -121,12 +129,20 @@ export const startOrGetChatForOrder = functions.https.onCall(async (data, contex
                 [buyerUid]: { username: buyerData.username, photoURL: buyerData.photoURL },
                 [sellerUid]: { username: sellerData.username, photoURL: sellerData.photoURL },
             },
+            // Link to the order
             orderId: orderId,
-            orderTitle: `Замовлення №${orderId.substring(0, 8)}`, // Example title
+            orderTitle: `Замовлення №${orderId.substring(0, 8)}`,
+            
+            // Link to the primary lot for context
+            lotId: primaryLot.id,
+            lotName: primaryLot.name,
+            lotImage: primaryLot.images && primaryLot.images[0] ? primaryLot.images[0] : '',
+
             lastMessage: null,
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
         };
+        // --- MODIFICATION END ---
 
         await chatRef.set(newChat);
         return { chatId: newChat.id };

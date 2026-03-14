@@ -33,7 +33,7 @@ export default function DashboardMessagesPage() {
     );
 
     const unsubscribe = onSnapshot(chatsQuery, (snapshot) => {
-      const fetchedChats = snapshot.docs.map(doc => doc.data() as Chat);
+      const fetchedChats = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }) as Chat);
       setChats(fetchedChats);
       setLoading(false);
     }, (error) => {
@@ -43,12 +43,10 @@ export default function DashboardMessagesPage() {
 
     return () => unsubscribe();
   }, [user]);
-
-  const handleOpenChat = (chat: Chat) => {
-    const otherUid = chat.participantUids.find(uid => uid !== user?.uid);
-    if (!otherUid || !chat.participantInfo[otherUid]) return;
-    
-    openChatFromList(chat);
+  
+  // --- MODIFICATION: Simplified handler ---
+  const handleOpenChat = (chatId: string) => {
+    openChatFromList(chatId);
   };
 
   if (loading) {
@@ -79,7 +77,7 @@ export default function DashboardMessagesPage() {
                   <div 
                     key={chat.id}
                     className="flex items-center gap-4 p-3 rounded-lg hover:bg-secondary cursor-pointer transition-colors"
-                    onClick={() => handleOpenChat(chat)}
+                    onClick={() => handleOpenChat(chat.id)} // Correctly pass only the ID
                   >
                     <Avatar className="h-12 w-12">
                       <AvatarImage src={otherUserInfo?.photoURL || undefined} alt={otherUserInfo?.username} />
@@ -87,12 +85,13 @@ export default function DashboardMessagesPage() {
                     </Avatar>
                     <div className="flex-grow overflow-hidden">
                       <div className="flex justify-between items-center">
-                        <p className="font-semibold truncate">{otherUserInfo?.username}</p>
+                        <p className="font-semibold truncate">{otherUserInfo?.username || 'Співрозмовник'}</p>
                         <p className="text-xs text-muted-foreground flex-shrink-0">
                           {chat.updatedAt && new Date(chat.updatedAt).toLocaleDateString('uk-UA')}
                         </p>
                       </div>
-                      <p className="text-sm text-muted-foreground truncate">{chat.lotName}</p>
+                      {/* Display lot name or order title as context */}
+                      <p className="text-sm text-muted-foreground truncate">{chat.orderTitle || chat.lotName || 'Загальний чат'}</p>
                       <p className="text-sm text-muted-foreground truncate">{lastMessageText}</p>
                     </div>
                   </div>

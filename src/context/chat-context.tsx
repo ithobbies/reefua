@@ -8,26 +8,22 @@ import { useToast } from '@/hooks/use-toast';
 import type { Chat } from '@functions/types';
 import { useAuth } from './auth-context';
 
-// This interface defines what information our active chat widget needs to display.
+// --- MODIFICATION START ---
+// The only info needed to render a chat widget is its ID.
+// The widget itself will fetch all necessary data.
 export interface ActiveChatInfo {
   chatId: string;
-  lotId: string;
-  lotName: string;
-  lotImage: string;
-  // Details about the *other* person in the chat
-  otherParticipant: {
-      uid: string;
-      username: string;
-  };
 }
 
 interface ChatContextType {
   activeChat: ActiveChatInfo | null;
-  startChatFromLot: (lot: { lotId: string; lotName: string; lotImage: string; sellerUid: string; sellerName: string; }) => void;
-  openChatFromList: (chat: Chat) => void;
+  // Simplified function signatures
+  startChat: (lotId: string, orderId?: string) => void; 
+  openChatFromList: (chatId: string) => void;
   closeChat: () => void;
   isStarting: boolean;
 }
+// --- MODIFICATION END ---
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
 
@@ -35,29 +31,30 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   const [activeChat, setActiveChat] = useState<ActiveChatInfo | null>(null);
   const [isStarting, setIsStarting] = useState(false);
   const { toast } = useToast();
-  const { user } = useAuth(); // Get the current user to determine the "other" participant
+  const { user } = useAuth();
 
-  // Used when a user clicks "Message" on a lot page.
-  const startChatFromLot = async (lot: { lotId: string; lotName: string; lotImage: string; sellerUid: string; sellerName: string; }) => {
-    // Don't restart if this chat is already open.
-    if (activeChat?.chatId === `${lot.lotId}_${user?.uid}`) return;
+  // --- MODIFICATION START ---
+  // Unified function to start any chat, either from a lot or an order page.
+  const startChat = async (lotId: string, orderId?: string) => {
+    if (!user) {
+        toast({ variant: "destructive", title: "Помилка", description: "Ви повинні увійти, щоб почати чат." });
+        return;
+    }
+
+    // Prevents re-opening the same chat
+    if (activeChat?.chatId === (orderId || `${lotId}_${user.uid}`)) return;
     
     setIsStarting(true);
     try {
-      const startOrGetChatFunction = httpsCallable(functions, 'startOrGetChat');
-      const result = await startOrGetChatFunction({ lotId: lot.lotId });
+      // Determine which cloud function to call
+      const functionName = orderId ? 'startOrGetChatForOrder' : 'startOrGetChat';
+      const params = orderId ? { orderId } : { lotId };
+
+      const startOrGetChatFunction = httpsCallable(functions, functionName);
+      const result = await startOrGetChatFunction(params);
       const { chatId } = result.data as { chatId: string };
       
-      setActiveChat({
-        chatId,
-        lotId: lot.lotId,
-        lotName: lot.lotName,
-        lotImage: lot.lotImage,
-        otherParticipant: {
-          uid: lot.sellerUid,
-          username: lot.sellerName,
-        }
-      });
+      setActiveChat({ chatId });
 
     } catch (error: any) {
       toast({ variant: "destructive", title: "Помилка чату", description: error.message || "Не вдалося почати чат." });
@@ -67,40 +64,19 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     }
   };
   
-  // Used when a user clicks on a conversation from their message list.
-  const openChatFromList = (chat: Chat) => {
-    if (!user) return;
-
-    if (!chat.lotId || !chat.lotName || !chat.lotImage) {
-        toast({variant: "destructive", title: "Помилка чату", description: "Не вдалося відкрити чат, відсутня інформація про лот."})
-        return;
-    }
-
-    // Determine who the "other" person is in the chat.
-    const otherUid = chat.participantUids.find(uid => uid !== user.uid);
-    if (!otherUid) {
-        toast({variant: "destructive", title: "Помилка чату", description: "Не вдалося визначити співрозмовника."})
-        return;
-    };
-
-    setActiveChat({
-      chatId: chat.id,
-      lotId: chat.lotId,
-      lotName: chat.lotName,
-      lotImage: chat.lotImage,
-      otherParticipant: {
-          uid: otherUid,
-          username: chat.participantInfo[otherUid]?.username || 'Співрозмовник'
-      }
-    });
+  // Simplified function: just sets the active chat ID.
+  const openChatFromList = (chatId: string) => {
+    if (activeChat?.chatId === chatId) return; // Don't re-open same chat
+    setActiveChat({ chatId });
   }
+  // --- MODIFICATION END ---
 
   const closeChat = () => {
     setActiveChat(null);
   };
 
   return (
-    <ChatContext.Provider value={{ activeChat, startChatFromLot, openChatFromList, closeChat, isStarting }}>
+    <ChatContext.Provider value={{ activeChat, startChat, openChatFromList, closeChat, isStarting }}>
       {children}
     </ChatContext.Provider>
   );

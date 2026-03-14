@@ -1,5 +1,9 @@
-"use client"; // This directive marks the component as a Client Component
+"use client";
 
+import { useEffect, useState } from "react";
+import Link from 'next/link';
+import { functions } from "@/lib/firebase"; 
+import { httpsCallable } from "firebase/functions";
 import {
   Card,
   CardContent,
@@ -16,6 +20,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   BarChart,
   Bar,
@@ -35,66 +40,107 @@ import {
   AlertCircle,
   ArrowUpRight,
   Link as LinkIcon,
+  UserPlus,
 } from "lucide-react";
 
+// --- Mock Data (will be replaced or augmented with live data) ---
 const userRegistrationData = [
-  { date: "01.07", users: 12 },
-  { date: "02.07", users: 19 },
-  { date: "03.07", users: 25 },
-  { date: "04.07", users: 31 },
-  { date: "05.07", users: 45 },
-  { date: "06.07", users: 52 },
-  { date: "07.07", users: 68 },
-];
+    { date: "01.07", users: 12 },
+    { date: "02.07", users: 19 },
+    { date: "03.07", users: 25 },
+    { date: "04.07", users: 31 },
+    { date: "05.07", users: 45 },
+    { date: "06.07", users: 52 },
+    { date: "07.07", users: 68 },
+  ];
+  
+  const recentComplaints = [
+    {
+      id: "CMP001",
+      user: "user123",
+      text: "Лот не відповідає опису...",
+      link: "/lot/xyz-123",
+    },
+    {
+      id: "CMP002",
+      user: "buyer_pro",
+      text: "Продавець не виходить на зв\'язок.",
+      link: "/profile/seller-abc",
+    },
+    {
+      id: "CMP003",
+      user: "jane_doe",
+      text: "Підозра на шахрайство.",
+      link: "/lot/abc-456",
+    },
+  ];
+  
+  const topSellers = [
+    { name: "TopSeller UA", sales: "150,000 ₴" },
+    { name: "Vintage World", sales: "125,500 ₴" },
+    { name: "Art Collector", sales: "98,000 ₴" },
+    { name: "Retro Cars", sales: "250,000 ₴" },
+  ];
 
-const popularCategoriesData = [
-  { name: "Електроніка", value: 450 },
-  { name: "Антикваріат", value: 320 },
-  { name: "Мистецтво", value: 280 },
-  { name: "Монети", value: 210 },
-  { name: "Автомобілі", value: 150 },
-];
+// --- Type Definition for Key Metrics ---
+interface KeyMetricsData {
+  totalUsers: number;
+  telegramSubscribers: number; // New metric
+  activeLots: number;
+  totalSales: number;
+  totalDeals: number;
+  salesConversion: number;
+}
 
-const recentComplaints = [
-  {
-    id: "CMP001",
-    user: "user123",
-    text: "Лот не відповідає опису...",
-    link: "/lot/xyz-123",
-  },
-  {
-    id: "CMP002",
-    user: "buyer_pro",
-    text: "Продавець не виходить на зв'язок.",
-    link: "/profile/seller-abc",
-  },
-  {
-    id: "CMP003",
-    user: "jane_doe",
-    text: "Підозра на шахрайство.",
-    link: "/lot/abc-456",
-  },
-];
-
-const topSellers = [
-  { name: "TopSeller UA", sales: "150,000 ₴" },
-  { name: "Vintage World", sales: "125,500 ₴" },
-  { name: "Art Collector", sales: "98,000 ₴" },
-  { name: "Retro Cars", sales: "250,000 ₴" },
-];
-
+// --- Main Component ---
 export default function AdminDashboardPage() {
+  const [keyMetrics, setKeyMetrics] = useState<KeyMetricsData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchKeyMetrics = async () => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const getKeyMetrics = httpsCallable(functions, 'getKeyMetrics');
+        const result = await getKeyMetrics();
+        setKeyMetrics(result.data as KeyMetricsData);
+      } catch (err) {
+        console.error("Error fetching key metrics:", err);
+        setError("Не вдалося завантажити ключові показники.");
+      }
+      setIsLoading(false);
+    };
+
+    fetchKeyMetrics();
+  }, []);
+
+  const renderKpiValue = (value: number | undefined, format: (v: number) => string) => {
+    if (isLoading) return <Skeleton className="h-6 w-24" />;
+    if (value === undefined) return <span className="text-sm text-muted-foreground">N/A</span>;
+    return <p className="font-semibold">{format(value)}</p>;
+  }
+
   return (
     <div className="space-y-6">
-      <div className="flex items-center space-x-3">
-        <ShieldCheck className="h-8 w-8 text-red-600" />
-        <h1 className="text-3xl font-headline font-bold text-primary">
-          Адмін-панель
-        </h1>
-        <Badge variant="destructive">Суперкористувач</Badge>
+      <div className="flex justify-between items-center">
+        <div className="flex items-center space-x-3">
+          <ShieldCheck className="h-8 w-8 text-red-600" />
+          <h1 className="text-3xl font-headline font-bold text-primary">
+            Адмін-панель
+          </h1>
+          <Badge variant="destructive">Суперкористувач</Badge>
+        </div>
+        <Button asChild>
+          <Link href="/admin/set-role">
+            <UserPlus className="mr-2 h-4 w-4" />
+            Призначити роль
+          </Link>
+        </Button>
       </div>
 
-      {/* Metric Cards */}
+      {/* Metric Cards - Still using static data for now */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -176,21 +222,30 @@ export default function AdminDashboardPage() {
             <CardTitle>Ключові показники</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
+            {error && <p className="text-sm text-red-500">{error}</p>}
             <div className="flex items-center justify-between">
               <p className="text-sm text-muted-foreground">Всього користувачів</p>
-              <p className="font-semibold">12,450</p>
+              {renderKpiValue(keyMetrics?.totalUsers, (v) => v.toLocaleString())}
+            </div>
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-muted-foreground">Підписників Telegram</p>
+              {renderKpiValue(keyMetrics?.telegramSubscribers, (v) => v.toLocaleString())}
             </div>
             <div className="flex items-center justify-between">
               <p className="text-sm text-muted-foreground">Активних лотів</p>
-              <p className="font-semibold">3,120</p>
+              {renderKpiValue(keyMetrics?.activeLots, (v) => v.toLocaleString())}
             </div>
             <div className="flex items-center justify-between">
-              <p className="text-sm text-muted-foreground">Сума продажів (міс)</p>
-              <p className="font-semibold">1,250,000 ₴</p>
+              <p className="text-sm text-muted-foreground">Сума продажів (за весь час)</p>
+              {renderKpiValue(keyMetrics?.totalSales, (v) => `${v.toLocaleString('uk-UA')} ₴`)}
+            </div>
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-muted-foreground">Угод закрито (за весь час)</p>
+              {renderKpiValue(keyMetrics?.totalDeals, (v) => v.toLocaleString())}
             </div>
             <div className="flex items-center justify-between">
               <p className="text-sm text-muted-foreground">Конверсія в продаж</p>
-              <p className="font-semibold">15.4%</p>
+              {renderKpiValue(keyMetrics?.salesConversion, (v) => `${v.toFixed(1)}%`)}
             </div>
             <Button className="w-full">
               Повний звіт <ArrowUpRight className="ml-2 h-4 w-4" />

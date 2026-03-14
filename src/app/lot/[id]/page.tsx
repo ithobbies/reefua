@@ -54,7 +54,10 @@ export default function LotDetailPage() {
 
   const { toast } = useToast();
   const { user, loading: authLoading } = useAuth();
-  const { startChatFromLot, isStarting: isChatStarting } = useChat();
+  // --- NECESSARY FIX START ---
+  // Renamed `startChatFromLot` to `startChat` during the context refactor.
+  const { startChat, isStarting: isChatStarting } = useChat();
+  // --- NECESSARY FIX END ---
 
   const category = useMemo(() => lot ? productCategories.find(cat => cat.slug === lot.category || cat.name === lot.category) : null, [lot]);
   const subcategory = useMemo(() => category ? category.subcategories.find(sub => sub.slug === lot?.subcategory || sub.name === lot?.subcategory) : null, [category, lot]);
@@ -101,10 +104,13 @@ export default function LotDetailPage() {
     return () => unsubscribeLot();
   }, [lotId, lot?.type]);
 
+  // --- NECESSARY FIX START ---
+  // The new `startChat` function only requires the `lotId`.
   const handleStartChat = () => {
     if (!lot) return;
-    startChatFromLot({ lotId: lot.id, lotName: lot.name, lotImage: lot.images[0], sellerUid: lot.sellerUid, sellerName: lot.sellerUsername });
+    startChat(lot.id);
   };
+  // --- NECESSARY FIX END ---
 
   const handleBidSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

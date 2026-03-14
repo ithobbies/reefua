@@ -6,10 +6,6 @@ import { sendTelegramMessage } from './telegram'; // Импортируем фу
 
 const db = admin.firestore();
 
-// ... (остальные функции: createLot, buyNow, searchLots, reactivateLot) ...
-// Я не буду повторять их код здесь, чтобы не загромождать ответ.
-// Просто представьте, что они здесь без изменений.
-
 export const createLot = functions.region('us-central1').https.onCall(async (data, context) => {
     if (!context.auth) {
         functions.logger.warn("createLot call without authentication.");
@@ -38,11 +34,12 @@ export const createLot = functions.region('us-central1').https.onCall(async (dat
         const lotCity = isShop && userData.shopCity ? userData.shopCity : city;
         const lotPhoneNumber = isShop ? userData.shopPhoneNumber : undefined;
 
-        if (!name || !description || !category || !subcategory || !lotRegion || !lotCity || !images || !Array.isArray(images) || images.length === 0 || !type) {
-            functions.logger.warn("Validation failed. Missing required fields.", {
-                name, description, category, subcategory, lotRegion, lotCity, images, type
+        // Validation including max 3 images check
+        if (!name || !description || !category || !subcategory || !lotRegion || !lotCity || !images || !Array.isArray(images) || images.length === 0 || images.length > 3 || !type) {
+            functions.logger.warn("Validation failed. Missing required fields or invalid data.", {
+                name, description, category, subcategory, lotRegion, lotCity, imagesCount: images ? images.length : 0, type
             });
-            throw new functions.https.HttpsError("invalid-argument", "Required lot information is missing or invalid, including location.");
+            throw new functions.https.HttpsError("invalid-argument", "Required lot information is missing or invalid. You must provide between 1 and 3 images.");
         }
 
         const lotRef = db.collection("lots").doc();
@@ -121,7 +118,6 @@ export const createLot = functions.region('us-central1').https.onCall(async (dat
             throw new functions.https.HttpsError("invalid-argument", "Invalid lot type specified.");
         }
         
-        // --- FIX: Conditionally add phoneNumber ---
         if (lotPhoneNumber) {
             (newLot as any).phoneNumber = lotPhoneNumber;
         }
@@ -250,7 +246,6 @@ export const expireDirectSales = functions.pubsub.schedule('every 24 hours').onR
     for (const doc of snapshot.docs) {
         const lot = doc.data() as Lot;
 
-        // Отправляем уведомление перед обновлением
         const userRef = db.collection('users').doc(lot.sellerUid);
         const userDoc = await userRef.get();
         if (userDoc.exists) {

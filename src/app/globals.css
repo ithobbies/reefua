@@ -95,3 +95,7 @@ body {
     @apply font-headline;
   }
 }
+
+.ProseMirror {
+  font-size: 1rem;
+}

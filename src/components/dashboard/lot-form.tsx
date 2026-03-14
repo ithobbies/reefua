@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, UploadCloud, Loader2, Info } from 'lucide-react';
+import { ArrowLeft, UploadCloud, Loader2, Info, X } from 'lucide-react';
 import Link from 'next/link';
 
 import { useAuth } from '@/context/auth-context';
@@ -53,6 +53,13 @@ interface LotFormProps {
     existingLot?: Lot & { id: string };
 }
 
+interface ImageItem {
+  id: string;
+  file?: File;
+  preview: string;
+  isNew: boolean;
+}
+
 // Reusable Tooltip Component with structured content
 const InfoTooltip = ({ title, items }: { title: string, items: { label: string; description: string }[] }) => (
   <TooltipProvider>
@@ -82,7 +89,6 @@ export function LotForm({ existingLot }: LotFormProps) {
   const isEditMode = !!existingLot;
   
   // Initialize form data with existing lot data or defaults
-  // For new lots by 'shop' users, set region and city from their profile
   const [formData, setFormData] = useState<Partial<LotFormData>>(() => {
     const initialData: Partial<LotFormData> = {
       name: '',
@@ -122,8 +128,19 @@ export function LotForm({ existingLot }: LotFormProps) {
   const [saleType, setSaleType] = useState<SaleType>(existingLot?.type || 'direct');
   const [subcategories, setSubcategories] = useState<Subcategory[]>([]);
   const [cities, setCities] = useState<City[]>([]);
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(existingLot?.images?.[0] || null);
+  
+  // Image handling state
+  const [images, setImages] = useState<ImageItem[]>(() => {
+    if (existingLot?.images && existingLot.images.length > 0) {
+      return existingLot.images.map(url => ({
+        id: uuidv4(),
+        preview: url,
+        isNew: false
+      }));
+    }
+    return [];
+  });
+  
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -141,7 +158,6 @@ export function LotForm({ existingLot }: LotFormProps) {
       router.push('/auctions');
     }
     
-    // Set initial subcategories and cities based on form data (works for both edit and new 'shop' user)
     const currentCategorySlug = formData.category;
     if (currentCategorySlug) {
       const currentCategory = productCategories.find(cat => cat.slug === currentCategorySlug);
@@ -198,7 +214,11 @@ export function LotForm({ existingLot }: LotFormProps) {
       setFormData(prev => ({...prev, type: type}));
   }
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (images.length >= 3) {
+      toast({ variant: 'destructive', title: 'Ліміт фото', description: 'Можна завантажити не більше 3 фото.' });
+      return;
+    }
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       setOriginalFileName(file.name);
@@ -215,33 +235,37 @@ export function LotForm({ existingLot }: LotFormProps) {
   };
   
   const handleCropConfirm = (croppedFile: File) => {
-    setImageFile(croppedFile);
-    setImagePreview(URL.createObjectURL(croppedFile));
+    const newItem: ImageItem = {
+      id: uuidv4(),
+      file: croppedFile,
+      preview: URL.createObjectURL(croppedFile),
+      isNew: true
+    };
+    setImages(prev => [...prev, newItem]);
     setCropModalOpen(false);
   };
 
+  const handleRemoveImage = (id: string) => {
+    setImages(prev => prev.filter(img => img.id !== id));
+  };
 
-  const uploadImage = async (): Promise<string> => {
-      if (!imageFile) {
-        if (isEditMode && imagePreview) return imagePreview;
-        throw new Error("Файл зображення не вибрано.");
-      }
+
+  const uploadImage = async (file: File): Promise<string> => {
       if (!user) throw new Error("Користувач не автентифікований.");
       
-      setIsUploading(true);
-      setUploadProgress(0);
-
       const storage: FirebaseStorage = getStorage(app);
-      const fileExtension = imageFile.name.split('.').pop();
+      const fileExtension = file.name.split('.').pop() || 'jpg';
       const fileName = `${uuidv4()}.${fileExtension}`;
       const storageRef = ref(storage, `lot-images/${fileName}`);
       
       return new Promise((resolve, reject) => {
-        const uploadTask = uploadBytesResumable(storageRef, imageFile);
+        const uploadTask = uploadBytesResumable(storageRef, file);
         uploadTask.on('state_changed', 
-          (snapshot) => setUploadProgress((snapshot.bytesTransferred / snapshot.totalBytes) * 100), 
-          (error) => { setIsUploading(false); reject(error); }, 
-          () => { getDownloadURL(uploadTask.snapshot.ref).then(resolve).catch(reject); setIsUploading(false); }
+          (snapshot) => {
+             // We could aggregate progress here if needed, but for simplicity we'll just show activity
+          }, 
+          (error) => { reject(error); }, 
+          () => { getDownloadURL(uploadTask.snapshot.ref).then(resolve).catch(reject); }
         );
       });
   };
@@ -249,8 +273,8 @@ export function LotForm({ existingLot }: LotFormProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!isEditMode && !imageFile) {
-        toast({ variant: 'destructive', title: 'Помилка валідації', description: "Будь ласка, завантажте зображення." });
+    if (images.length === 0) {
+        toast({ variant: 'destructive', title: 'Помилка валідації', description: "Будь ласка, завантажте хоча б одне зображення." });
         return;
     }
 
@@ -269,14 +293,25 @@ export function LotForm({ existingLot }: LotFormProps) {
     }
     
     setIsSubmitting(true);
+    setIsUploading(true);
 
     try {
-        const imageUrl = (imageFile || imagePreview) ? await uploadImage() : '';
+        // Upload new images and collect all URLs
+        const imageUrls: string[] = [];
+        
+        for (const img of images) {
+          if (img.isNew && img.file) {
+            const url = await uploadImage(img.file);
+            imageUrls.push(url);
+          } else {
+            imageUrls.push(img.preview);
+          }
+        }
         
         const { durationDays, ...restOfFormData } = formData;
         let payload: any = {
             ...restOfFormData,
-            images: imageUrl ? [imageUrl] : existingLot?.images || [],
+            images: imageUrls,
             type: saleType,
             updatedAt: serverTimestamp()
         };
@@ -336,6 +371,7 @@ export function LotForm({ existingLot }: LotFormProps) {
         toast({ variant: "destructive", title: `Помилка ${isEditMode ? 'оновлення' : 'створення'} лоту`, description: errorMessage });
     } finally {
         setIsSubmitting(false);
+        setIsUploading(false);
     }
   };
 
@@ -489,19 +525,69 @@ export function LotForm({ existingLot }: LotFormProps) {
 
             <div className="lg:col-span-1 space-y-6">
               <Card>
-                <CardHeader><CardTitle>Зображення лоту*</CardTitle><CardDescription>Завантажте основне фото вашого лоту.</CardDescription></CardHeader>
-                <CardContent>
-                  <Label htmlFor="image" className={`block w-full cursor-pointer ${isLoading ? 'cursor-not-allowed' : ''}`}>
-                    <div className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-muted rounded-md hover:border-primary transition-colors">
-                      {imagePreview ? <img src={imagePreview} alt="Попередній перегляд" className="max-h-48 rounded-md object-contain" /> : (<><UploadCloud className="h-12 w-12 text-muted-foreground" /><p className="mt-2 text-sm text-muted-foreground">Натисніть, щоб завантажити</p><p className="text-xs text-muted-foreground">(PNG, JPG, WEBP до 5MB)</p></>)}
-                    </div>
-                  </Label>
-                  <Input ref={fileInputRef} id="image" name="image" type="file" onChange={handleImageChange} accept="image/*" className="sr-only" disabled={isLoading}/>
-                  {isUploading && <div className="w-full bg-muted rounded-full h-2.5 mt-2"><div className="bg-primary h-2.5 rounded-full" style={{width: `${uploadProgress}%`}}></div></div>}
-                  <p className="mt-2 text-xs text-muted-foreground text-center">Для додавання більше фотографій, відредагуйте лот після створення.</p>
+                <CardHeader>
+                  <CardTitle>Зображення лоту ({images.length}/3)</CardTitle>
+                  <CardDescription>Завантажте до 3 фото вашого лоту.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {/* Image Grid */}
+                  <div className="grid grid-cols-2 gap-3">
+                    {images.map((img) => (
+                      <div key={img.id} className="relative group aspect-square rounded-md overflow-hidden border bg-muted">
+                        <img src={img.preview} alt="Лот" className="w-full h-full object-cover" />
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveImage(img.id)}
+                          className="absolute top-1 right-1 bg-destructive/90 hover:bg-destructive text-white rounded-full p-1 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity"
+                          disabled={isLoading}
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                      </div>
+                    ))}
+                    
+                    {images.length < 3 && (
+                      <Label 
+                        htmlFor="image-upload" 
+                        className={`aspect-square flex flex-col items-center justify-center border-2 border-dashed border-muted-foreground/30 rounded-md hover:border-primary/50 hover:bg-muted/30 transition-all cursor-pointer ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                      >
+                        <UploadCloud className="h-8 w-8 text-muted-foreground mb-2" />
+                        <span className="text-xs text-muted-foreground font-medium">Додати фото</span>
+                      </Label>
+                    )}
+                  </div>
+                  
+                  <Input 
+                    ref={fileInputRef} 
+                    id="image-upload" 
+                    type="file" 
+                    onChange={handleImageInput} 
+                    accept="image/*" 
+                    className="hidden" 
+                    disabled={isLoading || images.length >= 3}
+                  />
+                  
+                  {isUploading && (
+                     <div className="space-y-1">
+                        <div className="text-xs text-muted-foreground flex justify-between">
+                            <span>Завантаження...</span>
+                        </div>
+                        <div className="w-full bg-muted rounded-full h-2">
+                            <div className="bg-primary h-2 rounded-full animate-pulse w-full"></div>
+                        </div>
+                     </div>
+                  )}
+                  
+                  <p className="text-xs text-muted-foreground">
+                    Підтримуються формати: PNG, JPG, WEBP. Максимальний розмір: 5MB.
+                  </p>
                 </CardContent>
               </Card>
-              <Button type="submit" className="w-full text-lg py-3" disabled={isLoading}>{isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}{isLoading ? 'Обробка...' : buttonText}</Button>
+              
+              <Button type="submit" className="w-full text-lg py-3" disabled={isLoading}>
+                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {isLoading ? 'Обробка...' : buttonText}
+              </Button>
             </div>
           </div>
         </form>

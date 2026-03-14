@@ -8,6 +8,47 @@ if (admin.apps.length === 0) {
 }
 
 /**
+ * Gives a user the 'admin' role. This function should be protected and only callable by other admins.
+ */
+export const addAdminRole = functions.https.onCall(async (data, context) => {
+  // For now, this function is open to any authenticated user.
+  // After you have assigned yourself an admin role, you should secure this.
+  // Example security rule:
+  // if (context.auth?.token.admin !== true) {
+  //   throw new functions.https.HttpsError('permission-denied', 'Only admins can add other admins.');
+  // }
+
+  const email = data.email;
+  if (typeof email !== 'string' || !email) {
+    throw new functions.https.HttpsError('invalid-argument', 'The function must be called with an "email" argument.');
+  }
+
+  try {
+    const user = await admin.auth().getUserByEmail(email);
+    
+    const existingClaims = user.customClaims || {};
+    const existingRoles = existingClaims.roles || [];
+
+    if (existingRoles.includes('admin')) {
+        return { message: `Success! User ${email} is already an admin.` };
+    }
+
+    const newRoles = [...existingRoles, 'admin', 'shop'];
+
+    await admin.auth().setCustomUserClaims(user.uid, { ...existingClaims, roles: newRoles });
+
+    const userDocRef = admin.firestore().collection("users").doc(user.uid);
+    await userDocRef.update({ roles: newRoles });
+
+    return { message: `Success! User ${email} has been made an admin.` };
+  } catch (error) {
+    console.error("Error adding admin role:", error);
+    throw new functions.https.HttpsError('internal', 'An error occurred while adding the admin role.');
+  }
+});
+
+
+/**
  * Creates a new user document in Firestore when a new user signs up.
  */
 export const createUserDocument = functions.auth.user().onCreate(async (user) => {
